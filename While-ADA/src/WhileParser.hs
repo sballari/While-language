@@ -1,4 +1,4 @@
-module Parser where 
+module WhileParser where 
     import Control.Applicative
     import Data.Char
     import WhileStructures
