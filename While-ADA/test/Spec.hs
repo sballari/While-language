@@ -1,19 +1,13 @@
 
 import Test.Tasty
-
 import Test.Tasty.HUnit
 
-footests = [numericAssign]
+import ParserTest
 
 main :: IO ()
-
 main = do
-
   defaultMain (testGroup "Library tests" tests)
-
     where
+      tests = ParserTest.tests
 
-      tests = footests
 
-
-numericAssign = testCase "foo" (assertEqual "" 1 1)

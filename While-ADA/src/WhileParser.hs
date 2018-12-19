@@ -126,6 +126,7 @@ module WhileParser where
             parseAExpr2
             <|>
             parseAExpr3
+            
              
             
     parseAExpr1 :: Parser (AExpr)
@@ -141,12 +142,14 @@ module WhileParser where
             
     parseAExpr2 :: Parser (AExpr)
     parseAExpr2 = 
-        do 
-            pure(\a op b -> Mul a b) <*> parseAExpr3 <*> symbol "*" <*> parseAExpr2   
+        pure(\a op b -> Mul a b) <*> parseAExpr3 <*> symbol "*" <*> parseAExpr2   
         <|>
-            parseAExpr3
+        parseAExpr3
     
     parseAExpr3 :: Parser (AExpr)
     parseAExpr3 = 
         fmap Num integer <|> 
-        fmap Var variable        
+        fmap Var variable <|>
+        pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
+                
+    
