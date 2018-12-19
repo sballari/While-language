@@ -8,6 +8,7 @@ module WhileStructures where
         | Min AExpr AExpr 
         | Var Name 
         | Num Int -- integer numeric values (Z)
+        deriving (Show)
 
     data BExpr = 
         True 
@@ -16,6 +17,7 @@ module WhileStructures where
         | LessEq AExpr AExpr
         | Neg BExpr
         | And BExpr BExpr
+        deriving (Show)
 
     data Stm = 
         Assign Name AExpr
@@ -23,3 +25,4 @@ module WhileStructures where
         |Comp Stm Stm
         |Cond BExpr Stm Stm -- if b then S1 else S2     
         |While BExpr Stm -- while b S
+        deriving (Show)
