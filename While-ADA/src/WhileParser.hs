@@ -1,7 +1,7 @@
 module Parser where 
     import Control.Applicative
     import Data.Char
-    import Language
+    import WhileStructures
 
 
     newtype Parser a = P (String -> [(a,String)])
@@ -116,22 +116,37 @@ module Parser where
     symbol :: String -> Parser String
     symbol xs = token (string xs)
 
-    list :: Parser a -> Parser [a] 
-    list p = (do    symbol "["
-                    x <- p 
-                    xs <- many (do  symbol ","
-                                    n<-p 
-                                    return n  )
-                    symbol "]"
-                    return (x:xs) ) 
-                    <|>
-                    (do symbol "[]"
-                        return [])
+    --While specific Parser 
 
-    naturals :: Parser [Int]
-    naturals = list natural
-
-    integers :: Parser [Int]
-    integers = list integer
-
+    parseAExpr :: Parser (AExpr)
+    parseAExpr = 
+        do             
+            parseAExpr1 
+            <|>
+            parseAExpr2
+            <|>
+            parseAExpr3
+             
+            
+    parseAExpr1 :: Parser (AExpr)
+    parseAExpr1 = 
+        do 
+            a <- parseAExpr2
+            op <- symbol "+" <|> symbol "-"
+            b <- parseAExpr1
+            if op == "+" then return (Sum a b)
+            else return (Min a b)
+        <|>
+            parseAExpr2
+            
+    parseAExpr2 :: Parser (AExpr)
+    parseAExpr2 = 
+        do 
+            pure(\a op b -> Mul a b) <*> parseAExpr3 <*> symbol "*" <*> parseAExpr2   
+        <|>
+            parseAExpr3
     
+    parseAExpr3 :: Parser (AExpr)
+    parseAExpr3 = 
+        fmap Num integer <|> 
+        fmap Var variable        
