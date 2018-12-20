@@ -121,15 +121,7 @@ module WhileParser where
     --AExpr
 
     parseAExpr :: Parser (AExpr)
-    parseAExpr = 
-        do             
-            parseAExpr1 
-            <|>
-            parseAExpr2
-            <|>
-            parseAExpr3
-            
-             
+    parseAExpr = parseAExpr1 
             
     parseAExpr1 :: Parser (AExpr)
     parseAExpr1 = 
@@ -186,9 +178,21 @@ module WhileParser where
     
     --------------------------------------------------------------------------
     --Stm
+    
+    parseStms :: Parser (Stm)
+    parseStms = 
+        pure(\a b c -> Comp a c) <*> parseStm <*> symbol ";" <*> parseStms
+        <|> parseStm
 
     parseStm :: Parser (Stm)
-    parseStm = pure Skip 
+    parseStm = 
+        parseAssignment <|>
+        parseSkip <|>
+        parseCond <|>
+        parseWhile <|>
+        pure(\a b c->b) <*> symbol "(" <*> parseStms <*> symbol ")"
+
+
 
     parseAssignment :: Parser (Stm)
     parseAssignment = pure(\a b c -> Assign a c) <*> variable <*> symbol ":=" <*> parseAExpr
@@ -196,6 +200,7 @@ module WhileParser where
     parseSkip :: Parser (Stm)
     parseSkip = fmap (\x->Skip) (symbol "skip")
 
+    parseCond :: Parser(Stm)
     parseCond = 
         do 
             symbol "if"
@@ -205,3 +210,13 @@ module WhileParser where
             symbol "else"
             s2 <- parseStm
             return (Cond b s1 s2)
+
+    parseWhile :: Parser(Stm)
+    parseWhile = 
+        do
+            symbol "while" 
+            b <- parseBExpr
+            symbol "do"
+            body <- parseStm
+            return (While b body)
+    
