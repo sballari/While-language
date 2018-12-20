@@ -1,7 +1,7 @@
 module WhileParser where 
     import Control.Applicative
     import Data.Char
-    import WhileStructures
+    import WhileStructures as WS
 
 
     newtype Parser a = P (String -> [(a,String)])
@@ -152,4 +152,29 @@ module WhileParser where
         fmap Var variable <|>
         pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
                 
+    parseBExpr :: Parser (BExpr)
+    parseBExpr = 
+        parseBExpr1 <|>
+        parseBExpr2 <|>
+        parseBExpr3
+
+
+    parseBExpr1 :: Parser (BExpr)
+    parseBExpr1 = 
+        do 
+            a <- parseAExpr
+            op <- symbol "=" <|> symbol "<="
+            b <- parseAExpr
+            if op == "=" then return (Eq a b)
+            else return (LessEq a b)
     
+    parseBExpr2 :: Parser (BExpr)
+    parseBExpr2 = pure(\a b c-> And a c) <*> parseBExpr3 <*> symbol "&" <*> parseBExpr2
+                  <|> parseBExpr3
+    
+    parseBExpr3 :: Parser (BExpr)
+    parseBExpr3 = 
+        fmap (\x->WS.True) (symbol "true") <|>
+        fmap (\x->WS.False) (symbol "false") <|>
+        pure(\a b c->b) <*> symbol "(" <*> parseBExpr <*> symbol ")" <|>
+        pure(\x y -> Neg y)<*> symbol "!" <*> parseBExpr3 
