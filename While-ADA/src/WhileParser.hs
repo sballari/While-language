@@ -117,6 +117,8 @@ module WhileParser where
     symbol xs = token (string xs)
 
     --While specific Parser 
+    --------------------------------------------------------------------------
+    --AExpr
 
     parseAExpr :: Parser (AExpr)
     parseAExpr = 
@@ -151,6 +153,9 @@ module WhileParser where
         fmap Num integer <|> 
         fmap Var variable <|>
         pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
+
+    --------------------------------------------------------------------------
+    --BExpr
                 
     parseBExpr :: Parser (BExpr)
     parseBExpr = 
@@ -178,3 +183,25 @@ module WhileParser where
         fmap (\x->WS.False) (symbol "false") <|>
         pure(\a b c->b) <*> symbol "(" <*> parseBExpr <*> symbol ")" <|>
         pure(\x y -> Neg y)<*> symbol "!" <*> parseBExpr3 
+    
+    --------------------------------------------------------------------------
+    --Stm
+
+    parseStm :: Parser (Stm)
+    parseStm = pure Skip 
+
+    parseAssignment :: Parser (Stm)
+    parseAssignment = pure(\a b c -> Assign a c) <*> variable <*> symbol ":=" <*> parseAExpr
+    
+    parseSkip :: Parser (Stm)
+    parseSkip = fmap (\x->Skip) (symbol "skip")
+
+    parseCond = 
+        do 
+            symbol "if"
+            b <- parseBExpr
+            symbol "then"
+            s1 <- parseStm
+            symbol "else"
+            s2 <- parseStm
+            return (Cond b s1 s2)
