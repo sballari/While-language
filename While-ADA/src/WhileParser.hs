@@ -143,6 +143,7 @@ module WhileParser where
     parseAExpr3 :: Parser (AExpr)
     parseAExpr3 = 
         fmap Num integer <|> 
+        pure (\ a b c d e -> Range b d) <*> symbol "[" <*> natural <*> symbol "," <*> natural <*> symbol "]" <|>
         fmap Var variable <|>
         pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
 

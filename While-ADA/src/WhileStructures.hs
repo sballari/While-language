@@ -8,6 +8,7 @@ module WhileStructures where
         | Min AExpr AExpr 
         | Var Name 
         | Num Int -- integer numeric values (Z)
+        | Range Int Int -- nondeterministic range
         deriving (Show, Eq)
 
     data BExpr = 
