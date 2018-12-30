@@ -5,8 +5,8 @@ module AbsDomain where
         bottom :: a
         top :: a
         -- gamma :: a -> [Int] -- concretization function
-        union :: a -> a -> a
-        intersection :: a -> a -> a
+        union :: a -> a -> a -- abstract version
+        intersection :: a -> a -> a -- abstract version
     
     -- SIGN DOMAIN
     data Sign = Bottom | Top | 
