@@ -36,12 +36,12 @@ module AbsState where
   union :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   union x AbsState.Bottom = x
   union AbsState.Bottom y = y  
-  union (S xs) (S ys) = S (Data.List.union xs ys)
+  union (S xs) (S ys) =S [(a, (AD.union b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
 
   intersection :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   intersection _ AbsState.Bottom = AbsState.Bottom
   intersection AbsState.Bottom _ = AbsState.Bottom
-  intersection (S xs) (S ys) = let i = intersect xs ys in 
+  intersection (S xs) (S ys) = let i = [(a, (AD.intersection b d)) | (a,b)<-xs , (c,d)<-ys, a==c] in 
                                 if (findEl bottom i) then AbsState.Bottom
                                 else (S i) 
                              
