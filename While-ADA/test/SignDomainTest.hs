@@ -2,11 +2,14 @@ module SignDomainTest (tests) where
     import SignDomain as SD
     import AbsState as AS
     import AbsDomain as AD
+    import WhileParser
     import WhileStructures as WS
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [testUnion, testUnion1, testUnion2,testInt, testInt1, testStateUnion, testStateUnion1,testStateInt1,testStateInt2 ]
+    tests = [testUnion, testUnion1, testUnion2,testInt, testInt1, testStateUnion,
+                testStateUnion1,testStateInt1,testStateInt2, testOmega1, testOmega2,
+                testOmega3 ]
 
     testUnion  = testCase "union bottom eq0" (assertEqual "" expected result)
         where 
@@ -54,3 +57,24 @@ module SignDomainTest (tests) where
             expected = S [("x",Eq0), ("y",More0)]
             result = AS.intersection (S[("x",LessEq0),("y",More0),("z",Eq0)]) (S[("x",MoreEq0),("y",MoreEq0)])
 
+
+
+    parseR :: String -> AExpr
+    parseR i = (\[(x,y)]->x) (parse parseAExpr i)
+
+    testOmega1 = testCase "omega fun 1" (assertEqual "" expected result)
+        where 
+            expected = Top
+            result = omega (parseR "(1+2)+(-3)" )
+
+    testOmega2 = testCase "omega fun 2" (assertEqual "" expected result)
+        where 
+            expected = More0
+            result = omega (parseR "(5*4)+6" )
+
+    testOmega3 = testCase "omega fun 3" (assertEqual "" expected result)
+        where 
+            expected = [Top,Top,Top]
+            result = [  omega (parseR "2/(3+(-1))" ),
+                        omega (parseR "2/(3+(-3))" ),
+                        omega (parseR "2/(3+(-5))" )]
