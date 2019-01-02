@@ -23,14 +23,14 @@ module ParserTest (tests) where
     testBExpr = testCase "parse BExpr" (assertEqual "" expected result)
         where 
             expected = 
-                [LessEq (Min (Num 4) (Num 3)) (Num 5),
+                [LessEq (Sum (Num 4) (Minus(Num 3))) (Num 5),
                  And (Neg WS.True) (LessEq (Num 8) (Num 2)),
                  And (Neg WS.True) WS.False,
                  Neg (And WS.True WS.False),
                  And (Neg (Eq (Num 4)(Num 8))) (WS.False) 
                 ]
             result =
-                [resultP parseBExpr "(4-3)<=5",
+                [resultP parseBExpr "(4+(-3))<=5",
                  resultP parseBExpr "!true & (8<=2)",
                  resultP parseBExpr "!true & false",
                  resultP parseBExpr "!(true & false)",

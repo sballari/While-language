@@ -127,10 +127,9 @@ module WhileParser where
     parseAExpr1 = 
         do 
             a <- parseAExpr2
-            op <- symbol "+" <|> symbol "-"
+            op <- symbol "+"
             b <- parseAExpr1
-            if op == "+" then return (Sum a b)
-            else return (Min a b)
+            return (Sum a b)
         <|>
             parseAExpr2
             
@@ -142,7 +141,8 @@ module WhileParser where
     
     parseAExpr3 :: Parser (AExpr)
     parseAExpr3 = 
-        fmap Num integer <|> 
+        fmap Num natural <|> 
+        pure (\x y -> Minus y) <*> symbol "-" <*> parseAExpr <|>
         pure (\ a b c d e -> Range b d) <*> symbol "[" <*> natural <*> symbol "," <*> natural <*> symbol "]" <|>
         fmap Var variable <|>
         pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
