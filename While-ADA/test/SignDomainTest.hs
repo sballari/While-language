@@ -9,7 +9,7 @@ module SignDomainTest (tests) where
 
     tests = [testUnion, testUnion1, testUnion2,testInt, testInt1, testStateUnion,
                 testStateUnion1,testStateInt1,testStateInt2, testOmega1, testOmega2,
-                testOmega3 ]
+                testOmega3, testAS ]
 
     testUnion  = testCase "union bottom eq0" (assertEqual "" expected result)
         where 
@@ -78,3 +78,9 @@ module SignDomainTest (tests) where
             result = [  omega (parseR "2/(3+(-1))" ),
                         omega (parseR "2/(3+(-3))" ),
                         omega (parseR "2/(3+(-5))" )]
+    
+    testAS = testCase "absAS fun" (assertEqual "" expected result)
+        where 
+            expected = [Top,More0]
+            result = [  absAS (parseR "x/(3+(-1))") (S[("x",More0)]),
+                        absAS (parseR "(5*4)+x") (S[("x",More0)]) ]

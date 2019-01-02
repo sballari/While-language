@@ -1,5 +1,6 @@
 module AbsStateTest (tests) where
     import AbsState
+    import IntDomain
     import WhileStructures as WS
     import Test.Tasty
     import Test.Tasty.HUnit
@@ -23,19 +24,18 @@ module AbsStateTest (tests) where
             result = alter (S[("x",18),("x",30),("z",11)]) "x" 21
     
 
-    instance UndefSup Int where 
-        undef = 0
+    
 
 
     testLookup  = testCase "test lookup 1" (assertEqual "" expected result)
         where 
-            expected = 18 :: Int
-            result = lookUp (S[("x",18),("y",30),("z",11)]) "x" ::Int
+            expected = 18 ::  Int
+            result = lookUp (S[("x",18),("y",30),("z",11)]) "x" ::  Int
 
     testLookup1  = testCase "test lookup 2" (assertEqual "" expected result)
         where 
-            expected = 0 :: Int
-            result = lookUp (S[("x",18),("y",30),("z",11)]) "j" ::Int
+            expected = 100 ::  Int
+            result = lookUp (S[("x",18),("y",30),("z",11)]) "j" :: Int
 
 
     
