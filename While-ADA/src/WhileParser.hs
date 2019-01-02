@@ -135,7 +135,10 @@ module WhileParser where
             
     parseAExpr2 :: Parser (AExpr)
     parseAExpr2 = 
-        pure(\a op b -> Mul a b) <*> parseAExpr3 <*> symbol "*" <*> parseAExpr2   
+        pure(\a op b -> if op=="*" then Mul a b else Div a b) 
+                <*> parseAExpr3
+                <*> (symbol "*" <|> symbol "/")
+                <*> parseAExpr2   
         <|>
         parseAExpr3
     
@@ -143,7 +146,7 @@ module WhileParser where
     parseAExpr3 = 
         fmap Num natural <|> 
         pure (\x y -> Minus y) <*> symbol "-" <*> parseAExpr <|>
-        pure (\ a b c d e -> Range b d) <*> symbol "[" <*> natural <*> symbol "," <*> natural <*> symbol "]" <|>
+        pure (\ a b c d e -> Range b d) <*> symbol "[" <*> integer <*> symbol "," <*> integer <*> symbol "]" <|>
         fmap Var variable <|>
         pure(\a b c->b) <*> symbol "(" <*> parseAExpr <*> symbol ")"
 

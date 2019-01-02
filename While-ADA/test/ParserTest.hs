@@ -14,11 +14,15 @@ module ParserTest (tests) where
             expected =
                 [Sum (Var "x") (Mul (Num 2) (Var "y")),
                  Mul (Var "x") (Mul (Num 2) (Var "y")),
-                 Mul (Mul (Var "x") (Num 2)) (Var "y")]
+                 Mul (Mul (Var "x") (Num 2)) (Var "y"),
+                 Mul (Div (Var "x") (Num 3)) (Num 2),
+                 Div (Var "x") (Mul  (Num 3) (Num 2))]
             result =
                 [resultP parseAExpr "x+2*y",
                  resultP parseAExpr "x*(2*y)",
-                 resultP parseAExpr "(x*2)*y"]
+                 resultP parseAExpr "(x*2)*y",
+                 resultP parseAExpr "(x/3)*2",
+                 resultP parseAExpr "x/3*2"]
     
     testBExpr = testCase "parse BExpr" (assertEqual "" expected result)
         where 

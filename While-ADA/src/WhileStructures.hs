@@ -5,6 +5,7 @@ module WhileStructures where
     data AExpr = 
         Sum AExpr AExpr  
         | Mul AExpr AExpr 
+        | Div AExpr AExpr
         | Minus AExpr 
         | Var Name 
         | Num Int -- integer numeric values (Z)
