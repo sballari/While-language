@@ -1,5 +1,6 @@
 module AbsState where  
   import AbsDomain as AD
+  import qualified  WhileStructures as WS
   import Data.List
 
   type VarName = String
@@ -20,10 +21,10 @@ module AbsState where
 
                             
                           
-  lookUp :: UndefSup a => AbsState a -> String -> a  
-  lookUp AbsState.Bottom name = undef
+  lookUp :: (AbsDomain a) => AbsState a -> String -> a  
+  lookUp AbsState.Bottom name = bottom
   lookUp (S xs) name = case (lookup name xs) of
-                          Nothing -> undef
+                          Nothing -> top
                           Just x -> x 
 
   
@@ -44,10 +45,20 @@ module AbsState where
   intersection (S xs) (S ys) = let i = [(a, (AD.intersection b d)) | (a,b)<-xs , (c,d)<-ys, a==c] in 
                                 if (findEl bottom i) then AbsState.Bottom
                                 else (S i) 
+
+  -- abstract semantics
+  absAS :: (AbsDomain a{-, UndefSup a-}) => WS.AExpr -> (AbsState a)-> a
+  absAS (WS.Sum ex1 ex2) s = absSum (absAS ex1 s) (absAS ex2 s)
+  absAS (WS.Mul ex1 ex2) s = absMul (absAS ex1 s) (absAS ex2 s)
+  absAS (WS.Minus ex) s = absMinus (absAS ex s)
+  absAS (WS.Div ex1 ex2) s = absDiv (absAS ex1 s) (absAS ex2 s)
+  absAS (WS.Num x) s = omega (WS.Num x)
+  absAS (WS.Range x y) s = omega (WS.Range x y)
+  absAS (WS.Var n) s = lookUp s n
                              
   --utility function
   findEl :: (AbsDomain a) => a -> [(b,a)] -> Bool 
   findEl el xs = foldr (\x r-> (((snd x) == el) || r) ) False xs
     
-  class UndefSup a where
-    undef :: a 
+  -- class UndefSup a where
+  --   undef :: a 
