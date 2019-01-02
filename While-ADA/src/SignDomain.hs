@@ -8,6 +8,7 @@ module SignDomain where
                 Eq0 | More0 | MoreEq0 |
                 Not0 deriving (Eq, Show)
     
+    
     instance AbsDomain Sign where
         
         (<=) Bottom _ = True
@@ -172,3 +173,6 @@ module SignDomain where
                                         | (signum x)==0 && (signum y)==(-1) = LessEq0
                                         | (signum x)==(-1) && (signum y)==1 = Top
                                         | otherwise = omega (WS.Range y x)
+
+        
+        
