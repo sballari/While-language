@@ -1,5 +1,6 @@
 module AbsDomain where
     import WhileStructures
+    
 
     class Eq a => AbsDomain a where
         (<=) :: a -> a -> Bool
@@ -14,6 +15,8 @@ module AbsDomain where
         absMul :: a -> a -> a
         absDiv :: a -> a -> a  
         absMinus :: a -> a
+        omega :: AExpr -> a
+        
+    
 
-        omega :: AExpr -> a  
     
