@@ -1,178 +1,90 @@
 module SignDomain where
     import AbsDomain
-    import qualified WhileStructures as WS
 
-    -- SIGN DOMAIN
-    data Sign = Bottom | Top | 
-                LessEq0 | Less0 |
-                Eq0 | More0 | MoreEq0 |
-                Not0 deriving (Eq, Show)
-    
-    
+    data Sign = Bottom | Zero | LessEqZero | MoreEqZero | Top 
+                deriving Show
+
     instance AbsDomain Sign where
+        --(<=) :: a -> a -> Maybe Bool
+        (<=) Bottom _ = Just True
+        (<=) _ Bottom = Just False
         
-        (<=) Bottom _ = True
-        (<=) _ Top = True
-        (<=) Top _ = False
-        (<=) _ Bottom = False
-        (<=) Less0 LessEq0 = True
-        (<=) Eq0 LessEq0 = True
-        (<=) Less0 Not0 = True
-        (<=) More0 Not0 = True
-        (<=) Eq0 MoreEq0 = True
-        (<=) More0 MoreEq0 = True
-        (<=) x y = if x==y then True else False
-    
+        (<=) Zero _ = Just True
+        (<=) _ Zero = Just False
+
+        (<=) LessEqZero _ = Just True
+        (<=) _ LessEqZero = Just False
+
+        (<=) LessEqZero MoreEqZero = Nothing
+        (<=) MoreEqZero LessEqZero = Nothing
+
+        (<=) MoreEqZero _ = Just True
+        (<=) _ MoreEqZero = Just False
+
+        (<=) _ Top = Just True
+        (<=) Top _ = Just False
+              
+
+        -- bottom :: a
         bottom = Bottom
+
+        -- top :: a
         top = Top
-
         
-        union Bottom y = y
-        union _ Top = Top
-        union Less0 LessEq0 = LessEq0
-        union LessEq0 More0 = Top
-        union Eq0 LessEq0 = LessEq0
-        union Less0 Not0 = Top
-        union More0 Not0 = Top
-        union Eq0 MoreEq0 = MoreEq0
-        union More0 MoreEq0 = MoreEq0   
-        union x y = if x==y then x else union y x
+        -- gamma :: a -> [Int]
+        -- gamma Bottom = []
+        -- gamma Zero = [0]
+        -- gamma LessEqZero = [0,-1..]
+        -- gamma MoreEqZero = [0..]
+        -- gamma Top = (reverse [0,-1..]) ++ [1..]
 
-        intersection Bottom y = Bottom
-        intersection x Top = x
-        intersection Less0 LessEq0 = Less0
-        intersection LessEq0 More0 = Bottom
-        intersection LessEq0 MoreEq0 = Eq0
-        intersection Eq0 LessEq0 = Eq0
-        intersection Less0 Not0 = Less0
-        intersection More0 Not0 = More0
-        intersection Eq0 MoreEq0 = Eq0
-        intersection More0 MoreEq0 = More0   
-        intersection x y = if x==y then x else union y x
+        -- alfa :: AExpr -> a
+        alfa (Num n)
+            n == 0 = Zero
+            n >= 0 = MoreEqZero
+            n <= 0 = LessEqZero
+        
+        alfa (Range n n')
+            n == 0 = MoreEqZero
+            n <= 0 & n' <= 0 = LessEqZero
+            n <= 0 & n' >= 0 = Top
+            n >= 0 & n' >= 0 = MoreEqZero
+            n >= 0 & n' <= 0 = Bottom
+        
+        --join :: a -> a -> a
 
+        lub :: a -> a -> abs
+        lub x y 
+            (x <= y) == Just True = y
+            (x <= y) == Just False = x 
+            otherwise = Top
 
-        --ABSTRACT SEMANTICS
-        -- absSum
+        join x y = lub x y
+
+        --meet :: a -> a -> a
+
+        glb :: a -> a -> a
+        glb x y
+            (x <= y) == Just True = x
+            (x <= y) == Just False = y
+            otherwise = Bottom
+
+        -- unary operators --> necessario?
+        --absNeg :: a -> a
+        absNeg Bottom = Bottom
+        absNeg Zero = Zero
+        absNeg LessEqZero = MoreEqZero
+        absNeg MoreEqZero = LessEqZero
+        absNeg Top = Top
+
+        -- binary operators 
+        --absSum :: a -> a -> a
         absSum Bottom _ = Bottom
-        absSum _ Bottom = Bottom
-        absSum Top _ = Top
-        absSum _ Top = Top
-        absSum x Eq0 = x
-        absSum Eq0 y = y
-        absSum x Not0 = Top
-        absSum Not0 y = Top
-
-        absSum Less0 Less0 = Less0
-        absSum Less0 More0 = Top
-        absSum Less0 LessEq0 = LessEq0
-        absSum Less0 MoreEq0 = Top
-        
-        absSum More0 Less0 = Top
-        absSum More0 More0 = More0
-        absSum More0 LessEq0 = Top
-        absSum More0 MoreEq0 = MoreEq0
-
-        absSum LessEq0 LessEq0 = LessEq0
-        absSum LessEq0 Less0 = Less0
-        absSum LessEq0 More0 = Top
-        absSum LessEq0 MoreEq0 = Top
-        
-        absSum MoreEq0 LessEq0 = Top 
-        absSum MoreEq0 Less0 = Top
-        absSum MoreEq0 More0 = MoreEq0
-        absSum MoreEq0 MoreEq0 = MoreEq0
-
-        -- absMul
-        absMul Bottom _ = Bottom
-        absMul _ Bottom = Bottom
-        absMul _ Eq0 = Eq0
-        absMul Eq0 _ = Eq0
-        absMul Top _ = Top
-        absMul _ Top = Top
-        
-        absMul _ Not0 = Not0 -- TODO pensarci
-        absMul Not0 _ = Not0 -- TODO pensarci
-
-        absMul Less0 Less0 = More0
-        absMul Less0 More0 = Less0
-        absMul Less0 LessEq0 = MoreEq0
-        absMul Less0 MoreEq0 = LessEq0
-        
-        absMul More0 Less0 = Less0
-        absMul More0 More0 = More0
-        absMul More0 LessEq0 = LessEq0
-        absMul More0 MoreEq0 = MoreEq0
-
-        absMul LessEq0 LessEq0 = MoreEq0
-        absMul LessEq0 Less0 = MoreEq0
-        absMul LessEq0 More0 = LessEq0
-        absMul LessEq0 MoreEq0 = LessEq0
-        
-        absMul MoreEq0 LessEq0 = LessEq0 
-        absMul MoreEq0 Less0 = LessEq0
-        absMul MoreEq0 More0 = MoreEq0
-        absMul MoreEq0 MoreEq0 = MoreEq0
-
-        -- absDiv
-        absDiv Bottom _ = Bottom
-        absDiv _ Bottom = Bottom
-        absDiv _ Eq0 = Bottom
-        absDiv Eq0 _ = Eq0
-        
-        absDiv Top _ = Top
-        absDiv _ Top = Top
-        
-        absDiv _ Not0 = Not0
-        absDiv Not0 _ = Not0
-
-        absDiv Less0 Less0 = More0
-        absDiv Less0 More0 = Less0
-        absDiv Less0 LessEq0 = More0
-        absDiv Less0 MoreEq0 = Less0
-        
-        absDiv More0 Less0 = Less0
-        absDiv More0 More0 = More0
-        absDiv More0 LessEq0 = Less0
-        absDiv More0 MoreEq0 = More0
-
-        absDiv LessEq0 LessEq0 = MoreEq0
-        absDiv LessEq0 Less0 = MoreEq0
-        absDiv LessEq0 More0 = LessEq0
-        absDiv LessEq0 MoreEq0 = LessEq0
-        
-        absDiv MoreEq0 LessEq0 = LessEq0 
-        absDiv MoreEq0 Less0 = LessEq0
-        absDiv MoreEq0 More0 = MoreEq0
-        absDiv MoreEq0 MoreEq0 = MoreEq0
-        
-        --absMinus 
-        absMinus More0 = Less0
-        absMinus MoreEq0 = LessEq0
-        absMinus Less0 = More0
-        absMinus LessEq0 = MoreEq0
-        absMinus Eq0 = Eq0
-        absMinus Not0 = Not0
-        absMinus Top = Top 
-        absMinus Bottom = Bottom
-        
 
 
-        --omega :: AExpr -> a
-        omega (WS.Sum ex1 ex2) = absSum (omega ex1) (omega ex2)
-        omega (WS.Mul ex1 ex2) = absMul (omega ex1) (omega ex2)
-        omega (WS.Minus ex) = absMinus (omega ex)
-        omega (WS.Div ex1 ex2) = absDiv (omega ex1) (omega ex2)
-        omega (WS.Num x) = case signum x of 
-                                        1 -> More0
-                                        0 -> Eq0
-                                        (-1) -> Less0
-        omega (WS.Range x y) | (signum x)==1 && (signum y)==1 = More0
-                                        | (signum x)==0 && (signum y)==1 = MoreEq0
-                                        | (signum x)==0 && (signum y)==0 = Eq0
-                                        | (signum x)==(-1) && (signum y)==(-1) = Less0 
-                                        | (signum x)==0 && (signum y)==(-1) = LessEq0
-                                        | (signum x)==(-1) && (signum y)==1 = Top
-                                        | otherwise = omega (WS.Range y x)
-
+        absMul :: a -> a -> a               
+        absDiv :: a -> a -> a  
+        absMinus :: a -> a
         
-        
+        widening :: a -> a -> a
+        widening x y = if x <= y then x else Top -- naive

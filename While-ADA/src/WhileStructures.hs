@@ -23,8 +23,8 @@ module WhileStructures where
 
     data Stm = 
         Assign Name AExpr
-        |Skip
-        |Comp Stm Stm
-        |Cond BExpr Stm Stm -- if b then S1 else S2     
-        |While BExpr Stm -- while b S
+        | Skip
+        | Comp Stm Stm
+        | Cond BExpr Stm Stm -- if b then S1 else S2     
+        | While BExpr Stm -- while b do S
         deriving (Show, Eq)

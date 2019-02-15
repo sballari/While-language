@@ -5,7 +5,7 @@ module AbsState where
 
   type VarName = String
 
-  data AbsState a = S [(VarName, a)] | Bottom deriving (Show, Eq)
+  data AbsState a = S [(VarName, a)] | Bottom deriving (Show, Eq) -- a non può essere Bottom
   -- a should be the abstract domain
   -- haskell doesn't allow type constraint in data type
 
@@ -17,21 +17,27 @@ module AbsState where
                             else 
                               case (alter (S xs) name v) of 
                                 S xs -> S(x:xs)
-                                AbsState.Bottom -> AbsState.Bottom
+                              --  AbsState.Bottom -> AbsState.Bottom
 
                             
                           
-  lookUp :: (AbsDomain a) => AbsState a -> String -> a  
-  lookUp AbsState.Bottom name = bottom
-  lookUp (S xs) name = case (lookup name xs) of
-                          Nothing -> top
-                          Just x -> x 
+  lookUp :: (AbsDomain a) => AbsState a -> String -> a
+  lookUp AbsState.Bottom name = AD.bottom -- bottom?
+  -- lookUp (S xs) name = case (lookup name xs) of --lookup?
+  --                         Nothing -> top
+  --                         Just x -> x 
+  lookUp (S []) name = AD.top
+  lookUp (S (x:xs)) name = if (fst x) == name then (snd x) else lookUp (S xs) name
 
   
   -- component wise extensions
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
-  (<=) (S xs) (S ys) = (xs == ys)  
+  -- (<=) (S xs) (S ys) = (xs == ys)  -- ?
+  (<=) (S []) (S []) = True
+  (<=) (S (x:xs)) (S (y:ys)) = if lookUp (S x) x <= lookUp (S y) y then (<=) (S (xs)) (S (ys)) else False 
+  -- per ogni V ho che lookUp (S xs) V <= lookUp (S ys) V
+  -- S ed S' possono avere cardinalità diverse oppure l'ordine delle tuple diverso?
   (<=) _ _ = False
 
   union :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
@@ -57,8 +63,8 @@ module AbsState where
   absAS (WS.Var n) s = lookUp s n
                              
   --utility function
-  findEl :: (AbsDomain a) => a -> [(b,a)] -> Bool 
-  findEl el xs = foldr (\x r-> (((snd x) == el) || r) ) False xs
+  -- findEl :: (AbsDomain a) => a -> [(b,a)] -> Bool 
+  -- findEl el xs = foldr (\x r-> (((snd x) == el) || r) ) False xs
     
   -- class UndefSup a where
   --   undef :: a 
