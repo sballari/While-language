@@ -12,6 +12,7 @@ module AbsState where
 
   alter :: AbsState a -> String -> a -> AbsState a
   alter AbsState.Bottom name v = AbsState.Bottom
+  alter _ _ bottom = AbsState.Bottom 
   alter (S[]) name v = S [(name, v)]
   alter (S(x:xs)) name v = if (fst x)==name then S ((name,v):xs) 
                             else 
@@ -46,8 +47,8 @@ module AbsState where
                                 if (findEl bottom i) then AbsState.Bottom
                                 else (S i) 
 
-  -- abstract semantics
-  absAS :: (AbsDomain a{-, UndefSup a-}) => WS.AExpr -> (AbsState a)-> a
+  -- abstract semantics of arithmetic expression
+  absAS :: (AbsDomain a) => WS.AExpr -> (AbsState a)-> a
   absAS (WS.Sum ex1 ex2) s = absSum (absAS ex1 s) (absAS ex2 s)
   absAS (WS.Mul ex1 ex2) s = absMul (absAS ex1 s) (absAS ex2 s)
   absAS (WS.Minus ex) s = absMinus (absAS ex s)
@@ -55,10 +56,33 @@ module AbsState where
   absAS (WS.Num x) s = omega (WS.Num x)
   absAS (WS.Range x y) s = omega (WS.Range x y)
   absAS (WS.Var n) s = lookUp s n
-                             
+
+  -- abstract semantics of boolean expressions
+  -- states filter
+  absBS :: (AbsDomain a) => WS.BExpr -> (AbsState a)-> (AbsState a)
+  absBS WS.True s = s
+  absBS WS.False s = AbsState.Bottom
+  absBS (WS.Eq e1 e2) s | (a1 /= top || a1 /= bottom) &&
+                          (a2 /= top || a2 /= bottom) &&
+                          (a1 /= a2) = AbsState.Bottom
+                        | (a1 == bottom || a2 == bottom) = AbsState.Bottom 
+                        | otherwise = s
+        where a1 = (absAS e1 s)
+              a2 = (absAS e2 s)
+
+  absBS (WS.LessEq e1 e2) s | (a1 /= top && a2 /= top) && 
+                              (a1 AD.> a2) = AbsState.Bottom 
+                            | a1 == bottom && a2 == bottom = AbsState.Bottom 
+                            | otherwise = s
+    where a1 = (absAS e1 s)
+          a2 = (absAS e2 s)
+  
+  absBS (WS.And b1 b2) s = absBS b2 (absBS b1 s) 
+  absBS (WS.Neg b1) s = if (absBS b1 s) == s then AbsState.Bottom else s
+  
   --utility function
   findEl :: (AbsDomain a) => a -> [(b,a)] -> Bool 
   findEl el xs = foldr (\x r-> (((snd x) == el) || r) ) False xs
+
+
     
-  -- class UndefSup a where
-  --   undef :: a 
