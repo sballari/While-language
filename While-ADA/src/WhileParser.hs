@@ -194,6 +194,7 @@ module WhileParser where
         parseSkip <|>
         parseCond <|>
         parseWhile <|>
+        parseAssert <|>
         pure(\a b c->b) <*> symbol "(" <*> parseStms <*> symbol ")"
 
 
@@ -203,6 +204,12 @@ module WhileParser where
     
     parseSkip :: Parser (Stm)
     parseSkip = fmap (\x->Skip) (symbol "skip")
+
+    parseAssert :: Parser (Stm)
+    parseAssert = do 
+                    symbol "assert"
+                    b <- parseBExpr
+                    return Assert b
 
     parseCond :: Parser(Stm)
     parseCond = 

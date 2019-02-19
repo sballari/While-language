@@ -27,4 +27,5 @@ module WhileStructures where
         | Comp Stm Stm
         | Cond BExpr Stm Stm -- if b then S1 else S2     
         | While BExpr Stm -- while b do S
+        | Assert BExpr
         deriving (Show, Eq)
