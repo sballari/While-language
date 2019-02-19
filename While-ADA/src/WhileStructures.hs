@@ -19,6 +19,7 @@ module WhileStructures where
         | LessEq AExpr AExpr
         | Neg BExpr
         | And BExpr BExpr
+        | Or BExpr BExpr
         deriving (Show, Eq)
 
     data Stm = 

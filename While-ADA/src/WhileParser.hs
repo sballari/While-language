@@ -170,7 +170,12 @@ module WhileParser where
             else return (LessEq a b)
     
     parseBExpr2 :: Parser (BExpr)
-    parseBExpr2 = pure(\a b c-> And a c) <*> parseBExpr3 <*> symbol "&" <*> parseBExpr2
+    parseBExpr2 = pure(\a op c-> case op of 
+                                    "&" -> And a c
+                                    "|" -> Or a c ) 
+                                    <*> parseBExpr3 
+                                    <*> (symbol "&" <|> symbol "|") 
+                                    <*> parseBExpr2
                   <|> parseBExpr3
     
     parseBExpr3 :: Parser (BExpr)
