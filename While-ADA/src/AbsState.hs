@@ -3,34 +3,32 @@ module AbsState where
   import qualified  WhileStructures as WS
   import Data.List
 
-  {-
+  
   type VarName = String
 
+  
   data AbsState a = S [(VarName, a)] | Bottom deriving (Show, Eq) -- a non può essere Bottom
   -- a should be the abstract domain
   -- haskell doesn't allow type constraint in data type
 
 
   alter :: AbsState a -> String -> a -> AbsState a
-  alter AbsState.Bottom name v = AbsState.Bottom
+  alter AbsState.Bottom _ _ = AbsState.Bottom
   alter (S[]) name v = S [(name, v)]
-  alter (S(x:xs)) name v = if (fst x)==name then S ((name,v):xs) 
+  alter (S(x:xs)) name v =  if (fst x)==name then S ((name,v):xs) 
                             else 
                               case (alter (S xs) name v) of 
                                 S xs -> S(x:xs)
-                              --  AbsState.Bottom -> AbsState.Bottom
+                                AbsState.Bottom -> AbsState.Bottom
 
                             
                           
-  lookUp :: (AbsDomain a) => AbsState a -> String -> a
-  lookUp AbsState.Bottom name = AD.bottom -- bottom?
-  -- lookUp (S xs) name = case (lookup name xs) of --lookup?
-  --                         Nothing -> top
-  --                         Just x -> x 
-  lookUp (S []) name = AD.top
-  lookUp (S (x:xs)) name = if (fst x) == name then (snd x) else lookUp (S xs) name
+  epsilon :: AbsDomain a=> AbsState a -> String -> a
+  epsilon AbsState.Bottom name = AD.bottom -- bottom?
+  epsilon (S []) name = AD.top
+  epsilon (S (x:xs)) name = if (fst x) == name then (snd x) else epsilon (S xs) name
 
-  
+  {-
   -- component wise extensions
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
