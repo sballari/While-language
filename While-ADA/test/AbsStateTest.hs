@@ -25,7 +25,7 @@ module AbsStateTest (tests) where
             expected = (S[("x",21),("x",30),("z",11)])
             result = alter (S[("x",18),("x",30),("z",11)]) "x" 21
     
-            -}
+            
     
 
 
@@ -40,4 +40,4 @@ module AbsStateTest (tests) where
             result = lookUp (S[("x",18),("y",30),("z",11)]) "j" :: Int
 
 
-    
+    -}
