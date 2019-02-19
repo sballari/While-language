@@ -9,8 +9,8 @@ module AbsDomain where
         bottom :: a 
         --gamma :: a -> [Int] -- concretization function : B# -> power(I)
         alfa :: AExpr -> a  -- astrae costanti (c) e intervalli non deterministici ([c,c'])
-        join :: a -> a -> a -- lub
-        meet :: a -> a -> a -- glb
+        join :: a -> a -> a -- abs lub
+        meet :: a -> a -> a -- abs glb
         
         -- unary operators
         absNeg :: a -> a

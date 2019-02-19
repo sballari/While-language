@@ -209,7 +209,7 @@ module WhileParser where
     parseAssert = do 
                     symbol "assert"
                     b <- parseBExpr
-                    return Assert b
+                    return (Assert b)
 
     parseCond :: Parser(Stm)
     parseCond = 

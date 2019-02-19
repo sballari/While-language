@@ -40,24 +40,24 @@ module SignDomain where
 
         -- alfa :: AExpr -> a
         alfa (Num n)
-            n == 0 = Zero
-            n >= 0 = MoreEqZero
-            n <= 0 = LessEqZero
+            |n == 0 = Zero
+            |n >= 0 = MoreEqZero
+            |n <= 0 = LessEqZero
         
         alfa (Range n n')
-            n == 0 = MoreEqZero
-            n <= 0 & n' <= 0 = LessEqZero
-            n <= 0 & n' >= 0 = Top
-            n >= 0 & n' >= 0 = MoreEqZero
-            n >= 0 & n' <= 0 = Bottom
+            |n == 0 = MoreEqZero
+            |n <= 0 & n' <= 0 = LessEqZero
+            |n <= 0 & n' >= 0 = Top
+            |n >= 0 & n' >= 0 = MoreEqZero
+            |n >= 0 & n' <= 0 = Bottom
         
         --join :: a -> a -> a
 
         lub :: a -> a -> abs
         lub x y 
-            (x <= y) == Just True = y
-            (x <= y) == Just False = x 
-            otherwise = Top
+            |(x <= y) == Just True = y
+            |(x <= y) == Just False = x 
+            |otherwise = Top
 
         join x y = lub x y
 
