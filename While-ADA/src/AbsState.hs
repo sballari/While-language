@@ -21,24 +21,27 @@ module AbsState where
                                 S xs -> S(x:xs)
                                 AbsState.Bottom -> AbsState.Bottom
 
-                            
+   -- D# = (V->(B#\{AD.Bottom})) U AS.Bottom                         
                           
-  epsilon :: AbsDomain a=> AbsState a -> String -> a
-  epsilon AbsState.Bottom name = AD.bottom -- bottom?
-  epsilon (S []) name = AD.top
-  epsilon (S (x:xs)) name = if (fst x) == name then (snd x) else epsilon (S xs) name
+  lookUp :: AbsDomain a=> AbsState a -> String -> a
+  -- lookUp AbsState.Bottom name = AD.bottom -- bottom?
+  lookUp (S []) name = AD.top
+  lookUp (S (x:xs)) name = if (fst x) == name then (snd x) else lookUp (S xs) name
 
-  {-
+   
   -- component wise extensions
+
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
-  -- (<=) (S xs) (S ys) = (xs == ys)  -- ?
-  (<=) (S []) (S []) = True
-  (<=) (S (x:xs)) (S (y:ys)) = if lookUp (S x) x <= lookUp (S y) y then (<=) (S (xs)) (S (ys)) else False 
+  (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x AD.<= (lookUp (S ys) var)) && sr ) True xs
+         
+  -- (<=) (S []) (S []) = True
+  -- (<=) (S (x:xs)) (S (y:ys)) = if lookUp (S x) x <= lookUp (S y) y then (<=) (S (xs)) (S (ys)) else False 
   -- per ogni V ho che lookUp (S xs) V <= lookUp (S ys) V
   -- S ed S' possono avere cardinalità diverse oppure l'ordine delle tuple diverso?
   (<=) _ _ = False
 
+ {-
   union :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   union x AbsState.Bottom = x
   union AbsState.Bottom y = y  
