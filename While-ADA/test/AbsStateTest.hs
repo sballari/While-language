@@ -1,10 +1,12 @@
 module AbsStateTest (tests) where
     import AbsState
-    import IntDomain
     import WhileStructures as WS
     import Test.Tasty
     import Test.Tasty.HUnit
     
+    {-
+    --test non piu' validi in quanto non e' piu' 
+    --presente il dominio degli interi
 
     tests = [testAlter, testAlter1, testAlter2, testLookup, testLookup1]
 
@@ -23,7 +25,7 @@ module AbsStateTest (tests) where
             expected = (S[("x",21),("x",30),("z",11)])
             result = alter (S[("x",18),("x",30),("z",11)]) "x" 21
     
-
+            -}
     
 
 

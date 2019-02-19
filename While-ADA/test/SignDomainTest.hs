@@ -6,6 +6,8 @@ module SignDomainTest (tests) where
     import WhileStructures as WS
     import Test.Tasty
     import Test.Tasty.HUnit
+    {-
+    NOTA: i test sono da aggiornare per il dominio non esteso
 
     tests = [testUnion, testUnion1, testUnion2,testInt, testInt1, testStateUnion,
                 testStateUnion1,testStateInt1,testStateInt2, testOmega1, testOmega2,
@@ -84,3 +86,4 @@ module SignDomainTest (tests) where
             expected = [Top,More0]
             result = [  absAS (parseR "x/(3+(-1))") (S[("x",More0)]),
                         absAS (parseR "(5*4)+x") (S[("x",More0)]) ]
+-}
