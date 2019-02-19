@@ -175,8 +175,8 @@ module WhileParser where
     
     parseBExpr3 :: Parser (BExpr)
     parseBExpr3 = 
-        fmap (\x->WS.True) (symbol "true") <|>
-        fmap (\x->WS.False) (symbol "false") <|>
+        fmap (\x->WTrue) (symbol "true") <|>
+        fmap (\x->WFalse) (symbol "false") <|>
         pure(\a b c->b) <*> symbol "(" <*> parseBExpr <*> symbol ")" <|>
         pure(\x y -> Neg y)<*> symbol "!" <*> parseBExpr3 
     

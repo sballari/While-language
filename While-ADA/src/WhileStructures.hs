@@ -13,8 +13,8 @@ module WhileStructures where
         deriving (Show, Eq)
 
     data BExpr = 
-        True 
-        | False 
+        WTrue 
+        | WFalse 
         | Eq AExpr AExpr
         | LessEq AExpr AExpr
         | Neg BExpr

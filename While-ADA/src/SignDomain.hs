@@ -1,5 +1,6 @@
 module SignDomain where
-    import AbsDomain
+    import AbsDomain as AD
+    import WhileStructures
 
     data Sign = Bottom | Zero | LessEqZero | MoreEqZero | Top 
                 deriving Show
@@ -40,34 +41,35 @@ module SignDomain where
 
         -- alfa :: AExpr -> a
         alfa (Num n)
-            |n == 0 = Zero
-            |n >= 0 = MoreEqZero
-            |n <= 0 = LessEqZero
+            |n Prelude.== 0 = Zero
+            |n Prelude.>= 0 = MoreEqZero
+            |n Prelude.<= 0 = LessEqZero
         
         alfa (Range n n')
-            |n == 0 = MoreEqZero
-            |n <= 0 & n' <= 0 = LessEqZero
-            |n <= 0 & n' >= 0 = Top
-            |n >= 0 & n' >= 0 = MoreEqZero
-            |n >= 0 & n' <= 0 = Bottom
+            |n Prelude.== 0 = MoreEqZero
+            |n Prelude.<= 0 && n' Prelude.<= 0 = LessEqZero
+            |n Prelude.<= 0 && n' Prelude.>= 0 = Top
+            |n Prelude.>= 0 && n' Prelude.>= 0 = MoreEqZero
+            |n Prelude.>= 0 && n' Prelude.<= 0 = Bottom
         
-        --join :: a -> a -> a
-
-        lub :: a -> a -> abs
-        lub x y 
-            |(x <= y) == Just True = y
-            |(x <= y) == Just False = x 
-            |otherwise = Top
+        --join :: Sign -> Sign -> Sign
 
         join x y = lub x y
+            where 
+                lub a b  
+                    |(AD.<=) a b == Just True = b
+                    |(AD.<=) a b == Just False = a 
+                    |otherwise = Top
 
-        --meet :: a -> a -> a
+        
 
-        glb :: a -> a -> a
-        glb x y
-            (x <= y) == Just True = x
-            (x <= y) == Just False = y
-            otherwise = Bottom
+        --meet :: Sign -> Sign -> Sign
+        meet x y= glb x y
+            where
+                glb a b
+                    | (AD.<=) a b == Just True = a
+                    | (AD.<=) a b == Just False = b
+                    | otherwise = Bottom
 
         -- unary operators --> necessario?
         --absNeg :: a -> a
@@ -82,9 +84,11 @@ module SignDomain where
         absSum Bottom _ = Bottom
 
 
+        {-
         absMul :: a -> a -> a               
         absDiv :: a -> a -> a  
-        absMinus :: a -> a
+        absMinus :: a -> a  
+        -}
         
-        widening :: a -> a -> a
-        widening x y = if x <= y then x else Top -- naive
+        -- widening :: Sign -> Sign -> Sign
+        widening x y = if (AD.<=) x y == Just True then x else Top -- naive
