@@ -3,6 +3,7 @@ module AbsState where
   import qualified  WhileStructures as WS
   import Data.List
 
+  {-
   type VarName = String
 
   data AbsState a = S [(VarName, a)] | Bottom deriving (Show, Eq) -- a non può essere Bottom
@@ -68,3 +69,4 @@ module AbsState where
     
   -- class UndefSup a where
   --   undef :: a 
+  -}
