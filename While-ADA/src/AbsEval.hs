@@ -13,4 +13,13 @@ module AbsEval where
     exprE (Mul e1 e2) s = absMul (exprE e1 s) (exprE e2 s)
     exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
 
+    assS :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
+    assS (Assign var e) s   
+        | s == Bottom           = Bottom
+        | (exprE e s) == bottom = Bottom
+        | otherwise             = alter s var (exprE e s)
+
+    
+       
+
 
