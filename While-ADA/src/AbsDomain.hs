@@ -17,10 +17,11 @@ module AbsDomain where
         -- unary operators
         absNeg :: a -> a
 
-        -- binary operators 
+        -- sound binary operators 
         absSum :: a -> a -> a
         absMul :: a -> a -> a               
         absDiv :: a -> a -> a  
+        -- sound unary operators
         absMinus :: a -> a
         
         widening :: a -> a -> a
