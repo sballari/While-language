@@ -5,7 +5,10 @@ module SignDomain where
     data Sign = Bottom | Zero | LessEqZero | MoreEqZero | Top 
                 deriving Show
 
-    instance AbsDomain Sign where
+    instance Eq Sign where 
+        a == b = (a <= b) && (b <= a)
+
+    instance Ord Sign where
         --(<=) :: a -> a -> Bool
         (<=) Bottom _ = True
         (<=) _ Bottom = False
@@ -25,7 +28,7 @@ module SignDomain where
         (<=) _ Top = True
         (<=) Top _ = False
               
-
+    instance AbsDomain Sign where
         -- bottom :: a
         bottom = Bottom
 
@@ -41,24 +44,24 @@ module SignDomain where
 
         -- alfa :: AExpr -> a
         alfa (Num n)
-            |n Prelude.== 0 = Zero
-            |n Prelude.>= 0 = MoreEqZero
-            |n Prelude.<= 0 = LessEqZero
+            |n == 0 = Zero
+            |n >= 0 = MoreEqZero
+            |n <= 0 = LessEqZero
         
         alfa (Range n n')
-            |n Prelude.== 0 = MoreEqZero
-            |n Prelude.<= 0 && n' Prelude.<= 0 = LessEqZero
-            |n Prelude.<= 0 && n' Prelude.>= 0 = Top
-            |n Prelude.>= 0 && n' Prelude.>= 0 = MoreEqZero
-            |n Prelude.>= 0 && n' Prelude.<= 0 = Bottom
+            |n == 0 = MoreEqZero
+            |n <= 0 && n' <= 0 = LessEqZero
+            |n <= 0 && n' >= 0 = Top
+            |n >= 0 && n' >= 0 = MoreEqZero
+            |n >= 0 && n' <= 0 = Bottom
         
         --join :: Sign -> Sign -> Sign
 
         join x y = lub x y
             where 
                 lub a b  
-                    |(AD.<=) a b == True = b
-                    |(AD.<=) a b == False = a 
+                    |(<=) a b == True = b
+                    |(<=) a b == False = a 
                     |otherwise = Top
 
         
@@ -67,8 +70,8 @@ module SignDomain where
         meet x y= glb x y
             where
                 glb a b
-                    | (AD.<=) a b == True = a
-                    | (AD.<=) a b == False = b
+                    | (<=) a b == True = a
+                    | (<=) a b == False = b
                     | otherwise = Bottom
 
         -- unary operators --> necessario?
@@ -91,4 +94,4 @@ module SignDomain where
         -}
         
         -- widening :: Sign -> Sign -> Sign
-        widening x y = if (AD.<=) x y == True then x else Top -- naive
+        widening x y = if (<=) x y == True then x else Top -- naive

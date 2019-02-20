@@ -23,7 +23,7 @@ module AbsState where
 
    -- D# = (V->(B#\{AD.Bottom})) U AS.Bottom                         
                           
-  lookUp :: AbsDomain a=> AbsState a -> String -> a
+  lookUp :: AbsDomain a => AbsState a -> String -> a
   -- lookUp AbsState.Bottom name = AD.bottom -- bottom?
   lookUp (S []) name = AD.top
   lookUp (S (x:xs)) name = if (fst x) == name then (snd x) else lookUp (S xs) name
@@ -33,7 +33,7 @@ module AbsState where
 
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
-  (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x AD.<= (lookUp (S ys) var)) && sr ) True xs
+  (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x Prelude.<= (lookUp (S ys) var)) && sr ) True xs
   (<=) _ _ = False
          
   -- (<=) (S []) (S []) = True
@@ -42,19 +42,21 @@ module AbsState where
   -- S ed S' possono avere cardinalità diverse oppure l'ordine delle tuple diverso?
   
   
- {-
-  union :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
-  union x AbsState.Bottom = x
-  union AbsState.Bottom y = y  
-  union (S xs) (S ys) =S [(a, (AD.union b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
+ 
+  join :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
+  join x Bottom = x
+  join Bottom y = y  
+  join (S xs) (S ys) =S [(a, (AD.join b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
 
-  intersection :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
-  intersection _ AbsState.Bottom = AbsState.Bottom
-  intersection AbsState.Bottom _ = AbsState.Bottom
-  intersection (S xs) (S ys) = let i = [(a, (AD.intersection b d)) | (a,b)<-xs , (c,d)<-ys, a==c] in 
+  meet :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
+  meet _ AbsState.Bottom = AbsState.Bottom
+  meet AbsState.Bottom _ = AbsState.Bottom
+  meet (S xs) (S ys) = -- TODO da scrivere in maniera + efficiente
+    let i = [(a, (AD.meet b d)) | (a,b)<-xs , (c,d)<-ys, a==c] in 
                                 if (findEl bottom i) then AbsState.Bottom
                                 else (S i) 
-
+                                  
+{-
   -- abstract semantics
   absAS :: (AbsDomain a{-, UndefSup a-}) => WS.AExpr -> (AbsState a)-> a
   absAS (WS.Sum ex1 ex2) s = absSum (absAS ex1 s) (absAS ex2 s)
@@ -64,11 +66,11 @@ module AbsState where
   absAS (WS.Num x) s = omega (WS.Num x)
   absAS (WS.Range x y) s = omega (WS.Range x y)
   absAS (WS.Var n) s = lookUp s n
-                             
+  -}                           
   --utility function
-  -- findEl :: (AbsDomain a) => a -> [(b,a)] -> Bool 
-  -- findEl el xs = foldr (\x r-> (((snd x) == el) || r) ) False xs
-    
+  findEl :: (Eq a) => a -> [(b,a)] -> Bool 
+  findEl el = foldr (\x r-> (((snd x) == el) || r) ) False
+  {-
   -- class UndefSup a where
   --   undef :: a 
   -}
