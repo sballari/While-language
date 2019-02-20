@@ -17,6 +17,10 @@ module WhileStructures where
         | WFalse 
         | Eq AExpr AExpr
         | LessEq AExpr AExpr
+        | Less AExpr AExpr
+        | NotEq AExpr AExpr
+        | More AExpr AExpr
+        | MoreEq AExpr AExpr
         | Neg BExpr
         | And BExpr BExpr
         | Or BExpr BExpr
