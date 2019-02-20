@@ -34,13 +34,14 @@ module AbsState where
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
   (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x AD.<= (lookUp (S ys) var)) && sr ) True xs
+  (<=) _ _ = False
          
   -- (<=) (S []) (S []) = True
   -- (<=) (S (x:xs)) (S (y:ys)) = if lookUp (S x) x <= lookUp (S y) y then (<=) (S (xs)) (S (ys)) else False 
   -- per ogni V ho che lookUp (S xs) V <= lookUp (S ys) V
   -- S ed S' possono avere cardinalità diverse oppure l'ordine delle tuple diverso?
-  (<=) _ _ = False
-
+  
+  
  {-
   union :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   union x AbsState.Bottom = x

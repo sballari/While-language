@@ -6,24 +6,24 @@ module SignDomain where
                 deriving Show
 
     instance AbsDomain Sign where
-        --(<=) :: a -> a -> Maybe Bool
-        (<=) Bottom _ = Just True
-        (<=) _ Bottom = Just False
+        --(<=) :: a -> a -> Bool
+        (<=) Bottom _ = True
+        (<=) _ Bottom = False
         
-        (<=) Zero _ = Just True
-        (<=) _ Zero = Just False
+        (<=) Zero _ = True
+        (<=) _ Zero = False
 
-        (<=) LessEqZero _ = Just True
-        (<=) _ LessEqZero = Just False
+        (<=) LessEqZero _ = True
+        (<=) _ LessEqZero = False
 
-        (<=) LessEqZero MoreEqZero = Nothing
-        (<=) MoreEqZero LessEqZero = Nothing
+        (<=) LessEqZero MoreEqZero = False --Nothing, in caso di maybe bool
+        (<=) MoreEqZero LessEqZero = False --Nothing, in caso di maybe bool
 
-        (<=) MoreEqZero _ = Just True
-        (<=) _ MoreEqZero = Just False
+        (<=) MoreEqZero _ = True
+        (<=) _ MoreEqZero = False
 
-        (<=) _ Top = Just True
-        (<=) Top _ = Just False
+        (<=) _ Top = True
+        (<=) Top _ = False
               
 
         -- bottom :: a
@@ -57,8 +57,8 @@ module SignDomain where
         join x y = lub x y
             where 
                 lub a b  
-                    |(AD.<=) a b == Just True = b
-                    |(AD.<=) a b == Just False = a 
+                    |(AD.<=) a b == True = b
+                    |(AD.<=) a b == False = a 
                     |otherwise = Top
 
         
@@ -67,8 +67,8 @@ module SignDomain where
         meet x y= glb x y
             where
                 glb a b
-                    | (AD.<=) a b == Just True = a
-                    | (AD.<=) a b == Just False = b
+                    | (AD.<=) a b == True = a
+                    | (AD.<=) a b == False = b
                     | otherwise = Bottom
 
         -- unary operators --> necessario?
@@ -91,4 +91,4 @@ module SignDomain where
         -}
         
         -- widening :: Sign -> Sign -> Sign
-        widening x y = if (AD.<=) x y == Just True then x else Top -- naive
+        widening x y = if (AD.<=) x y == True then x else Top -- naive

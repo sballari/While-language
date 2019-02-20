@@ -4,7 +4,7 @@ module AbsDomain where
     
     class AbsDomain a where
         -- (<=) :: a -> a -> Bool
-        (<=) :: a -> a -> Maybe Bool -- ordine parziale
+        (<=) :: a -> a -> Bool -- ordine parziale
         top :: a
         bottom :: a 
         --gamma :: a -> [Int] -- concretization function : B# -> power(I)
