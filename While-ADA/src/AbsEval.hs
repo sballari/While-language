@@ -19,7 +19,11 @@ module AbsEval where
         | (exprE e s) == bottom = Bottom
         | otherwise             = alter s var (exprE e s)
 
-    
+    condC :: (AbsDomain a) => BExpr -> [AbsState a] -> [AbsState a] 
+    --fina ultra grossa p. 54
+    condC _ ss = ss
+
+
        
 
 
