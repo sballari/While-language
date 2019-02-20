@@ -1,7 +1,7 @@
 module AbsEval where
     import WhileStructures
-    import AbsDomain
-    import AbsState
+    import AbsDomain as AD
+    import AbsState as AS
 
     --abstract semantic of expressions in a non-relational domain
     exprE :: (AbsDomain a) => AExpr -> AbsState a -> a
@@ -13,18 +13,21 @@ module AbsEval where
     exprE (Mul e1 e2) s = absMul (exprE e1 s) (exprE e2 s)
     exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
 
-    assS :: (AbsDomain a) => Stm -> [AbsState a] -> [AbsState a]
-    assS (Assign var e) ss = foldr (\s sr -> (ass s):sr) [] ss        
-        where ass s | s == Bottom           = Bottom
+    semS :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
+    semS (Assign var e) s      
+                    | s == Bottom           = Bottom
                     | (exprE e s) == bottom = Bottom
                     | otherwise             = alter s var (exprE e s)
 
-    condC :: (AbsDomain a) => BExpr -> [AbsState a] -> [AbsState a] 
+    condC :: (AbsDomain a) => BExpr -> AbsState a -> AbsState a 
     --fina ultra grossa p. 54
-    condC (WTrue) ss = ss
-    condC (WFalse) ss = []
-    condC (And c1 c2) ss = meet (condC c1 ss) (condC c2 ss) 
-    condC (Or c1 c2) ss = join (condC c1 ss) (condC c2 ss) 
+    condC (WTrue) s = s
+    condC (WFalse) s = Bottom
+    condC (And c1 c2) s = AS.meet (condC c1 s) (condC c2 s)
+    condC (Or c1 c2) s =  AS.join (condC c1 s) (condC c2 s)
+    condC _ s = s
+
+
     
 
 
