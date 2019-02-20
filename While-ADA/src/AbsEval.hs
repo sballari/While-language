@@ -13,15 +13,19 @@ module AbsEval where
     exprE (Mul e1 e2) s = absMul (exprE e1 s) (exprE e2 s)
     exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
 
-    assS :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
-    assS (Assign var e) s   
-        | s == Bottom           = Bottom
-        | (exprE e s) == bottom = Bottom
-        | otherwise             = alter s var (exprE e s)
+    assS :: (AbsDomain a) => Stm -> [AbsState a] -> [AbsState a]
+    assS (Assign var e) ss = foldr (\s sr -> (ass s):sr) [] ss        
+        where ass s | s == Bottom           = Bottom
+                    | (exprE e s) == bottom = Bottom
+                    | otherwise             = alter s var (exprE e s)
 
     condC :: (AbsDomain a) => BExpr -> [AbsState a] -> [AbsState a] 
     --fina ultra grossa p. 54
-    condC _ ss = ss
+    condC (WTrue) ss = ss
+    condC (WFalse) ss = []
+    condC (And c1 c2) ss = meet (condC c1 ss) (condC c2 ss) 
+    condC (Or c1 c2) ss = join (condC c1 ss) (condC c2 ss) 
+    
 
 
        
