@@ -5,6 +5,19 @@ module SignDomain where
     data Sign = Bottom | Zero | LessEqZero | MoreEqZero | Top 
                 deriving Show
 
+    alpha :: AExpr -> Sign
+    alpha (Num n)
+        |n == 0 = Zero
+        |n >= 0 = MoreEqZero
+        |n <= 0 = LessEqZero
+    
+    alpha (Range n n')
+        |n == 0 = MoreEqZero
+        |n <= 0 && n' <= 0 = LessEqZero
+        |n <= 0 && n' >= 0 = Top
+        |n >= 0 && n' >= 0 = MoreEqZero
+        |n >= 0 && n' <= 0 = Bottom
+
     instance Eq Sign where 
         a == b = (a <= b) && (b <= a)
 
@@ -35,6 +48,8 @@ module SignDomain where
         -- top :: a
         top = Top
         
+        soundC (Var x) = alpha (Var x)
+        soundRange (Range x y) = alpha (Range x y)
         -- gamma :: a -> [Int]
         -- gamma Bottom = []
         -- gamma Zero = [0]
@@ -43,17 +58,7 @@ module SignDomain where
         -- gamma Top = (reverse [0,-1..]) ++ [1..]
 
         -- alfa :: AExpr -> a
-        alfa (Num n)
-            |n == 0 = Zero
-            |n >= 0 = MoreEqZero
-            |n <= 0 = LessEqZero
         
-        alfa (Range n n')
-            |n == 0 = MoreEqZero
-            |n <= 0 && n' <= 0 = LessEqZero
-            |n <= 0 && n' >= 0 = Top
-            |n >= 0 && n' >= 0 = MoreEqZero
-            |n >= 0 && n' <= 0 = Bottom
         
         --join :: Sign -> Sign -> Sign
 

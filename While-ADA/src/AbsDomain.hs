@@ -7,7 +7,10 @@ module AbsDomain where
         top :: a
         bottom :: a 
         --gamma :: a -> [Int] -- concretization function : B# -> power(I)
-        alfa :: AExpr -> a  -- astrae costanti (c) e intervalli non deterministici ([c,c'])
+        --alfa :: AExpr -> a  --non obbligatoria
+
+        soundC :: AExpr -> a -- obbligatoria
+        soundRange :: AExpr -> a -- obbligatoria
         join :: a -> a -> a -- abs lub
         meet :: a -> a -> a -- abs glb
         
