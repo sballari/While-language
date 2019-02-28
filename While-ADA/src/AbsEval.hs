@@ -6,28 +6,28 @@ module AbsEval where
     --abstract semantic of expressions in a non-relational domain
 
     class (AbsDomain a) => AbsEval a where     
-        exprE ::  AExpr -> AbsState a -> a
-        exprE (Var x) s = lookUp s x 
-        exprE (Num n) _ = soundC (Num n)
-        exprE (Range x y) _ = soundRange (Range x y)
-        exprE (Minus e) s = absMinus (exprE e s)
-        exprE (Sum e1 e2) s = absSum (exprE e1 s) (exprE e2 s)
-        exprE (Mul e1 e2) s = absMul (exprE e1 s) (exprE e2 s)
-        exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
+        exprEG ::  AExpr -> AbsState a -> a
+        exprEG (Var x) s = lookUp s x 
+        exprEG (Num n) _ = soundC (Num n)
+        exprEG (Range x y) _ = soundRange (Range x y)
+        exprEG (Minus e) s = absMinus (exprEG e s)
+        exprEG (Sum e1 e2) s = absSum (exprEG e1 s) (exprEG e2 s)
+        exprEG (Mul e1 e2) s = absMul (exprEG e1 s) (exprEG e2 s)
+        exprEG (Div e1 e2) s = absDiv (exprEG e1 s) (exprEG e2 s)
 
-        semS ::  Stm -> AbsState a -> AbsState a
-        semS (Assign var e) s      
+        semSG ::  Stm -> AbsState a -> AbsState a
+        semSG (Assign var e) s      
                         | s == Bottom           = Bottom
-                        | (exprE e s) == bottom = Bottom
-                        | otherwise             = alter s var (exprE e s)
+                        | (exprEG e s) == bottom = Bottom
+                        | otherwise             = alter s var (exprEG e s)
 
-        condC ::  BExpr -> AbsState a -> AbsState a 
+        condCG ::  BExpr -> AbsState a -> AbsState a 
         --fina ultra grossa p. 54
-        condC (WTrue) s = s
-        condC (WFalse) s = Bottom
-        condC (And c1 c2) s = AS.meet (condC c1 s) (condC c2 s)
-        condC (Or c1 c2) s =  AS.join (condC c1 s) (condC c2 s)
-        condC _ s = s
+        condCG (WTrue) s = s
+        condCG (WFalse) s = Bottom
+        condCG (And c1 c2) s = AS.meet (condCG c1 s) (condCG c2 s)
+        condCG (Or c1 c2) s =  AS.join (condCG c1 s) (condCG c2 s)
+        condCG _ s = s
 
 
     
