@@ -12,7 +12,7 @@ module AbsState where
   -- haskell doesn't allow type constraint in data type
 
 
-  alter :: AbsState a -> String -> a -> AbsState a
+  alter :: AbsDomain a => AbsState a -> String -> a -> AbsState a
   alter AbsState.Bottom _ _ = AbsState.Bottom
   alter (S[]) name v = S [(name, v)]
   alter (S(x:xs)) name v =  if (fst x)==name then S ((name,v):xs) 
