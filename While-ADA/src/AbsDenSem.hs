@@ -24,14 +24,14 @@ module AbsDenSem where
                 p1 = semS s1 (condC c s)
                 p2 = semS s2 (condC (Neg c) s)
 
-        semS (While c e) s = condC (Neg c) (lim fun)
-            where fun x = AS.widening x (AS.join s (semS e (condC c x)))
+        semS (While c e) r = condC (Neg c) (lim fun)
+            where fun x = AS.widening x (AS.join r (semS e (condC c x)))
         
         
         lim :: (AbsState a -> AbsState a) ->  AbsState a
         lim f = (lim' f 0) Bottom
 
         lim' :: (AbsState a -> AbsState a) -> Int -> (AbsState a -> AbsState a)
-        lim' f 0= if (id Bottom) == (f Bottom) then id else lim' f 1
+        lim' f 0 = if (id Bottom) == (f Bottom) then id else lim' f 1
         lim' f n = if  (f Bottom) == ((f.f) Bottom) then f
                 else lim' (f.f) (n+1)
