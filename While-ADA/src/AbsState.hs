@@ -56,6 +56,11 @@ module AbsState where
                                 if (findEl bottom i) then AbsState.Bottom
                                 else (S i) 
                                   
+  widening :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
+  widening Bottom y = y
+  widening x Bottom = x
+  widening (S xs) (S ys) =
+    S [(a, (AD.widening b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
 {-
   -- abstract semantics
   absAS :: (AbsDomain a{-, UndefSup a-}) => WS.AExpr -> (AbsState a)-> a
