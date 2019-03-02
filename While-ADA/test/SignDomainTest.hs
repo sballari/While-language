@@ -1,4 +1,4 @@
-module SignDomainTest (tests) where
+module SignDomainTest  where
     import SignDomain as SD
     import AbsState as AS
     import AbsDomain as AD

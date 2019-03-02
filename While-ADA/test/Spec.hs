@@ -5,6 +5,7 @@ import Test.Tasty.HUnit
 import ParserTest
 import SignDomainTest
 import AbsStateTest
+import CFGTest
 
 main :: IO ()
 main = do

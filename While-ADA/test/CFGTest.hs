@@ -9,6 +9,6 @@ module CFGTest (tests) where
 
     t1  = testCase "[CFG] assign" (assertEqual "" expected result)
         where 
-            expected =  [(L 1, semSG (Assign "V" (Num 3)),L 2)]      
-            result = fst (app (cfg (Assign "V" (Num 3))) 1)
+            expected =  [(L 1, show (Assign "V" (Num 3)),L 2)]   
+            result = fst (app (debugCFG (Assign "V" (Num 3))) 1)
                 
