@@ -28,10 +28,10 @@ module ParserTest (tests) where
         where 
             expected = 
                 [LessEq (Sum (Num 4) (Minus(Num 3))) (Num 5),
-                 And (Neg WS.True) (LessEq (Num 8) (Num 2)),
-                 And (Neg WS.True) WS.False,
-                 Neg (And WS.True WS.False),
-                 And (Neg (Eq (Num 4)(Num 8))) (WS.False) 
+                 And (Neg WTrue) (LessEq (Num 8) (Num 2)),
+                 And (Neg WTrue) WFalse,
+                 Neg (And WTrue WFalse),
+                 And (Neg (Eq (Num 4)(Num 8))) (WFalse) 
                 ]
             result =
                 [resultP parseBExpr "(4+(-3))<=5",
@@ -47,7 +47,7 @@ module ParserTest (tests) where
                 [Skip,
                  Assign "x" (Num 93),
                  Cond (LessEq (Num 3) (Num 33)) Skip (Assign "x" (Num 1)),
-                 While WS.True Skip,
+                 While WTrue Skip,
                  Skip]
             result =
                 [resultP parseStm "skip",
