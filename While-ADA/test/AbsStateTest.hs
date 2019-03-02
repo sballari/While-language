@@ -1,8 +1,8 @@
-module AbsStateTest (tests) where
-    import AbsState
-    import WhileStructures as WS
-    import Test.Tasty
-    import Test.Tasty.HUnit
+module AbsStateTest  where
+--     import AbsState
+--     import WhileStructures as WS
+--     import Test.Tasty
+--     import Test.Tasty.HUnit
     
     {-
     --test non piu' validi in quanto non e' piu' 
