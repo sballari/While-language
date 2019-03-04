@@ -127,9 +127,9 @@ module WhileParser where
     parseAExpr1 = 
         do 
             a <- parseAExpr2
-            op <- symbol "+"
+            op <- symbol "+" <|> symbol "-"
             b <- parseAExpr1
-            return (Sum a b)
+            return (if op == "+" then Sum a b else Sum a (Minus b))
         <|>
             parseAExpr2
             
@@ -152,7 +152,7 @@ module WhileParser where
 
     --------------------------------------------------------------------------
     --BExpr
-                
+    -- TODO: probabilmente il parser dei booleani non e' il top del top, rivedere  
     parseBExpr :: Parser (BExpr)
     parseBExpr = 
         parseBExpr1 <|>
@@ -164,11 +164,20 @@ module WhileParser where
     parseBExpr1 = 
         do 
             a <- parseAExpr
-            op <- symbol "=" <|> symbol "<="
+            op <- parseRelOp
             b <- parseAExpr
-            if op == "=" then return (Eq a b)
-            else return (LessEq a b)
-    
+            return (op a b)
+           
+    parseRelOp :: Parser (AExpr -> AExpr -> BExpr)
+    parseRelOp = 
+        fmap (\x->Eq) (symbol "=")          <|>
+        fmap (\x->NotEq) (symbol "!=")      <|>
+        fmap (\x->LessEq) (symbol "<=")     <|>
+        fmap (\x->MoreEq) (symbol ">=")     <|>
+        fmap (\x->More) (symbol ">")        <|>
+        fmap (\x->Less) (symbol "<")        
+
+
     parseBExpr2 :: Parser (BExpr)
     parseBExpr2 = pure(\a op c-> case op of 
                                     "&" -> And a c
