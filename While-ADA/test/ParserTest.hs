@@ -4,7 +4,7 @@ module ParserTest (tests) where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm]
+    tests = [testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP]
 
     resultP :: Parser a -> String -> a
     resultP p i = (\[(x,y)]->x) (parse p i)
@@ -82,3 +82,12 @@ module ParserTest (tests) where
         where 
             result = resultP parseStms "x:=3"
             expected = Assign "x" (Num 3)
+    
+    whileP = testCase "parse while example" (assertEqual "" expected result)
+            where 
+                result = resultP parseStms program1
+                expected = Comp (Assign "r" (Var "q")) (While (MoreEq (Var "r") (Var "b")) (Comp (Assign "r" (Sum (Var "r") (Minus (Var "b")))) (Assign "q" (Sum (Var "q") (Num 1)))))
+        
+        
+    program1 :: String
+    program1 = "r:=q; while r >= b do (r:=r-b;q:=q+1)"
