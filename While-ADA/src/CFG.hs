@@ -62,7 +62,7 @@ module CFG where
             l1 <- freshLabel
             l2 <-freshLabel
             l3 <-takeLabel 
-            g1 <- cfg s f g-- l3 -> l4
+            g1 <- cfg s f g -- l3 -> l4
             l4 <- freshLabel
             l5 <- takeLabel
             return ([(l1,f Skip,l2), (l2, g c, l3), (l2,g (Neg c), l5), (l4,f Skip,l2)]++g1)
@@ -78,8 +78,15 @@ module CFG where
     debugB :: BExpr -> String 
     debugB c = show c
 
-    
-
+    ---------------------------------------------------
+    -------------- CFG UTILITY FUNCTIONS  -------------
+    ---------------------------------------------------
+    labels :: Graph a-> [Label]
+    labels g = [ L i| i <- nrls] -- sfrutto il fatto che labels incrementali
+        where 
+            ls = [sl| (L sl,_,_) <- g] -- lista con ripetizioni
+            nrls = [(minimum ls)..(maximum ls)]
+              
 
     ---------------------------------------------------
     -------- STATE TRANSFORMATION PATTERN CODE --------
