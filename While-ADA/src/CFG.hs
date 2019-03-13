@@ -5,7 +5,7 @@ module CFG where
     import AbsState as AS
 
 
-    newtype Label = L Int deriving (Show, Eq)
+    newtype Label = L Int deriving (Show, Eq, Ord)
     type CGraph a = [(Label,AbsState a -> AbsState a, Label)]
     type Graph a = [(Label, a, Label)]
 
@@ -81,12 +81,7 @@ module CFG where
     ---------------------------------------------------
     -------------- CFG UTILITY FUNCTIONS  -------------
     ---------------------------------------------------
-    labels :: Graph a-> [Label]
-    labels g = [ L i| i <- nrls] -- sfrutto il fatto che labels incrementali
-        where 
-            ls = [sl| (L sl,_,_) <- g] -- lista con ripetizioni
-            nrls = [(minimum ls)..(maximum ls)]
-              
+
 
     ---------------------------------------------------
     -------- STATE TRANSFORMATION PATTERN CODE --------
