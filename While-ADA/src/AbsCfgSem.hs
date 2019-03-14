@@ -6,77 +6,82 @@ module AbsCfgSem where
     import CFG
 
     type W = [Label] --widening points 
-    
-    
-    --invariants' :: CGraph -> AbsState -> [(Label,AbsState)]
-    -- at each program point i, we have a variable X#i with value in AbsState.
-    -- I is a sound abs of the initial states (the 2nd parameter)
+    type Clm a = [(Label, a)]
+    type Adjs a = [(Label,[(Label,a)])] 
+    -- Grafo visto come lista delle liste di adiacenza in entrata (convertitore)
 
-    -- invariants' cfg i =  
-    --     where ls = labels cfg
+    ---------------------------------------------------
+    ------------ GRAPH UTILITY FUNCTIONS  -------------
+    ---------------------------------------------------
 
-    program1 :: CGraph a
-    program1 = 
-        [(L 1,id,L 2),
-        (L 2,id,L 3),
-        (L 3,id,L 4),
-        (L 3,id,L 7),
-        (L 6,id,L 3),
-        (L 4,id,L 5),
-        (L 5,id,L 6)]
-
-
-    labels :: CGraph a-> [Label]
+    labels :: Graph a -> [Label]
     labels cfg = [L i|i <- [0..m]]
         where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
 
-    type Adjs a = [(Label,[(Label,a)])] -- lista delle liste di adiacenza
-    inEdge :: CGraph a -> Adjs (AbsState a -> AbsState a)
-    inEdge cfg = [(lj,[(li,f)|(li,f,lj)<-cfg]) | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
+    in_adjs :: Graph a -> Adjs a
+    in_adjs cfg = [(lj,[(li,f)|(li,f,lj)<-cfg]) | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
 
+    ---------------------------------------------------
+    --------------------- FINE  -----------------------
+    ---------------------------------------------------
+    analyze :: AbsDomain a =>
+        CGraph a ->
+        W -> -- punti di widening
+        AbsState a -> -- initial state of the program
+        Clm (AbsState a) -- invarianti per ogni program point
+    analyze cfg ws is = 
+        invariantCalc inGraph ls ws is clm0
+        where 
+            ls = labels cfg  
+            clm0 = [(li,Bottom)|li <- ls] 
+            inGraph = in_adjs cfg
 
+    invariantCalc :: AbsDomain a =>
+        Adjs (AbsState a -> AbsState a) ->
+        [Label] -> -- label del programma
+        W -> -- punti di widening
+        AbsState a -> -- initial state of the program
+        Clm (AbsState a) -> 
+        Clm (AbsState a) -- invarianti per ogni program point
+    invariantCalc inGraph ls ws is clm= 
+        if iter clm == clm then clm -- trovato un pt fisso
+        else invariantCalc inGraph ls ws is clm
+        where
+            iter = invariant inGraph ls ws is
    
     -- singola iterazione clm e' il risultato precedente
-    type Clm a = [(Label, a)]
     invariant :: (AbsDomain a) => 
         Adjs (AbsState a -> AbsState a) -- grafo visto con lista adiacenze in entrata (+ comodo)
-        -> [Label] --insieme delle label nel cfg
+        -> [Label] -- insieme delle label nel cfg (per semplicita')
         -> W -- punti di widening
+        -> AbsState a -- initial state
         -> Clm (AbsState a) -- risultato del calcolo precedente (iterazione k)
         -> Clm (AbsState a) -- iterazione k+1
-    invariant in_adj labels ws clm = 
+    invariant in_adj labels ws is clm = 
         do 
-            li <- labels
-            case lookup li in_adj of
-                Just in_adj_li -> 
-                        let 
-                            Just xik = lookup li clm 
-                            union = inUnion xik in_adj_li
-                        in
-                            if elem li ws then 
-                                return (li, xik `AS.widening` union)
-                            else return (li, union )
+            lj <- labels
+            if lj == L 1 then return (lj, is)
+            else 
+                case lookup lj in_adj of
+                    Just in_adj_lj -> 
+                            let 
+                                Just xjk = lookup lj clm 
+                                union = inUnion clm in_adj_lj
+                            in
+                                if elem lj ws then 
+                                    return (lj, xjk `AS.widening` union)
+                                else return (lj, union )
             
 
                 
-     
-
-    inUnion :: AbsDomain a => AbsState a -> [(Label,AbsState a -> AbsState a)] -> AbsState a
-    inUnion xik = foldr (\(lj,f) sr-> sr `AS.join` (f xik) ) Bottom 
-    --in_adj_li = (i,f,j) in cfg[p]
-
-
-    -- invariant :: (AbsDomain a) => CGraph a -> Label -> Int -> AbsState a -> W -> AbsState a
-    -- invariant cfg li 0 is ws = Bottom
-    -- invariant cfg (L 1) (k+1) is ws = is
-    -- invariant cfg lj (k+1) is ws 
-    --     | elem lj ws     =  
-    --         let 
-    --             xjk = (invariant cfg lj k)
-    --             xik = (invariant cfg li k)
-    --         in 
-    --             xjk `widening` (foldr (\(li,f) sr-> sr `join` (f xik) ) Bottom inEdge)
-    --     | otherwise      =  foldr (\(li,f) sr-> sr `join` (f xik) ) Bottom inEdge
-    --     where 
-    --         inEdge lj = [(li,f)|(li,f,lj)<-cfg]
-
+    inUnion :: AbsDomain a => 
+        Clm (AbsState a)  -- risultati iterazione k per ogni program point
+        -> [(Label,AbsState a -> AbsState a)] -- lista degli archi in entrata
+        -> AbsState a --risultato dell'unione
+    inUnion clm = 
+        foldr   (\(li,f) sr-> 
+                    sr `AS.join` 
+                    ( let Just xik= lookup li clm in  (f xik) )
+                ) Bottom 
+    -- calcole della 
+    -- in_adj_li = (i,f,j) in cfg[p] (archi entranti in Li)
