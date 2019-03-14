@@ -6,6 +6,9 @@ module WhileParser where
 
     newtype Parser a = P (String -> [(a,String)])
 
+    resultP :: Parser a -> String -> a
+    resultP p i = (\[(x,y)]->x) (parse p i)
+
     parse :: Parser a -> String -> [(a,String)]
     parse (P parser) inp = parser inp
 

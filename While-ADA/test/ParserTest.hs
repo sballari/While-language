@@ -6,8 +6,7 @@ module ParserTest (tests) where
 
     tests = [testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP]
 
-    resultP :: Parser a -> String -> a
-    resultP p i = (\[(x,y)]->x) (parse p i)
+    
 
     testAExp  = testCase "parse AExp" (assertEqual "" expected result)
         where 
