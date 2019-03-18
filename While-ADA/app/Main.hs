@@ -1,6 +1,11 @@
 module Main where
 
     import System.IO
+    import WhileParser
+    import CFG
+    import WhileStructures
+    import Lib
+
     main :: IO() 
     main = do 
             putStrLn "Benvenuti in While-ADA v3.1!"
@@ -14,18 +19,11 @@ module Main where
             putStrLn source_code
             putStrLn "-------FINE PROGRAMMA--------"
 
-            case (parse parseStms source_code) of
-                [] -> putStrLn "ERRORE: parsing non riuscito"
-                [(program,rest)] -> 
-                    if rest /= "" then 
-                        putStrLn "ERRORE: parsing non completo"
-                        putStr "rimasto : "
-                        putStr rest
-                    else  
-                        putStrLn "\n-----------ALBERO------------"
-                        putStrLn (show program)
-                        putStrLn "----------FINE ALBERO--------"
-
+            let [(tree,rest)] = parse parseStms source_code 
+                (cfg,nf) = app (debugCFG tree) 1 
+                in 
+                printTree ([(tree,rest)]) >>
+                printCFG cfg
 
             putStrLn "\n-----------ANALISI------------"
             putStrLn "qualcosa succedera' qua...."
@@ -33,6 +31,6 @@ module Main where
 
             hClose handle 
             putStrLn "Arrivederci"
-            
+
 
     
