@@ -31,7 +31,7 @@ module CFG where
         do
             l1 <- freshLabel
             l2 <- takeLabel
-            return [(l1,g c, l2)] -- condCG
+            return [(l1,g c, l2)] -- condC
     cfg (Skip) f g = 
         do  
             l1 <- freshLabel
@@ -71,7 +71,7 @@ module CFG where
     convertS Skip = id
     convertS (Assign x y) = semSG (Assign x y)
     convertB :: AbsDomain a => BExpr -> AbsState a -> AbsState a
-    convertB x = condCG x
+    convertB x = condC x
             
     debugS :: Stm -> String
     debugS s = show s

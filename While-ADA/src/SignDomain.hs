@@ -2,101 +2,102 @@ module SignDomain where
     import AbsDomain as AD
     import WhileStructures
 
-    data Sign = Bottom | Zero | LessEqZero | MoreEqZero | Top 
-                deriving Show
+    data Sign = SignBottom | Zero | LessEqZero | MoreEqZero | SignTop 
+                deriving (Eq,Show)
 
-    alpha :: AExpr -> Sign
-    alpha (Num n)
-        |n == 0 = Zero
-        |n >= 0 = MoreEqZero
-        |n <= 0 = LessEqZero
     
-    alpha (Range n n')
-        |n == 0 = MoreEqZero
-        |n <= 0 && n' <= 0 = LessEqZero
-        |n <= 0 && n' >= 0 = Top
-        |n >= 0 && n' >= 0 = MoreEqZero
-        |n >= 0 && n' <= 0 = Bottom
 
-    instance Eq Sign where 
-        a == b = (a <= b) && (b <= a)
 
-    instance Ord Sign where
-        --(<=) :: a -> a -> Bool
-        (<=) Bottom _ = True
-        (<=) _ Bottom = False
-        
-        (<=) Zero _ = True
-        (<=) _ Zero = False
-
-        (<=) LessEqZero _ = True
-        (<=) _ LessEqZero = False
-
-        (<=) LessEqZero MoreEqZero = False --Nothing, in caso di maybe bool
-        (<=) MoreEqZero LessEqZero = False --Nothing, in caso di maybe bool
-
-        (<=) MoreEqZero _ = True
-        (<=) _ MoreEqZero = False
-
-        (<=) _ Top = True
-        (<=) Top _ = False
-              
     instance AbsDomain Sign where
-        -- bottom :: a
-        bottom = Bottom
-
-        -- top :: a
-        top = Top
+        top = SignTop
+        bottom = SignBottom
+  
+        soundC n
+            |n == 0 = Zero
+            |n >= 0 = MoreEqZero
+            |n Prelude.<= 0 = LessEqZero
         
-        soundC (Var x) = alpha (Var x)
-        soundRange (Range x y) = alpha (Range x y)
-        -- gamma :: a -> [Int]
-        -- gamma Bottom = []
-        -- gamma Zero = [0]
-        -- gamma LessEqZero = [0,-1..]
-        -- gamma MoreEqZero = [0..]
-        -- gamma Top = (reverse [0,-1..]) ++ [1..]
-
-        -- alfa :: AExpr -> a
+        soundRange (n, n')
+            |n == 0 = MoreEqZero
+            |n Prelude.<= 0 && n' Prelude.<= 0 = LessEqZero
+            |n Prelude.<= 0 && n' >= 0 = SignTop
+            |n >= 0 && n' >= 0 = MoreEqZero
+            |n >= 0 && n' Prelude.<= 0 = SignBottom
+          
+        (<=) _ SignTop = True
+        (<=) SignTop _ = False
+        (<=) LessEqZero MoreEqZero = False
+        (<=) _ MoreEqZero = True
+        (<=) MoreEqZero LessEqZero = False
+        (<=) _ LessEqZero = True
+        (<=) Zero SignBottom = False
+        (<=) Zero _  = True
+        (<=) SignBottom _ = True
         
-        
+                
         --join :: Sign -> Sign -> Sign
-
         join x y = lub x y
             where 
                 lub a b  
-                    |(<=) a b == True = b
-                    |(<=) a b == False = a 
-                    |otherwise = Top
-
-        
+                    |(AD.<=) a b == True = b
+                    |(AD.<=) a b == False && (AD.<=) b a == True = a 
+                    |otherwise = SignTop -- inconfrontabili
 
         --meet :: Sign -> Sign -> Sign
         meet x y= glb x y
             where
                 glb a b
-                    | (<=) a b == True = a
-                    | (<=) a b == False = b
-                    | otherwise = Bottom
+                    | (AD.<=) a b == True = a
+                    | (AD.<=) a b == False && (AD.<=) b a == True = b 
+                    | otherwise = SignBottom -- inconfrontabili
 
-        -- unary operators --> necessario?
-        --absNeg :: a -> a
-        absNeg Bottom = Bottom
-        absNeg Zero = Zero
-        absNeg LessEqZero = MoreEqZero
-        absNeg MoreEqZero = LessEqZero
-        absNeg Top = Top
+        --UNARY OPERATORS
+        --absMinus :: a -> a
+        absMinus SignBottom = SignBottom
+        absMinus Zero = Zero
+        absMinus LessEqZero = MoreEqZero
+        absMinus MoreEqZero = LessEqZero
+        absMinus SignTop = SignTop
 
-        -- binary operators 
+        --BINARY OPERATORS 
         --absSum :: a -> a -> a
-        absSum Bottom _ = Bottom
-
-
-        {-
-        absMul :: a -> a -> a               
-        absDiv :: a -> a -> a  
-        absMinus :: a -> a  
-        -}
+        absSum SignBottom _ = SignBottom
+        absSum _ SignBottom = SignBottom
+        absSum SignTop _ = SignTop 
+        absSum _ SignTop = SignTop
+        absSum Zero MoreEqZero = MoreEqZero
+        absSum Zero LessEqZero = LessEqZero
+        absSum Zero Zero = Zero 
+        absSum LessEqZero MoreEqZero = SignTop
+        absSum LessEqZero LessEqZero = LessEqZero
+        absSum LessEqZero Zero = LessEqZero
+        absSum MoreEqZero MoreEqZero = MoreEqZero
+        absSum MoreEqZero LessEqZero = SignTop
+        absSum MoreEqZero Zero = MoreEqZero
+        --absMul :: a -> a -> a  
+        absMul SignBottom _ = SignBottom
+        absMul _ SignBottom = SignBottom
+        absMul Zero _ = Zero
+        absMul _ Zero = Zero
+        absMul SignTop _ = SignTop 
+        absMul _ SignTop = SignTop
+        absMul LessEqZero MoreEqZero = LessEqZero
+        absMul LessEqZero LessEqZero = MoreEqZero        
+        absMul MoreEqZero MoreEqZero = MoreEqZero
+        absMul MoreEqZero LessEqZero = LessEqZero 
+        --absDiv :: a -> a -> a  
+        absDiv SignBottom _ = SignBottom
+        absDiv _ SignBottom = SignBottom
+        absDiv Zero SignTop = Zero
+        absDiv _ SignTop = SignTop
+        absDiv _ Zero = SignBottom 
+        absDiv SignTop _ = SignTop
+        absDiv Zero _ = Zero   
+        absDiv LessEqZero MoreEqZero = LessEqZero
+        absDiv LessEqZero LessEqZero = MoreEqZero        
+        absDiv MoreEqZero MoreEqZero = MoreEqZero
+        absDiv MoreEqZero LessEqZero = LessEqZero 
+        
         
         -- widening :: Sign -> Sign -> Sign
-        widening x y = if (<=) x y == True then x else Top -- naive
+        widening x1 x2 = if x2 AD.<= x1 == True then x1 else SignTop -- naive

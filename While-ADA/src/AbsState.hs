@@ -33,7 +33,7 @@ module AbsState where
 
   (<=) :: (AbsDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
-  (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x Prelude.<= (lookUp (S ys) var)) && sr ) True xs
+  (<=) (S xs) (S ys) = foldr (\(var,x) sr -> (x AD.<= (lookUp (S ys) var)) && sr ) True xs
   (<=) _ _ = False
          
   -- (<=) (S []) (S []) = True
