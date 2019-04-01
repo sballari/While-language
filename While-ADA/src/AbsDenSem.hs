@@ -5,15 +5,6 @@ module AbsDenSem where
     import WhileStructures
 
 
-
-
-
-    -- exprE :: (AbsDomain a) => AExpr -> AbsState a -> a
-    -- exprE e s = exprEG e s
-
-    -- condC :: (AbsDomain a) => BExpr -> AbsState a -> AbsState a 
-    -- condC bexpr s = condC bexpr s
-
     semS :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
     semS (Assign var e) s = semSG (Assign var e) s
     semS (Assert b) s = condC b s

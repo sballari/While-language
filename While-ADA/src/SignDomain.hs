@@ -33,7 +33,6 @@ module SignDomain where
         (<=) Zero SignBottom = False
         (<=) Zero _  = True
         (<=) SignBottom _ = True
-        
                 
         --join :: Sign -> Sign -> Sign
         join x y = lub x y

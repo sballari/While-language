@@ -11,7 +11,7 @@ module AbsState where
   -- a should be the abstract domain
   -- haskell doesn't allow type constraint in data type
 
-
+  
   alter :: AbsDomain a => AbsState a -> String -> a -> AbsState a
   alter AbsState.Bottom _ _ = AbsState.Bottom
   alter (S[]) name v = S [(name, v)]
