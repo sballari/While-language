@@ -23,11 +23,10 @@ module Main where
                 (cfg,nf) = app (debugCFG tree) 1 
                 in 
                 printTree ([(tree,rest)]) >>
-                printCFG cfg
+                printCFG cfg >>
+                printDenRes tree
 
-            putStrLn "\n-----------ANALISI------------"
-            putStrLn "qualcosa succedera' qua...."
-            putStrLn "----------FINE ANALISI--------"
+            
 
             hClose handle 
             putStrLn "Arrivederci"

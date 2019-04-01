@@ -4,7 +4,9 @@ module Lib where
     import WhileParser
     import CFG
     import WhileStructures
-
+    import AbsDenSem
+    import AbsState
+    import SignDomain
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -25,3 +27,11 @@ module Lib where
             putStrLn "\n------------CFG--------------"
             putStrLn (show  cfg) 
             putStrLn "------------FINE CFG---------" 
+
+    printDenRes:: Stm -> IO()
+    printDenRes prTree= 
+        do
+            putStrLn "\n-------ANALISI DEN----------"
+            putStrLn "DOMINIO: Segni"
+            putStrLn  (show ((semS prTree (S[]))::AbsState (Sign)))
+            putStrLn "----------FINE ANALISI--------"
