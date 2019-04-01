@@ -5,7 +5,7 @@ module AbsEval where
     import SignDomain
 
     --abstract semantic of expressions in a non-relational domain
-
+ 
     --usata solo da condC
     exprE ::  (AbsDomain a) => AExpr -> AbsState a -> a
     exprE (Var x) s = lookUp s x 
@@ -23,7 +23,13 @@ module AbsEval where
                     | (exprE e s) == bottom = Bottom
                     | otherwise             = alter s var (exprE e s)
 
-    condC :: (AbsDomain a) => BExpr -> AbsState a -> AbsState a 
+    type CondFun a = BExpr -> AbsState a -> AbsState a
+
+{-  ##################################
+    ##### COND GENERICA          #####
+    ################################## -}
+
+    condC :: (AbsDomain a) => CondFun a 
     --fina ultra grossa p. 54
     condC _ Bottom = Bottom
     condC (WTrue) s = s
@@ -32,12 +38,16 @@ module AbsEval where
     condC (Or c1 c2) s =  AS.join (condC c1 s) (condC c2 s)
     condC _ s = s -- super approssimato
 
-    signCondC :: BExpr -> AbsState Sign -> AbsState Sign
+{-  ##################################
+    ##### COND PER DOMINIO SEGNI #####
+    ################################## -} 
+
+    signCondC :: CondFun Sign
     signCondC _ Bottom = Bottom
     signCondC (WTrue) s = s
     signCondC (WFalse) s = Bottom
-    signCondC (And c1 c2) s = AS.meet (condC c1 s) (condC c2 s)
-    signCondC (Or c1 c2) s =  AS.join (condC c1 s) (condC c2 s) 
+    signCondC (And c1 c2) s = AS.meet (signCondC c1 s) (signCondC c2 s)
+    signCondC (Or c1 c2) s =  AS.join (signCondC c1 s) (signCondC c2 s) 
 
     signCondC (LessEq (Var v) (Num 0)) s 
         | a1 == Zero || a1 == MoreEqZero = alter s v Zero
