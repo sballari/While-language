@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
+
 module SignDomain where
     import AbsDomain as AD
     import WhileStructures
@@ -30,9 +32,12 @@ module SignDomain where
         (<=) _ MoreEqZero = True
         (<=) MoreEqZero LessEqZero = False
         (<=) _ LessEqZero = True
+        (<=) SignBottom Zero = True
+        (<=) Zero Zero = True
+        (<=) _ Zero = False
         (<=) Zero SignBottom = False
-        (<=) Zero _  = True
         (<=) SignBottom _ = True
+        (<=) _ SignBottom = False
                 
         --join :: Sign -> Sign -> Sign
         join x y = lub x y
