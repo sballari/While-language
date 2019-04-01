@@ -13,5 +13,5 @@ main = do
     where
       tests = ParserTest.tests
               ++ CFGTest.tests 
-              {- ++ SignDomainTest.tests ++ AbsStateTest.tests -}
+              ++ SignDomainTest.tests {- ++ AbsStateTest.tests -}
 
