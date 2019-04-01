@@ -6,9 +6,10 @@ module SignDomainTest  where
     import WhileStructures as WS
     import Test.Tasty
     import Test.Tasty.HUnit
+    import AbsEval
     
 
-    tests = [ ]
+    tests = [ r1,r2]
 
     --relazione d'ordine
     r1 = testCase "<=" (assertEqual "" expected result)
@@ -48,3 +49,8 @@ module SignDomainTest  where
                         (AD.<=) SignBottom Zero,
                         (AD.<=) SignBottom SignBottom
                         ]
+    
+    r2 = testCase "sign cond R>=B" (assertEqual "" expected result)
+        where 
+            expected = S[("Q",MoreEqZero),("R",MoreEqZero),("B",MoreEqZero)]
+            result = signCondC (MoreEq (Var "R") (Var "B")) (S[("Q",MoreEqZero),("R",SignTop),("B",MoreEqZero)])
