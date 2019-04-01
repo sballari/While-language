@@ -8,6 +8,7 @@ module Lib where
     import AbsState
     import SignDomain
     import AbsEval
+    import AbsCfgSem
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -35,4 +36,12 @@ module Lib where
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
             putStrLn  (show ((semS signCondC prTree (S[]))::AbsState (Sign)))
+            putStrLn "----------FINE ANALISI--------"
+
+    printCFGRes:: CGraph(Sign) -> IO()
+    printCFGRes graph= 
+        do
+            putStrLn "\n-------ANALISI CFG----------"
+            putStrLn "DOMINIO: Segni"
+            putStrLn  (show (analyze graph [] (S[])))
             putStrLn "----------FINE ANALISI--------"

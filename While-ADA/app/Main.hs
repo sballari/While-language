@@ -5,6 +5,7 @@ module Main where
     import CFG
     import WhileStructures
     import Lib
+    import SignDomain
 
     main :: IO() 
     main = do 
@@ -21,10 +22,12 @@ module Main where
 
             let [(tree,rest)] = parse parseStms source_code 
                 (cfg,nf) = app (debugCFG tree) 1 
+                (sem_cfg,r) = (app (createCFG tree) 1 )::(CGraph (Sign),Int)
                 in 
                 printTree ([(tree,rest)]) >>
                 printCFG cfg >>
-                printDenRes tree
+                printDenRes tree >>
+                printCFGRes sem_cfg
 
             
 
