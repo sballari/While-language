@@ -4,19 +4,18 @@ module AbsDenSem where
     import AbsState as AS
     import WhileStructures
 
-
-    semS :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
-    semS (Assign var e) s = semSG (Assign var e) s
-    semS (Assert b) s = condC b s
-    semS (Skip) s = s
-    semS (Comp stm1 stm2) s= ((semS stm2).(semS stm1)) s
-    semS (Cond c s1 s2) s = AS.join p1 p2
+    semS :: (AbsDomain a) => CondFun a -> Stm -> AbsState a -> AbsState a
+    semS condC (Assign var e) s = semSG (Assign var e) s
+    semS condC (Assert b) s = condC b s
+    semS condC (Skip) s = s
+    semS condC (Comp stm1 stm2) s= ((semS condC stm2).(semS condC stm1)) s
+    semS condC (Cond c s1 s2) s = AS.join p1 p2
         where 
-            p1 = semS s1 (condC c s)
-            p2 = semS s2 (condC (Neg c) s)
+            p1 = semS condC s1 (condC c s)
+            p2 = semS condC s2 (condC (Neg c) s)
 
-    semS (While c e) r = condC (Neg c) (lim fun)
-        where fun x = AS.widening x (AS.join r (semS e (condC c x)))
+    semS condC (While c e) r = condC (Neg c) (lim fun)
+        where fun x = AS.widening x (AS.join r (semS condC e (condC c x)))
     
     
     lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
