@@ -7,6 +7,7 @@ module Lib where
     import AbsDenSem
     import AbsState
     import SignDomain
+    import AbsEval
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -33,5 +34,5 @@ module Lib where
         do
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
-            putStrLn  (show ((semS prTree (S[]))::AbsState (Sign)))
+            putStrLn  (show ((semS signCondC prTree (S[]))::AbsState (Sign)))
             putStrLn "----------FINE ANALISI--------"
