@@ -9,6 +9,7 @@ module Lib where
     import SignDomain
     import AbsEval
     import AbsCfgSem
+    import CondCFunc
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -43,5 +44,5 @@ module Lib where
         do
             putStrLn "\n-------ANALISI CFG----------"
             putStrLn "DOMINIO: Segni"
-            putStrLn  (show (analyze graph [] (S[])))
+            --putStrLn  (show (analyze graph [] (S[])))
             putStrLn "----------FINE ANALISI--------"

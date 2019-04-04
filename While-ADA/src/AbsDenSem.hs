@@ -3,6 +3,7 @@ module AbsDenSem where
     import AbsDomain
     import AbsState as AS
     import WhileStructures
+    import CondCFunc
 
     semS :: (AbsDomain a) => CondFun a -> Stm -> AbsState a -> AbsState a
     semS condC (Assign var e) s = semSG (Assign var e) s

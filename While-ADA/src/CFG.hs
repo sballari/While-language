@@ -3,6 +3,7 @@ module CFG where
     import AbsDomain
     import AbsEval
     import AbsState as AS
+    import CondCFunc
 
 
     newtype Label = L Int deriving (Show, Eq, Ord)
@@ -15,8 +16,8 @@ module CFG where
     takeLabel::ST (Label)
     takeLabel = ST(\s -> (L s,s))
 
-    createCFG :: AbsDomain a => Stm -> ST (CGraph a)
-    createCFG s = cfg s convertS convertB
+    createCFG :: AbsDomain a => CondFun a -> Stm -> ST (CGraph a)
+    createCFG condC s = cfg s convertS condC
 
     debugCFG :: Stm -> ST(Graph String)
     debugCFG s = cfg s debugS debugB
@@ -70,8 +71,7 @@ module CFG where
     convertS :: AbsDomain a => Stm -> AbsState a -> AbsState a
     convertS Skip = id
     convertS (Assign x y) = semSG (Assign x y)
-    convertB :: AbsDomain a => BExpr -> AbsState a -> AbsState a
-    convertB x = condC x
+    
             
     debugS :: Stm -> String
     debugS s = show s
