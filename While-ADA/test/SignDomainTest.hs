@@ -8,10 +8,11 @@ module SignDomainTest  where
     import Test.Tasty.HUnit
     import AbsEval
     import AbsDenSem
+    import CondCFunc
     
     
 
-    tests = [ r1,r2,a1,a2]
+    tests = [ r1,r2,a1,a2,a3]
 
     --relazione d'ordine
     r1 = testCase "<=" (assertEqual "" expected result)
@@ -69,4 +70,11 @@ module SignDomainTest  where
             expected = S[("Q",MoreEqZero),("R",MoreEqZero),("B",SignTop)]
             testprog = Cond (LessEq (Var "R") (Var "B")) (Assign ("B") (Sum (Var "B") (Minus(Var "R")))) Skip
             initState = S[("Q",MoreEqZero),("R",SignTop),("B",SignTop)]
+            result = semS signCondC testprog initState
+
+    a3 = testCase "[sign dom]x:= 3; y:= -1" (assertEqual "" expected result)
+        where 
+            expected = S[("x",MoreEqZero),("y",LessEqZero)]
+            testprog = Comp (Assign "x" (Num 3)) (Assign "y" (Minus (Num 1)))
+            initState = S[]
             result = semS signCondC testprog initState
