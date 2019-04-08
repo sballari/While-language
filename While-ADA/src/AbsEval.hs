@@ -2,7 +2,6 @@ module AbsEval where
     import WhileStructures
     import AbsDomain as AD
     import AbsState as AS
-    import SignDomain
 
     --abstract semantic of expressions in a non-relational domain
  
