@@ -24,20 +24,21 @@ module CondCFunc where
     ##### COND PER DOMINIO SEGNI #####
     ################################## -} 
 
-    signCondC :: CondFun Sign
+    signCondC :: CondFun Sign -- BExpr -> AbsState Sign -> AbsState Sign --
     signCondC _ Bottom = Bottom
     signCondC (WTrue) s = s
     signCondC (WFalse) s = Bottom
     signCondC (And c1 c2) s = AS.meet (signCondC c1 s) (signCondC c2 s)
-    signCondC (Or c1 c2) s =  AS.join (signCondC c1 s) (signCondC c2 s) 
+    signCondC (Or c1 c2) s =  AS.join (signCondC c1 s) (signCondC c2 s)
 
-    signCondC (LessEq (Var v) y) s 
-        | ay == Zero && (a1 == Zero || a1 == MoreEqZero) = alter s v Zero
-        | ay == Zero && (a1 == SignTop || a1 == LessEqZero) = alter s v LessEqZero
-        | ay == LessEqZero = alter s v LessEqZero
-        | ay == MoreEqZero = s
-        | ay == SignBottom = Bottom -- caso non fattibile per smeshed bottom
-        | ay == SignTop = s
+    signCondC (LessEq (Var v) y) s
+        | ay == Zero && ({-a1 == Zero ||-} a1 == MoreEqZero) = alter s v Zero
+        | ay == Zero && (a1 == SignTop {-|| a1 == LessEqZero-}) = alter s v LessEqZero
+        | ay == LessEqZero && a1 == SignTop = alter s v LessEqZero
+        | ay == LessEqZero && a1 == MoreEqZero = alter s v Zero
+        {-| ay == MoreEqZero = s-} 
+        {-| ay == SignTop = s-}
+        | otherwise = s -- collasso tutti gli altri casi all'identità
         where 
             a1 = exprE (Var v) s
             ay = exprE y s
@@ -51,11 +52,17 @@ module CondCFunc where
             av = exprE (Var v) s
             aw = exprE (Var w) s
 
-    signCondC(MoreEq (Var v) (Num 0)) s 
-        | a1 == Zero || a1 == LessEqZero = alter s v Zero
-        | a1 == SignTop || a1 == MoreEqZero = alter s v MoreEqZero
+    signCondC(MoreEq (Var v) y) s
+        | ay == Zero && (a1 == LessEqZero) = alter s v Zero
+        | ay == Zero && (a1 == SignTop) = alter s v MoreEqZero
+        | ay == MoreEqZero && a1 == SignTop = alter s v MoreEqZero
+        | ay == MoreEqZero && a1 == LessEqZero = alter s v Zero
+        {-| ay == LessEqZero = s-} 
+        {-| ay == SignTop = s-}
+        | otherwise = s -- collasso tutti gli altri casi all'identità
         where 
             a1 = exprE (Var v) s
+            ay = exprE y s
 
     signCondC (MoreEq (Var v) (Var w)) s =
         (if elem aw [Zero, MoreEqZero] then alter s v MoreEqZero else s)
@@ -66,19 +73,6 @@ module CondCFunc where
             aw = exprE (Var w) s
     
     signCondC (LessEq x y) s = s
-
-    --CODICE NOSTRO NON COPIATO
-    -- signCondC (LessEq x y) s 
-    --     | (a1 !=SignTop) && (a2 != SignTop) && (a1 `maggioreStr` a2) = Bottom
-    --     | a1==bottom || a2==bottom = Bottom
-    --     | otherwise = s
-    --     where 
-    --         a1 = exprE x s
-    --         a2 = exprE y s
-
-    -- maggioreStr :: Sign -> Sign -> Bool
-    -- maggioreStr a b = (!(a (AD.<=) b)) && (a!=b) && (b (AD.<=) a)
-    -------------------------------
 
     signCondC (Eq x y) s 
         | ax == SignBottom || ay == SignBottom = Bottom
