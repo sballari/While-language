@@ -7,11 +7,11 @@ module AbsState where
   type VarName = String
 
   
-  data AbsState a = S [(VarName, a)] | Bottom deriving (Show, Eq) -- a non può essere Bottom
+  data AbsState a = S [(VarName, a)] | Bottom deriving (Show) -- a non può essere Bottom
   -- a should be the abstract domain
   -- haskell doesn't allow type constraint in data type
 
-  
+
   alter :: AbsDomain a => AbsState a -> String -> a -> AbsState a
   alter AbsState.Bottom _ _ = AbsState.Bottom
   alter (S[]) name v = S [(name, v)]
@@ -79,3 +79,9 @@ module AbsState where
   -- class UndefSup a where
   --   undef :: a 
   -}
+
+  instance  AbsDomain a => Eq (AbsState a) where
+    -- == :: a -> a -> Bool
+    S xs == S ys = (foldr (\x sr -> (elem x ys) && sr ) True xs ) && (foldr (\y sr-> (elem y xs) && sr ) True ys)
+    Bottom == Bottom = True
+    _ == _ = False
