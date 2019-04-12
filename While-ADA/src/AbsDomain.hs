@@ -5,10 +5,7 @@ module AbsDomain where
 
         top :: a
         bottom :: a 
-        (<=) :: a -> a -> Bool
-
-        --gamma :: a -> [Int] -- concretization function : B# -> power(I)
-        --alfa :: AExpr -> a  --non obbligatoria
+        (<=) :: a -> a -> Bool --riflessiva, antisimmetrica, transitiva
 
         soundC :: Int -> a -- obbligatoria
         soundRange :: (Int,Int) -> a -- obbligatoria
