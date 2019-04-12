@@ -5,18 +5,22 @@ module AbsDenSem where
     import WhileStructures
     import CondCFunc
 
-    semS :: (AbsDomain a) => CondFun a -> Stm -> AbsState a -> AbsState a
-    semS condC (Assign var e) s = semSG (Assign var e) s
-    semS condC (Assert b) s = condC b s
-    semS condC (Skip) s = s
-    semS condC (Comp stm1 stm2) s= ((semS condC stm2).(semS condC stm1)) s
-    semS condC (Cond c s1 s2) s = AS.join p1 p2
-        where 
-            p1 = semS condC s1 (condC c s)
-            p2 = semS condC s2 (condC (Neg c) s)
+    type Widening = Bool -- fare widening?
 
-    semS condC (While c e) r = condC (Neg c) (lim fun)
-        where fun x = AS.widening x (AS.join r (semS condC e (condC c x)))
+    semS :: (AbsDomain a) => Widening -> CondFun a -> Stm -> AbsState a -> AbsState a
+    --Widening : true se si vuole widening, false se non lo si vuole usare
+    semS w condC (Assign var e) s = semSG (Assign var e) s
+    semS w condC (Assert b) s = condC b s
+    semS w condC (Skip) s = s
+    semS w condC (Comp stm1 stm2) s= ((semS w condC stm2).(semS w condC stm1)) s
+    semS w condC (Cond c s1 s2) s = AS.join p1 p2
+        where 
+            p1 = semS w condC s1 (condC c s)
+            p2 = semS w condC s2 (condC (Neg c) s)
+
+    semS w condC (While c e) r = condC (Neg c) (lim fun)
+        where fun x = if w==True then AS.widening x (AS.join r (semS w condC e (condC c x)))
+                        else AS.join r (semS w condC e (condC c x))
     
     
     lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a

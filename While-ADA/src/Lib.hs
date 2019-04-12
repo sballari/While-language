@@ -36,7 +36,7 @@ module Lib where
         do
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
-            putStrLn  (show ((semS signCondC prTree (S[]))::AbsState (Sign)))
+            putStrLn  (show ((semS False signCondC prTree (S[]))::AbsState (Sign)))
             putStrLn "----------FINE ANALISI--------"
 
     printCFGRes:: CGraph(Sign) -> IO()
