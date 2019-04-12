@@ -12,7 +12,7 @@ module SignDomainTest  where
     
     
 
-    tests = [ s1,s1b,s2,s3,s4, r1,r2,a1,a2,a3]
+    tests = [ s1,s1b,s2,s3,s4,r1,r2,a1,a2,a3,a4,a5,a6]
 
     --relazione d'ordine
     r1 = testCase "<=" (assertEqual "" expected result)
@@ -94,19 +94,40 @@ module SignDomainTest  where
         where 
             expected = S[("Q",MoreEqZero),("R",MoreEqZero),("B",SignTop)]
             testprog = Cond (MoreEq (Var "R") (Var "B")) (Assign ("R") (Sum (Var "R") (Minus(Var "B")))) Skip
-            initState = S[("Q",MoreEqZero),("R",SignTop),("B",SignTop)]
-            result = semS signCondC testprog initState
+            initState = S[("Q",Zero),("R",MoreEqZero),("B",MoreEqZero)]
+            result = semS False signCondC testprog initState
             
     a2 = testCase "[sign dom] if R<=B then K=B-R else skip" (assertEqual "" expected result)
         where 
             expected = S[("Q",MoreEqZero),("R",LessEqZero),("B",MoreEqZero)]
             testprog = Cond (LessEq (Var "R") (Var "B")) (Assign ("B") (Sum (Var "B") (Minus(Var "R")))) Skip
             initState = S[]
-            result = semS signCondC testprog initState
+            result = semS False signCondC testprog initState
 
-    a3 = testCase "[sign dom]x:= 3; y:= -1" (assertEqual "" expected result)
+    a3 = testCase "[sign dom] z:=[0,12];x:= 3; y:= -1;" (assertEqual "" expected result)
         where 
-            expected = S[("x",MoreEqZero),("y",LessEqZero)]
-            testprog = Comp (Assign "x" (Num 3)) (Assign "y" (Minus (Num 1)))
+            expected = S[("z",MoreEqZero),("x",MoreEqZero),("y",LessEqZero)]
+            testprog = Comp (Assign "z" (Range 1 12)) (Comp (Assign "x" (Num 3)) (Assign "y" (Minus (Num 1))))
             initState = S[]
-            result = semS signCondC testprog initState
+            result = semS False signCondC testprog initState
+
+    a4 = testCase "[sign dom] calc div esatta" (assertEqual "" expected result)
+            where 
+                program = Comp (Assign "A" (Range 0 150)) (Comp (Assign "B" (Range 1 3)) (Comp (Assign "Q" (Num 0)) (Comp (Assign "R" (Var "A")) (While (MoreEq (Var "R") (Var "B")) (Comp (
+                    Assign "R" (Sum (Var "R") (Minus (Var "B")))) (Assign "Q" (Sum (Var "Q") (Num 1))))))))
+                expected = S[]
+                initState = S[]
+                result  = semS False signCondC program initState
+
+    a5 = testCase "[sign dom] while true do Q=Q+1" (assertEqual "" expected result)
+        where 
+            program = While (WTrue) (Assign "Q" (Sum (Var "Q") (Num 1))) 
+            expected = S[("Q", MoreEqZero)]
+            initState = S[("Q", Zero)]
+            result  = semS False signCondC program initState
+
+    a6 = testCase "[sign dom] absum Zero 1" (assertEqual "" expected result)
+        where 
+            expected = MoreEqZero
+            initState = S[("Q", Zero)]
+            result  = exprE (Sum (Var "Q") (Num 1)) initState
