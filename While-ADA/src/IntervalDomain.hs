@@ -5,12 +5,71 @@ module IntervalDomain where
     --import WhileStructures
 
     data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord)
-    data Interval = | Interval Bound Bound        
+    data Interval = Interval Bound Bound        
                     | IntervalBottom 
                     deriving (Eq)
 
-    instance  Bound where 
+    instance Num Bound where 
+        (B x) + (B y) = B (x+y)
+        (MinInf) + (B _) = MinInf
+        (B _ ) + (MinInf) = MinInf
+        (PlusInf) + (B _) = PlusInf
+        (B _ ) + (PlusInf) = PlusInf
+        (MinInf) + (MinInf) = MinInf
+        (PlusInf) + (PlusInf) = PlusInf 
 
+        (B x) * (B y) = B (x*y)
+        (MinInf) * (B c) = 
+            if c == 0 then B 0 
+            else if c<0 then PlusInf
+            else MinInf
+        (B c ) * (MinInf) = 
+            if c == 0 then B 0 
+            else if c<0 then PlusInf
+            else MinInf
+        (PlusInf) * (B c) = 
+            if c == 0 then B 0 
+            else if c<0 then MinInf
+            else PlusInf
+        (B c) * (PlusInf) = 
+            if c == 0 then B 0 
+            else if c<0 then MinInf
+            else PlusInf
+        (MinInf) * (MinInf) = PlusInf
+        (PlusInf) * (PlusInf) = PlusInf
+        (PlusInf) * (MinInf) = MinInf 
+        (MinInf) * (PlusInf) = MinInf
+
+        negate MinInf = PlusInf
+        negate PlusInf = MinInf 
+        negate (B c) = B (-c)
+
+
+    
+    instance Fractional Bound where 
+        -- divisione esatta
+        (B x) / (B y) = B (x `div` y)
+        (MinInf) / (B c) = 
+            if c>0 then MinInf 
+            else 
+                if c<0 then PlusInf
+                else (B 127)
+        
+        (B _ ) / (MinInf) = B 0
+
+        (PlusInf) / (B c) = 
+            if c>0 then PlusInf 
+            else 
+                if c<0 then MinInf
+                else (B 127)
+            
+        (B _ ) / (PlusInf) = B 0
+        (MinInf) / (MinInf) = B 0
+        (PlusInf) / (PlusInf) = B 0
+        (PlusInf) / (MinInf) = B 0 
+        (MinInf) / (PlusInf) = B 0 
+     
+ 
     instance AbsDomain Interval where
         --top::Interval
         top = Interval MinInf PlusInf
@@ -24,11 +83,11 @@ module IntervalDomain where
         _ <= IntervalBottom = False
 
         --soundC :: Int -> Interval
-        soundC n = Interval n n
+        soundC n = Interval (B n) (B n)
         -- soundRange :: (Int ,Int) -> Interval
         soundRange (x,y) = 
                 if sfasato then IntervalBottom
-                else  Interval x y
+                else  Interval (B x) (B y)
             where 
                 sfasato = x > y
 
@@ -58,15 +117,20 @@ module IntervalDomain where
         --absMul :: Interval -> Interval -> Interval
         absMul (Interval a b) (Interval c d) =
             Interval (minimum [a*c,a*d,b*c,b*d]) (maximum [a*c,a*d,b*c,b*d])
-        absMul IntervalTop _ = IntervalTop
-        absMul _ IntervalTop = IntervalTop
         absMul IntervalBottom _ = IntervalBottom
         absMul _ IntervalBottom = IntervalBottom
-        absMul (LBound a) (Interval c d) = 
-            where 
-                l = if c<0 || d<0 then menoInf else minimum [a*c,a*d]
-                r = if c>0 || d>0 then plusInf else maximum [a*c,a*d]
 
+        --absDiv :: Interval -> Interval -> Interval
+        absDiv (Interval a b) (Interval c d) 
+            | (B 1) Prelude.<= c = Interval (Prelude.minimum [a/c,a/d]) (Prelude.maximum [b/c,b/d])
+            | d Prelude.<= (B (-1)) = Interval (Prelude.minimum [b / c, b / d] ) (Prelude.maximum [a/c,a/d])
+            | otherwise =   let 
+                                x = meet (Interval c d) (Interval (B 1) PlusInf) 
+                                y = meet (Interval c d) (Interval MinInf (B (-1)))
+                                p1 = (Interval a b) `absDiv` x
+                                p2 = (Interval a b) `absDiv` y
+                            in join p1 p2
 
-
-        
+        --absMin::Interval -> Interval
+        absMinus (Interval a b) = Interval (-b) (-a)
+        absMinus (IntervalBottom) = IntervalBottom
