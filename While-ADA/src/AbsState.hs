@@ -46,7 +46,7 @@ module AbsState where
   join :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   join x Bottom = x
   join Bottom y = y  
-  join (S xs) (S ys) =S [(a, (AD.join b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
+  join (S xs) (S ys) = S [(a, (AD.join b d)) | (a,b)<-xs , (c,d)<-ys, a==c]
 
   meet :: (AbsDomain a) => AbsState a -> AbsState a -> AbsState a
   meet _ AbsState.Bottom = AbsState.Bottom
