@@ -137,6 +137,7 @@ module IntervalDomain where
 
         --widening :: a -> a -> a
         widening (Interval a b) (Interval c d) = 
+            Interval l r
             where 
-                l = if a <= c then a else MinInf
-                r = if b >= d then b eles PlusInf 
+                l = if a Prelude.<= c then a else MinInf
+                r = if b >= d then b else PlusInf 

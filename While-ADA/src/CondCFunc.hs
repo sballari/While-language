@@ -98,10 +98,10 @@ module CondCFunc where
     #### COND PER DOMINIO INTERVALLI ####
     ################################## -} 
 
-    intCondC :: CondFun IntervalDomain 
-    -- signCondC :: BExpr -> AbsState IntervalDomain -> AbsState IntervalDomain 
+    intCondC :: CondFun Interval 
+    -- intCondC :: BExpr -> AbsState IntervalDomain -> AbsState IntervalDomain 
 
-    intCondC :: CondFun Sign -- BExpr -> AbsState Sign -> AbsState Sign --
+    
     intCondC _ Bottom = Bottom
     intCondC (WTrue) s = s
     intCondC (WFalse) s = Bottom
@@ -111,14 +111,14 @@ module CondCFunc where
     
 
     intCondC (LessEq (Var v) (Var w)) s 
-        | a <= d = alter (alter s v (Interval a (min b d))) w (Interval (max a c) d)
+        | a Prelude.<= d = alter (alter s v (Interval a (min b d))) w (Interval (max a c) d)
         | otherwise = Bottom
         where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
 
     intCondC (LessEq (Var v) y) s
-            | a <= (B y) = alter s v (Interval a (min b (B y)))
+            | a Prelude.<= (B y) = alter s v (Interval a (min b (B y)))
             | otherwise = Bottom
             where 
                 Interval a b = lookUp s v
@@ -144,7 +144,7 @@ module CondCFunc where
         where 
             ax = exprE x s
             ay = exprE y s
-            int = meet ax ay
+            int = AD.meet ax ay
 
     intCondC (NotEq x y) s = s
 
