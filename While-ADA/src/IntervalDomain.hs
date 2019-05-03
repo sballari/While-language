@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
+--{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 
 module IntervalDomain where
     import AbsDomain as AD
@@ -134,3 +134,9 @@ module IntervalDomain where
         --absMin::Interval -> Interval
         absMinus (Interval a b) = Interval (-b) (-a)
         absMinus (IntervalBottom) = IntervalBottom
+
+        --widening :: a -> a -> a
+        widening (Interval a b) (Interval c d) = 
+            where 
+                l = if a <= c then a else MinInf
+                r = if b >= d then b eles PlusInf 
