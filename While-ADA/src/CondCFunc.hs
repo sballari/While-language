@@ -117,7 +117,7 @@ module CondCFunc where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
 
-    intCondC (LessEq (Var v) y) s
+    intCondC (LessEq (Var v) (Num y)) s
             | a Prelude.<= (B y) = alter s v (Interval a (min b (B y)))
             | otherwise = Bottom
             where 
@@ -131,7 +131,7 @@ module CondCFunc where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
 
-    intCondC(MoreEq (Var v) y) s
+    intCondC(MoreEq (Var v) (Num y)) s
         | b >= (B y) = alter s v (Interval (max a (B y)) b)
         | otherwise = Bottom
         where 
