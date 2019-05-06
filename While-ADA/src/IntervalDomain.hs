@@ -10,6 +10,8 @@ module IntervalDomain where
                     deriving (Eq,Show)
 
     instance Num Bound where 
+        fromInteger x = (B (fromIntegral x))
+
         (B x) + (B y) = B (x+y)
         (MinInf) + (B _) = MinInf
         (B _ ) + (MinInf) = MinInf
