@@ -6,6 +6,7 @@ import ParserTest
 import SignDomainTest
 import AbsStateTest
 import CFGTest
+import IntervalDomainTest
 
 main :: IO ()
 main = do
@@ -13,5 +14,7 @@ main = do
     where
       tests = ParserTest.tests
               ++ CFGTest.tests 
-              ++ SignDomainTest.tests {- ++ AbsStateTest.tests -}
+              ++ SignDomainTest.tests
+              ++ IntervalDomainTest.tests
+               {- ++ AbsStateTest.tests -}
 
