@@ -8,6 +8,7 @@ module Lib where
     import AbsState
     import SignDomain
     import AbsEval
+    import IntervalDomain
     import AbsCfgSem
     import CondCFunc
 
@@ -37,6 +38,8 @@ module Lib where
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
             putStrLn  (show ((semS False signCondC prTree (S[]))::AbsState (Sign)))
+            putStrLn "DOMINIO: Intervalli"
+            putStrLn (show ((semS False intCondC prTree (S[]))::AbsState (Interval)))
             putStrLn "----------FINE ANALISI--------"
 
     printCFGRes:: CGraph(Sign) -> IO()
