@@ -11,6 +11,7 @@ module Lib where
     import IntervalDomain
     import AbsCfgSem
     import CondCFunc
+    import AbsDomain
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -37,10 +38,14 @@ module Lib where
         do
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
-            putStrLn  (show ((semS False signCondC prTree (S[]))::AbsState (Sign)))
+            putStrLn  (show (semS False signCondC prTree stateSign))
             putStrLn "DOMINIO: Intervalli"
-            putStrLn (show ((semS False intCondC prTree (S[]))::AbsState (Interval)))
+            putStrLn (show (semS False intCondC prTree stateInt))
             putStrLn "----------FINE ANALISI--------"
+        where 
+            vars = variables prTree
+            stateSign = (topVarsInit vars) ::AbsState (Sign)
+            stateInt =  (topVarsInit vars) ::AbsState (Interval)
 
     printCFGRes:: CGraph(Sign) -> IO()
     printCFGRes graph= 
@@ -49,3 +54,6 @@ module Lib where
             putStrLn "DOMINIO: Segni"
             --putStrLn  (show (analyze graph [] (S[])))
             putStrLn "----------FINE ANALISI--------"
+
+    topVarsInit :: AbsDomain a => [Name] -> AbsState a
+    topVarsInit vars = foldr (\x st -> alter st x top) (S []) vars 
