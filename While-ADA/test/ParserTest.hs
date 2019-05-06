@@ -4,9 +4,15 @@ module ParserTest (tests) where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP]
+    tests = [variablesT, testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP]
 
     
+
+    variablesT  = testCase "[variables]" (assertEqual "" expected result)
+        where 
+            expected = ["x"]
+            result = variables program
+            program = While (NotEq (Var "x") (Num 0)) (Assign "x" (Sum (Var "x") (Num 1)))
 
     testAExp  = testCase "parse AExp" (assertEqual "" expected result)
         where 

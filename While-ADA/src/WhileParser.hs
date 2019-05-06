@@ -2,6 +2,7 @@ module WhileParser where
     import Control.Applicative
     import Data.Char
     import WhileStructures as WS
+    import qualified Data.Set 
 
 
     newtype Parser a = P (String -> [(a,String)])
@@ -248,3 +249,41 @@ module WhileParser where
             body <- parseStm
             return (While b body)
     
+    {- ##################
+    #   UTILITA' STM    #
+    ################## -}
+
+    variables :: Stm -> [Name]
+    variables stm = Data.Set.elems set
+        where 
+            set = Data.Set.fromList (variablesS stm)
+
+    variablesS :: Stm -> [Name]
+    variablesS (Assign x v) = [x] ++ (variablesA v)
+    variablesS (Skip) = []
+    variablesS (Comp s1 s2) = (variablesS s1) ++ (variablesS s2)
+    variablesS (Cond b s1 s2) = (variablesB b) ++ (variablesS s1) ++ (variablesS s2)
+    variablesS (While b s) = (variablesB b) ++ (variablesS s)
+    variablesS (Assert b) = (variablesB b) 
+
+    variablesA :: AExpr -> [Name]
+    variablesA (Sum a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesA (Div a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesA (Mul a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesA (Minus a1)  = (variablesA a1)
+    variablesA (Var x) = [x]
+    variablesA (Num _) = []
+    variablesA (Range _ _) = []
+
+    variablesB :: BExpr -> [Name]
+    variablesB WTrue = [] 
+    variablesB WFalse = []
+    variablesB (Eq a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (LessEq a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (Less a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (NotEq a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (More a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (MoreEq a1 a2) = (variablesA a1) ++ (variablesA a2)
+    variablesB (Neg b1) = variablesB b1
+    variablesB (And b1 b2) = (variablesB b1) ++ (variablesB b2)
+    variablesB (Or b1 b2) = (variablesB b1) ++ (variablesB b2)
