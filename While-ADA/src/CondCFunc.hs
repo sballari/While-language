@@ -146,6 +146,22 @@ module CondCFunc where
             ay = exprE y s
             int = AD.meet ax ay
 
+    intCondC (NotEq (Var x) (Num n)) s 
+        | (B n) ==a && (B n)==b  = Bottom 
+        | a == (B n)    = alter s x (Interval (B n+1) b)
+        | b == (B n)    = alter s x (Interval a (B n-1)) 
+        | otherwise     = s
+        where 
+            Interval a b = exprE (Var x) s
+    
+    intCondC (NotEq (Num n) (Var x)) s 
+        | (B n)==a && (B n)==b  = Bottom 
+        | a == (B n)    = alter s x (Interval (B n+1) b)
+        | b == (B n)    = alter s x (Interval a (B n-1)) 
+        | otherwise     = s
+        where 
+            Interval a b = exprE (Var x) s
+
     intCondC (NotEq x y) s = s
 
     intCondC (MoreEq x y) s = intCondC (LessEq y x) s
