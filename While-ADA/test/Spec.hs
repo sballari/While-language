@@ -7,6 +7,7 @@ import SignDomainTest
 import AbsStateTest
 import CFGTest
 import IntervalDomainTest
+import ShowTest
 
 main :: IO ()
 main = do
@@ -16,5 +17,6 @@ main = do
               ++ CFGTest.tests 
               ++ SignDomainTest.tests
               ++ IntervalDomainTest.tests
+              ++ ShowTest.tests
                {- ++ AbsStateTest.tests -}
 
