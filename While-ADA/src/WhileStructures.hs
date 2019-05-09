@@ -10,7 +10,7 @@ module WhileStructures where
         | Var Name 
         | Num Int -- integer numeric values (Z)
         | Range Int Int -- nondeterministic range
-        deriving (Show, Eq)
+        deriving (Eq)
 
     data BExpr = 
         WTrue 
@@ -24,7 +24,7 @@ module WhileStructures where
         | Neg BExpr
         | And BExpr BExpr
         | Or BExpr BExpr
-        deriving (Show, Eq)
+        deriving (Eq)
 
     data Stm = 
         Assign Name AExpr
@@ -34,3 +34,37 @@ module WhileStructures where
         | While BExpr Stm -- while b do S
         | Assert BExpr
         deriving (Show, Eq)
+
+    instance Show AExpr where
+        show  (Sum a1 a2) = show(a1)++" + "++show(a2)
+        show  (Mul a1 a2) = show(a1)++" * "++show(a2)
+        show  (Div a1 a2) = show(a1)++" / "++show(a2)
+        show  (Minus a1) =  " - "++show(a1)
+        show  (Var x) =  x
+        show  (Num x) =  show x
+        show  (Range a b) =  "["++(show a)++","++(show b)++"]"
+
+    instance Show BExpr where
+        show WTrue = "True"
+        show WFalse = "False" 
+        show (Eq a1 a2)= (show a1) ++ " = "  ++ (show a2)
+        show (LessEq a1 a2)= (show a1) ++ " <= "  ++ (show a2)
+        show (Less a1 a2)  = (show a1) ++ " < "  ++ (show a2)
+        show (NotEq a1 a2) = (show a1) ++ " != "  ++ (show a2)
+        show (More a1 a2)  = (show a1) ++ " > "  ++ (show a2)
+        show (MoreEq a1 a2)= (show a1) ++ " >= "  ++ (show a2)
+        {-
+        show (Neg(Eq a1 a2))= show (NotEq a1 a2)
+        show (Neg(LessEq a1 a2))= show (More a1 a2)
+        show (Neg(Less a1 a2)  )= show (MoreEq a1 a2)
+        show (Neg(NotEq a1 a2) )= show (Eq a1 a2)
+        show (Neg(More a1 a2)  )= show (LessEq a1 a2)
+        show (Neg(MoreEq a1 a2))= show (Less a1 a2)
+        -}
+        show (Neg b)   = "! ("++(show b)++")"
+        show (And b1 b2)   =  (show b1) ++ " AND "  ++ (show b2)
+        show (Or b1 b2)= (show b1) ++ " OR "  ++ (show b2)
+
+
+
+
