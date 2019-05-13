@@ -5,7 +5,7 @@ module CFGTest (tests) where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [t1,t2,t3]
+    tests = [t1,t2,t3,lab1,lab2]
 
     t1  = testCase "[CFG] assign" (assertEqual "" expected result)
         where 
@@ -34,3 +34,16 @@ module CFGTest (tests) where
                             (L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))",L 7),
                             (L 6,"Skip",L 3),(L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))",L 5),(L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))",L 6),(L 7,"Skip",L 8)]
             result = fst (app (debugCFG (Comp program1 Skip)) 1)
+
+    
+    lab1 = testCase "[labOut] x = 3+3" (assertEqual "" expected result)
+        where
+            expected = ["[L 1] X := 3 + 3"]
+            result = fst (app (labelledCode (Assign "X" (Sum (Num 3) (Num 3)))) 1)
+
+
+    lab2 = testCase "[labOut] ciao" (assertEqual "" expected result)
+            where 
+                expected = []
+                result = fst (app (labelledCode program1) 1)
+            
