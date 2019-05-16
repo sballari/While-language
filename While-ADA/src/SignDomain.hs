@@ -5,9 +5,14 @@ module SignDomain where
     import WhileStructures
 
     data Sign = SignBottom | Zero | LessEqZero | MoreEqZero | SignTop 
-                deriving (Eq,Show)
+                deriving (Eq)
 
-    
+    instance Show Sign where
+        show SignBottom  = "\8869"++"sign"
+        show Zero        = "0"
+        show LessEqZero  = '\8804':"0"
+        show MoreEqZero  =  '\8805': "0"
+        show SignTop     =  '\8868':"sign"
 
 
     instance AbsDomain Sign where
