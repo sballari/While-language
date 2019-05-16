@@ -7,10 +7,15 @@ module AbsState where
   type VarName = String
 
   
-  data AbsState a = S [(VarName, a)] | Bottom deriving (Show) -- a non può essere Bottom
+  data AbsState a = S [(VarName, a)] | Bottom -- a non può essere Bottom
   -- a should be the abstract domain
   -- haskell doesn't allow type constraint in data type
 
+  instance Show a => Show (AbsState a) where
+    show Bottom = "{}"
+    show (S xs) = "{" ++ (foldr (\(vn,val) rs -> -- serve veramente ??
+                            if rs == [] then vn++" \8712 "++show(val)
+                            else vn++" \8712 "++show(val)++", "++rs) "" xs) ++ "}"
 
   alter :: AbsDomain a => AbsState a -> String -> a -> AbsState a
   alter AbsState.Bottom _ _ = AbsState.Bottom
