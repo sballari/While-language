@@ -44,10 +44,10 @@ module AbsCfgSem where
         Clm (AbsState a) -> 
         Clm (AbsState a) -- invarianti per ogni program point
     invariantCalc inGraph ls ws is clm= 
-        if iter clm == clm then clm -- trovato un pt fisso
-        else invariantCalc inGraph ls ws is clm
+        if next_clm == clm then clm -- trovato un pt fisso
+        else invariantCalc inGraph ls ws is next_clm
         where
-            iter = invariant inGraph ls ws is
+            next_clm = invariant inGraph ls ws is clm
    
     -- singola iterazione clm e' il risultato precedente
     invariant :: (AbsDomain a) => 
@@ -62,7 +62,7 @@ module AbsCfgSem where
             lj <- labels
             if lj == L 1 then return (lj, is)
             else 
-                case lookup lj in_adj of
+                case lookup lj in_adj of -- label in entrata a lj
                     Just in_adj_lj -> 
                             let 
                                 Just xjk = lookup lj clm 
@@ -70,7 +70,7 @@ module AbsCfgSem where
                             in
                                 if elem lj ws then 
                                     return (lj, xjk `AS.widening` union)
-                                else return (lj, union )
+                                else return (lj, union)
             
 
                 
