@@ -40,8 +40,8 @@ module Lib where
             putStrLn (show  cfg) 
             putStrLn "------------FINE CFG---------" 
 
-    printDenRes:: Stm -> IO()
-    printDenRes prTree= 
+    printDenRes:: Stm -> [Name] -> IO()
+    printDenRes prTree vars= 
         do
             putStrLn "\n-------ANALISI DEN----------"
             putStrLn "DOMINIO: Segni"
@@ -50,17 +50,20 @@ module Lib where
             putStrLn (show (semS True intCondC prTree stateInt))
             putStrLn "----------FINE ANALISI--------"
         where 
-            vars = variables prTree
             stateSign = (topVarsInit vars) ::AbsState (Sign)
             stateInt =  (topVarsInit vars) ::AbsState (Interval)
 
-    printCFGRes:: CGraph(Sign) -> IO()
-    printCFGRes graph= 
+    printCFGRes:: (AbsDomain a, Show a) => CGraph(a)  -> [Name] -> IO()
+    printCFGRes graph vars= 
         do
             putStrLn "\n-------ANALISI CFG----------"
-            putStrLn "DOMINIO: Segni"
-            putStrLn  (show (analyze graph [L 6] (S[])))
+            putStrLn  (printClm fp_clm)
             putStrLn "----------FINE ANALISI--------"
-
+        where 
+            fp_clm = analyze graph [L 6] (topVarsInit vars)
+        
     topVarsInit :: AbsDomain a => [Name] -> AbsState a
     topVarsInit vars = foldr (\x st -> alter st x top) (S []) vars 
+
+    printClm :: Show a => Clm a -> String
+    printClm = foldr (\(l,val) sr -> (show l)++": "++(show val)++"\n"++sr  ) ""

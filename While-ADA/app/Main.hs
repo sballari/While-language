@@ -7,6 +7,7 @@ module Main where
     import Lib
     import SignDomain
     import CondCFunc
+    import IntervalDomain
 
     main :: IO() 
     main = do 
@@ -23,13 +24,17 @@ module Main where
 
             let [(tree,rest)] = parse parseStms source_code 
                 (cfg,nf) = app (debugCFG tree) 1 
-                (sem_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
+                vars = variables tree
+                (sign_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
+                (int_cfg,r') = (app (createCFG intCondC tree) 1 )::(CGraph (Interval),Int)
                 in 
                 printTree ([(tree,rest)]) >>
                 printLabCode tree >>
                 printCFG cfg >>
-                printDenRes tree >>
-                printCFGRes sem_cfg
+                printDenRes tree vars >>
+                printCFGRes sign_cfg vars >>
+                printCFGRes int_cfg vars
+
 
             
 
