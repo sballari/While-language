@@ -4,10 +4,19 @@ module IntervalDomain where
     import AbsDomain as AD
     --import WhileStructures
 
-    data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord,Show)
+    data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord)
     data Interval = Interval Bound Bound        
                     | IntervalBottom 
-                    deriving (Eq,Show)
+                    deriving (Eq)
+
+    instance Show Bound where 
+        show MinInf = '-':"\8734"
+        show PlusInf = '+':"\8734"
+        show (B n) = show n
+
+    instance Show Interval where 
+        show IntervalBottom = "[]"
+        show (Interval b1 b2) = "["++ (show b1) ++","++ (show b2) ++"]"
 
     instance Num Bound where 
         fromInteger x = (B (fromIntegral x))
