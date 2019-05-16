@@ -26,6 +26,13 @@ module Lib where
                         putStrLn (show program)
             putStrLn "----------FINE ALBERO--------"   
 
+    printLabCode :: Stm -> IO ()
+    printLabCode tree = 
+        do
+            putStrLn "\n-----------LABELLED CODE------------"
+            putStrLn ( printLabProg (fst (app (labelled tree) 1)) )
+            putStrLn "----------FINE ALBERO--------"  
+    
     printCFG:: Graph(String) -> IO()
     printCFG cfg =
         do 
@@ -40,7 +47,7 @@ module Lib where
             putStrLn "DOMINIO: Segni"
             putStrLn  (show (semS False signCondC prTree stateSign))
             putStrLn "DOMINIO: Intervalli"
-            putStrLn (show (semS False intCondC prTree stateInt))
+            putStrLn (show (semS True intCondC prTree stateInt))
             putStrLn "----------FINE ANALISI--------"
         where 
             vars = variables prTree
@@ -52,7 +59,7 @@ module Lib where
         do
             putStrLn "\n-------ANALISI CFG----------"
             putStrLn "DOMINIO: Segni"
-            --putStrLn  (show (analyze graph [] (S[])))
+            putStrLn  (show (analyze graph [L 6] (S[])))
             putStrLn "----------FINE ANALISI--------"
 
     topVarsInit :: AbsDomain a => [Name] -> AbsState a

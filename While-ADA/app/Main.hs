@@ -26,6 +26,7 @@ module Main where
                 (sem_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
                 in 
                 printTree ([(tree,rest)]) >>
+                printLabCode tree >>
                 printCFG cfg >>
                 printDenRes tree >>
                 printCFGRes sem_cfg
