@@ -6,9 +6,29 @@ module CFG where
     import CondCFunc
 
 
-    newtype Label = L Int deriving (Show, Eq, Ord)
+    newtype Label = L Int deriving (Eq, Ord)
     type CGraph a = [(Label,AbsState a -> AbsState a, Label)]
     type Graph a = [(Label, a, Label)]
+
+    pedix :: Int -> String
+    pedix 0 = "\8320" 
+    pedix 1 = "\8321"
+    pedix 2 = "\8322"
+    pedix 3 = "\8323"
+    pedix 4 = "\8324"
+    pedix 5 = "\8325"
+    pedix 6 = "\8326"
+    pedix 7 = "\8327"
+    pedix 8 = "\8328" 
+    pedix 9 = "\8329" 
+
+    pedix n = (pedix firsts) ++ (pedix last)
+        where 
+            firsts = (n `div` 10)
+            last = (n `mod` 10)
+
+    instance Show Label where
+        show (L n) = '\8467':(pedix n)
 
 
     freshLabel::ST (Label)
