@@ -35,9 +35,6 @@ module Main where
                 printCFGRes sign_cfg vars >>
                 printCFGRes int_cfg vars
 
-
-            
-
             hClose handle 
             putStrLn "Arrivederci"
 
