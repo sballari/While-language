@@ -15,7 +15,7 @@ module AbsCfgSem where
     ---------------------------------------------------
 
     labels :: Graph a -> [Label]
-    labels cfg = [L i|i <- [0..m]]
+    labels cfg = [L i|i <- [1..m]]
         where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
 
     in_adjs :: Graph a -> Adjs a
