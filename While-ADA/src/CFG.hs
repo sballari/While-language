@@ -108,12 +108,27 @@ module CFG where
     ---------------------------------------------------
     -------- PRINT PROGRAM WITH LABEL CODE END --------
     ---------------------------------------------------
+    -- TODO : ridefinire show label
 
+    printLabProg :: [String] -> String 
+    printLabProg = foldr (\ln r -> ln++"\n"++r) []
+
+    addToEnd :: [String] -> String -> [String]
     addToEnd [] str = [str]
+    addToEnd (x:[]) str = [x++str]
     addToEnd (x:xs) str = x:(addToEnd xs str)
-    
-    labelledCode:: Stm -> ST ([String])
 
+    shiftRight1Tab :: [String] -> [String]
+    shiftRight1Tab = foldr (\x sr -> ("\t"++x) : sr ) []
+    
+    labelled :: Stm -> ST([String])
+    labelled prg =
+        do 
+            lc <- labelledCode prg
+            labf <- takeLabel
+            return (addToEnd lc ("\n["++show(labf)++"]"))
+    
+    labelledCode :: Stm -> ST ([String])
     labelledCode (Assign v e) = 
         do
             l1 <- freshLabel
@@ -163,10 +178,9 @@ module CFG where
              
             g1 <- labelledCode s -- l3 -> l4
             l4 <- freshLabel
-            L5 <- takeLabel
             
             return (["["++(show l1)++"] while ["++(show l2)++"] "++ (show c) ++" do "]
                     ++ ["("] 
-                    ++ g1  
-                    ++ ["["++(show l4)++"] ) ","["++(show l5)++"]"]   )
+                    ++ (shiftRight1Tab g1)  
+                    ++ ["["++(show l4)++"] )"])
     
