@@ -45,5 +45,5 @@ module CFGTest (tests) where
     lab2 = testCase "[labOut] ciao" (assertEqual "" expected result)
             where 
                 expected = []
-                result = fst (app (labelledCode program1) 1)
+                result = printLabProg (fst (app (labelled program1) 1))
             
