@@ -54,11 +54,11 @@ module Lib where
             stateSign = (topVarsInit vars) ::AbsState (Sign)
             stateInt =  (topVarsInit vars) ::AbsState (Interval)
 
-    printCFGRes:: (AbsDomain a, Show a) => CGraph(a)  -> [Name] -> IO()
-    printCFGRes graph vars= 
+    printCFGRes:: (AbsDomain a, Show a) => CGraph(a)  -> [Name] -> Bool -> IO()
+    printCFGRes graph vars verbose= 
         do
             putStrLn "\n-------ANALISI CFG----------"
-            putStrLn  (printClm fp_clm)
+            putStrLn ( if verbose then (printClmSeq fp_clm) else (printClm (last fp_clm)) )
             putStrLn "----------FINE ANALISI--------"
         where 
             fp_clm = analyze graph [L 6] (topVarsInit vars)
@@ -68,3 +68,10 @@ module Lib where
 
     printClm :: Show a => Clm a -> String
     printClm = foldr (\(l,val) sr -> (show l)++": "++(show val)++"\n"++sr  ) ""
+
+
+    printClmSeq :: Show a => [Clm a] -> String
+    printClmSeq clms =
+        "VERBOSE ITERATION:\n" ++
+        (foldr (\col sr -> (printClm col)++"\n\n" ++ sr) "" clms) ++
+        "\nFINE VERBOSE ITERATION\n"
