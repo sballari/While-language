@@ -3,9 +3,10 @@ module CFGTest (tests) where
     import WhileStructures as WS
     import AbsEval
     import Test.Tasty
+    import AbsCfgSem
     import Test.Tasty.HUnit
 
-    tests = [t1,t2,t3,lab1,lab2]
+    tests = [t1,t2,t3,t4,t5,lab1,lab2]
 
     t1  = testCase "[CFG] assign" (assertEqual "" expected result)
         where 
@@ -32,10 +33,31 @@ module CFGTest (tests) where
                             (L 2,"Skip",L 3),
                             (L 3,"MoreEq (Var \"r\") (Var \"b\")",L 4),
                             (L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))",L 7),
-                            (L 6,"Skip",L 3),(L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))",L 5),(L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))",L 6),(L 7,"Skip",L 8)]
+                            (L 6,"Skip",L 3),
+                            (L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))",L 5),
+                            (L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))",L 6),
+                            (L 7,"Skip",L 8)]
             result = fst (app (debugCFG (Comp program1 Skip)) 1)
 
-    
+    t4 = testCase "[inadj] lista adiacenze in entrata book ex + skip finale" (assertEqual "" expected result)
+            where 
+                expected = [
+                    (L 1, []),
+                    (L 2, [(L 1,"Assign \"r\" (Var \"q\"))")]),
+                    (L 3, [(L 2,"Skip"),(L 6,"Skip")]),
+                    (L 4, [(L 3,"MoreEq (Var \"r\") (Var \"b\")")]),
+                    (L 5, [(L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))")]),
+                    (L 6, [(L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))")]),
+                    (L 7, [(L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))")]),
+                    (L 8, [(L 7,"Skip")])
+                    ]
+                result =  in_adjs (fst (app (debugCFG (Comp program1 Skip)) 1)) 
+
+    t5 = testCase "[labels] lista labes in CFG book ex + skip finale" (assertEqual "" expected result) 
+                where 
+                    expected = [L 1,L 2, L 3, L 4, L 5, L 6, L 7, L 8]
+                    result = labels (fst (app (debugCFG (Comp program1 Skip)) 1)) 
+
     lab1 = testCase "[labOut] x = 3+3" (assertEqual "" expected result)
         where
             expected = ["[L 1] X := 3 + 3"]
