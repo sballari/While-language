@@ -39,8 +39,8 @@ module Main where
                 printLabCode tree >>
                 printCFG cfg >>
                 printDenRes tree vars >>
-                printCFGRes sign_cfg vars >>
-                printCFGRes int_cfg vars
+                printCFGRes sign_cfg vars False>>
+                printCFGRes int_cfg vars True
 
             hClose handle 
             putStrLn "Arrivederci"
