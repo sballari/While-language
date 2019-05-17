@@ -1,6 +1,7 @@
 module Main where
 
     import System.IO
+    import System.Console.ANSI
     import WhileParser
     import CFG
     import WhileStructures
@@ -11,7 +12,13 @@ module Main where
 
     main :: IO() 
     main = do 
+            setSGR [ SetConsoleIntensity BoldIntensity
+                , SetColor Foreground Vivid Red
+                -- , SetColor Background Dull Green
+                ]
+            
             putStrLn "Benvenuti in While-ADA v3.1!"
+            setSGR [ Reset ]
             putStrLn "inserisci l'indirizzo del file da analizzare..."
             address <- getLine
 

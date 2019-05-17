@@ -1,6 +1,7 @@
 module Lib where
 
     import System.IO
+    import System.Console.ANSI
     import WhileParser
     import CFG
     import WhileStructures
