@@ -19,7 +19,7 @@ module AbsCfgSem where
         where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
 
     in_adjs :: Graph a -> Adjs a
-    in_adjs cfg = [(lj,[(li,f)|(li,f,lj)<-cfg]) | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
+    in_adjs cfg = [  (lj,[(li,f)|(li,f,lk)<-cfg, lj == lk])   | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
 
     ---------------------------------------------------
     --------------------- FINE  -----------------------
@@ -28,9 +28,9 @@ module AbsCfgSem where
         CGraph a ->
         W -> -- punti di widening
         AbsState a -> -- initial state of the program
-        Clm (AbsState a) -- invarianti per ogni program point
+        [Clm (AbsState a)] -- invarianti per ogni program point
     analyze cfg ws is = 
-        invariantCalc inGraph ls ws is clm0
+        invariantCalc inGraph ls ws is [clm0]
         where 
             ls = labels cfg  
             clm0 = [(li,Bottom)|li <- ls] 
@@ -41,13 +41,14 @@ module AbsCfgSem where
         [Label] -> -- label del programma
         W -> -- punti di widening
         AbsState a -> -- initial state of the program
-        Clm (AbsState a) -> 
-        Clm (AbsState a) -- invarianti per ogni program point
-    invariantCalc inGraph ls ws is clm= 
-        if next_clm == clm then clm -- trovato un pt fisso
-        else invariantCalc inGraph ls ws is next_clm
+        [Clm (AbsState a)] -> 
+        [Clm (AbsState a)] -- invarianti per ogni program point
+    invariantCalc inGraph ls ws is clms= 
+        if next_clm == lst then clms -- trovato un pt fisso
+        else (invariantCalc inGraph ls ws is (clms++[next_clm])) --sarebbe MOLTO piu' conveniente aggiungere in testa, ma e' per il senso logico
         where
-            next_clm = invariant inGraph ls ws is clm
+            lst = (last clms)
+            next_clm = invariant inGraph ls ws is lst
    
     -- singola iterazione clm e' il risultato precedente
     invariant :: (AbsDomain a) => 
