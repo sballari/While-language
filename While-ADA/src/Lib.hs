@@ -93,9 +93,9 @@ module Lib where
 
     printClmSeq :: Show a => [Clm a] -> String
     printClmSeq clms =
-        "VERBOSE ITERATION:\n" ++
-        (foldr (\col sr -> (printClm col)++"\n\n" ++ sr) "" clms) ++
-        "\nFINE VERBOSE ITERATION\n"
+        "\nVERBOSE ITERATION:\n" ++
+        (foldr (\col sr -> (printClm col)++"\n" ++ sr) "" clms) ++
+        "FINE VERBOSE ITERATION\n"
 
     putStrLnCBold :: String -> Color -> IO()
     putStrLnCBold str color= 
@@ -111,7 +111,7 @@ module Lib where
         do
             setSGR [ SetConsoleIntensity BoldIntensity
                 , SetColor Foreground Vivid Red
-                , SetColor Background Dull White
+                , SetColor Background Dull Yellow
                 ]           
             putStrLn str
             setSGR [ Reset ]
