@@ -9,38 +9,45 @@ module Main where
     import SignDomain
     import CondCFunc
     import IntervalDomain
+    import System.Environment
+
+    filePath :: [String] -> String
+    filePath = head
+
+    
 
     main :: IO() 
     main = do 
             setSGR [ SetConsoleIntensity BoldIntensity
                 , SetColor Foreground Vivid Red
                 -- , SetColor Background Dull Green
-                ]
-            
+                ]           
             putStrLn "Benvenuti in While-ADA v3.1!"
             setSGR [ Reset ]
-            putStrLn "inserisci l'indirizzo del file da analizzare..."
-            address <- getLine
-
-            handle <- openFile address ReadMode
+            
+            -- putStrLn "inserisci l'indirizzo del file da analizzare..."
+            -- address <- getLine
+            args <- getArgs 
+            putStrLn ("\nPROGRAMMA : "++(filePath args))
+            handle <- openFile (filePath args) ReadMode
             source_code <- hGetContents handle
 
-            putStrLn "\n-----------CODICE------------"
-            putStrLn source_code
-            putStrLn "-------FINE PROGRAMMA--------"
+            -- putStrLn "\n-----------CODICE------------"
+            -- putStrLn source_code
+            -- putStrLn "-------FINE PROGRAMMA--------"
 
             let [(tree,rest)] = parse parseStms source_code 
-                (cfg,nf) = app (debugCFG tree) 1 
+                -- (cfg,nf) = app (debugCFG tree) 1 
                 vars = variables tree
                 (sign_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
                 (int_cfg,r') = (app (createCFG intCondC tree) 1 )::(CGraph (Interval),Int)
                 in 
-                printTree ([(tree,rest)]) >>
+                -- printTree ([(tree,rest)]) >>
                 printLabCode tree >>
-                printCFG cfg >>
+                -- printCFG cfg >>
                 printDenRes tree vars >>
-                printCFGRes sign_cfg vars False>>
-                printCFGRes int_cfg vars True
+                printCFGRes sign_cfg vars "Segni">>
+                printCFGRes int_cfg vars "Intervalli"
 
             hClose handle 
             putStrLn "Arrivederci"
