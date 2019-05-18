@@ -12,7 +12,7 @@ module AbsState where
   -- haskell doesn't allow type constraint in data type
 
   instance Show a => Show (AbsState a) where
-    show Bottom = "{}"
+    show Bottom = "\8869"++"state"
     show (S xs) = "{" ++ (foldr (\(vn,val) rs -> -- serve veramente ??
                             if rs == [] then vn++" \8712 "++show(val)
                             else vn++" \8712 "++show(val)++", "++rs) "" xs) ++ "}"
