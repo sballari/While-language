@@ -11,7 +11,7 @@ module IntervalDomainTest  where
     import CondCFunc
     
 
-    tests = [a1]
+    tests = [a1,a2,a3]
 
     a1 = testCase "[Interval Domain] intcond R>=B" (assertEqual "" expected result)
         where 
@@ -19,9 +19,14 @@ module IntervalDomainTest  where
             result = intCondC (MoreEq (Var "R") (Var "B")) state
             state =  S[("Q",Interval (B 0) (B 0)),("R",Interval (B 0) (B 150)),("B", Interval (B 1) (B 3)), ("A", Interval (B 0) (B 150))]
             
-    -- a2 = testCase "[int dom] while x != 0 do x := x+1" (assertEqual "" expected result)
-    --     where 
-    --         program = While (NotEq (Var "x") (Num 0)) (Assign "x" (Sum (Var "x") (Num 1)))
-    --         expected = S[("Q", MoreEqZero)]
-    --         initState = S[("Q", Zero)]
-    --         result  = semS False signCondC program initState
+    a2 = testCase "[Interval Domain] intcond R<B" (assertEqual "" expected result)
+        where 
+            expected = S [("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 2)),("B",Interval (B 1) (B 3)),("A",Interval (B 0) (B 150))]
+            result = intCondC (Less (Var "R") (Var "B")) state
+            state =  S[("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 150)),("B", Interval (B 1) (B 3)), ("A", Interval (B 0) (B 150))]
+
+    a3 = testCase "[Interval Domain] intcond R<=B" (assertEqual "" expected result)
+        where 
+            expected = S [("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 3)),("B",Interval (B 1) (B 3)),("A",Interval (B 0) (B 150))]
+            result = intCondC (Less (Var "R") (Var "B")) state
+            state =  S[("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 150)),("B", Interval (B 1) (B 3)), ("A", Interval (B 0) (B 150))]
