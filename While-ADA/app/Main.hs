@@ -37,14 +37,14 @@ module Main where
             -- putStrLn "-------FINE PROGRAMMA--------"
 
             let [(tree,rest)] = parse parseStms source_code 
-                -- (cfg,nf) = app (debugCFG tree) 1 
                 vars = variables tree
                 (sign_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
                 (int_cfg,r') = (app (createCFG intCondC tree) 1 )::(CGraph (Interval),Int)
                 in 
                 -- printTree ([(tree,rest)]) >>
                 printLabCode tree >>
-                -- printCFG cfg >>
+                let (cfg,nf) = app (debugCFG tree) 1  in printCFG cfg >>
+                --let (cfg,nf) = app (debugCFG tree) 1  in printAdjList cfg >>
                 printDenRes tree vars >>
                 printCFGRes sign_cfg vars "Segni">>
                 printCFGRes int_cfg vars "Intervalli"
