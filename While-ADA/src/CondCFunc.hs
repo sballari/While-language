@@ -87,11 +87,28 @@ module CondCFunc where
         | otherwise = s
         where 
             ax = exprE x s
-            ay = exprE y s
+            ay = exprE y s    
 
     signCondC (MoreEq x y) s = signCondC (LessEq y x) s
-    signCondC (Less x y) s = (signCondC (LessEq x y) s) `AS.meet` (signCondC (NotEq x y) s)
-    signCondC (More x y) s = (signCondC (MoreEq x y) s) `AS.meet` (signCondC (NotEq x y) s)
+    signCondC (Less x y) s = (signCondC (LessEq x y) s) `AS.meet` (signCondC (NotEq x y) s) --TODO PROP non bueno
+    signCondC (More x y) s = (signCondC (MoreEq x y) s) `AS.meet` (signCondC (NotEq x y) s) --
+    
+
+    --------------------------------
+    -- CONTROLLARE -----------------
+    --------------------------------
+    signCondC (Neg WTrue ) s = signCondC WFalse s
+    signCondC (Neg WFalse ) s = signCondC WTrue s
+    signCondC (Neg (Eq a b)) s = signCondC  (NotEq a b) s
+    signCondC (Neg (LessEq a b)) s = signCondC (More a b) s
+    signCondC (Neg (Less a b)) s = signCondC (MoreEq a b) s
+    signCondC (Neg (NotEq a b)) s = signCondC (Eq a b) s
+    signCondC (Neg (More a b)) s = signCondC (LessEq a b) s
+    signCondC (Neg (MoreEq a b)) s = signCondC (Less a b) s
+    signCondC (Neg (Neg b)) s = signCondC b s
+    signCondC (Neg (And a b) ) s = signCondC (Or (Neg a) (Neg b)) s
+    signCondC (Neg (Or a b) ) s = signCondC (And (Neg a) (Neg b))   s
+
     signCondC b s = s
 
     {- ##################################
@@ -165,6 +182,23 @@ module CondCFunc where
     intCondC (NotEq x y) s = s
 
     intCondC (MoreEq x y) s = intCondC (LessEq y x) s
-    intCondC (Less x y) s = (intCondC (LessEq x y) s) `AS.meet` (intCondC (NotEq x y) s)
-    intCondC (More x y) s = (intCondC (MoreEq x y) s) `AS.meet` (intCondC (NotEq x y) s)
+    intCondC (Less x y) s = (intCondC (LessEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
+    intCondC (More x y) s = (intCondC (MoreEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
+    
+    
+    intCondC (Neg WTrue ) s = intCondC WFalse s
+    intCondC (Neg WFalse ) s = intCondC WTrue s
+    intCondC (Neg (Eq a b)) s = intCondC  (NotEq a b) s
+    intCondC (Neg (LessEq a b)) s = intCondC (More a b) s
+    intCondC (Neg (Less a b)) s = intCondC (MoreEq a b) s
+    intCondC (Neg (NotEq a b)) s = intCondC (Eq a b) s
+    intCondC (Neg (More a b)) s = intCondC (LessEq a b) s
+    intCondC (Neg (MoreEq a b)) s = intCondC (Less a b) s
+    intCondC (Neg (Neg b)) s = intCondC b s
+    intCondC (Neg (And a b) ) s = intCondC (Or (Neg a) (Neg b)) s
+    intCondC (Neg (Or a b) ) s = intCondC (And (Neg a) (Neg b))   s
+    
+    
     intCondC b s = s
+
+    
