@@ -41,6 +41,12 @@ module Lib where
             putStrLn (show  cfg) 
             putStrLn "------------FINE CFG---------" 
 
+    printAdjList:: Graph(String) -> IO()
+    printAdjList cfg =
+        do 
+            putStrLn "\n------------inAdjList--------------"
+            putStrLn (show (in_adjs cfg)) 
+            putStrLn "------------FINE inAdjList---------" 
 
     snToBool :: String -> Bool
     snToBool "s" = True
@@ -73,6 +79,7 @@ module Lib where
             fmap (snToBool) getLine >>= \verbose ->
                 putStrLn "indicare punti di widening (es: [1,2,3,...]) :" >>
                 fmap stringToWPoints getLine >>= \wideningPoints ->
+                putStrLn ("WIDENING POINTS = "++ (show wideningPoints)) >>
                 let fp_clm = analyze graph wideningPoints (topVarsInit vars) in 
                 putStrLnResult ( if verbose then printClmSeq fp_clm
                                     else printClm (last fp_clm) ) >>
