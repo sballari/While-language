@@ -18,10 +18,21 @@ module IntervalDomain where
         show IntervalBottom = "[]"
         show (Interval b1 b2) = "["++ (show b1) ++","++ (show b2) ++"]"
 
+    (+) :: Bound -> Int -> Bound
+    (B x) + n = B (x Prelude.+ n)
+    PlusInf + _ = PlusInf
+    MinInf + _ = MinInf
+
+    (-) :: Bound -> Int -> Bound
+    (B x) - n = B (x Prelude.- n)
+    PlusInf - _ = PlusInf
+    MinInf - _ = MinInf
+
+
     instance Num Bound where 
         fromInteger x = (B (fromIntegral x))
 
-        (B x) + (B y) = B (x+y)
+        (B x) + (B y) = B (x Prelude.+ y) 
         (MinInf) + (B _) = MinInf
         (B _ ) + (MinInf) = MinInf
         (PlusInf) + (B _) = PlusInf
@@ -120,7 +131,7 @@ module IntervalDomain where
 
         --absSum :: Interval -> Interval -> Interval
         absSum (Interval a b) (Interval c d) =
-            Interval (a+c) (b+d)       
+            Interval (a Prelude.+c ) (b Prelude.+ d)       
         absSum IntervalBottom _ = IntervalBottom
         absSum _ IntervalBottom = IntervalBottom
         

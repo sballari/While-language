@@ -139,22 +139,56 @@ module CondCFunc where
             | otherwise = Bottom
             where 
                 Interval a b = lookUp s v
+    --EXPERIMENTAL : operatori stretti. Bho ...
+    intCondC (Less (Var v) (Var w)) s 
+        | a Prelude.< d = alter (alter s v (Interval a rigth)) w (Interval left d)
+        | otherwise = Bottom
+        where
+            Interval a b = lookUp s v
+            Interval c d = lookUp s w
+            rigth = if b Prelude.< d then b else d IntervalDomain.- 1
+            left = if a >= c then a IntervalDomain.+1 else  c
 
-    
+    intCondC (Less (Var v) (Num y)) s
+            | a Prelude.< (B y) = alter s v (Interval a rigth)
+            | otherwise = Bottom
+            where 
+                Interval a b = lookUp s v
+                rigth = if b Prelude.< (B y) then b else (B y) IntervalDomain.- 1
+    -----------------------------------------------------------
     intCondC (MoreEq (Var v) (Var w)) s 
         | b >= c = alter (alter s v (Interval (max c a) b)) w (Interval c (min d b))
         | otherwise = Bottom
         where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
+            
 
     intCondC(MoreEq (Var v) (Num y)) s
         | b >= (B y) = alter s v (Interval (max a (B y)) b)
         | otherwise = Bottom
         where 
             Interval a b = lookUp s v
-    
+    --EXPERIMENTAL---------------------------------
+    intCondC (More (Var v) (Var w)) s 
+        | b > c = alter (alter s v (Interval left b)) w (Interval c rigth)
+        | otherwise = Bottom
+        where
+            Interval a b = lookUp s v
+            Interval c d = lookUp s w
+            rigth = if a Prelude.> c then a else c IntervalDomain.+1
+            left = if b Prelude.<= d then b IntervalDomain.-1 else d
+
+    intCondC(More (Var v) (Num y)) s
+        | b > (B y) = alter s v (Interval left b)
+        | otherwise = Bottom
+        where 
+            Interval a b = lookUp s v
+            left = if a Prelude.<= (B y) then (B y Prelude.+1) else a
+    ------------------------------
     intCondC (LessEq x y) s = s --dubbio serve???
+    intCondC (NotEq x y) s = s
+    intCondC (MoreEq x y) s = s
 
     intCondC (Eq x y) s = 
         if int==IntervalBottom then Bottom else s
@@ -165,25 +199,23 @@ module CondCFunc where
 
     intCondC (NotEq (Var x) (Num n)) s 
         | (B n) ==a && (B n)==b  = Bottom 
-        | a == (B n)    = alter s x (Interval (B n+1) b)
-        | b == (B n)    = alter s x (Interval a (B n-1)) 
+        | a == (B n)    = alter s x (Interval (B n Prelude.+1) b)
+        | b == (B n)    = alter s x (Interval a (B n Prelude.-1)) 
         | otherwise     = s
         where 
             Interval a b = exprE (Var x) s
     
     intCondC (NotEq (Num n) (Var x)) s 
         | (B n)==a && (B n)==b  = Bottom 
-        | a == (B n)    = alter s x (Interval (B n+1) b)
-        | b == (B n)    = alter s x (Interval a (B n-1)) 
+        | a == (B n)    = alter s x (Interval (B n Prelude.+1) b)
+        | b == (B n)    = alter s x (Interval a (B n Prelude.-1)) 
         | otherwise     = s
         where 
             Interval a b = exprE (Var x) s
 
-    intCondC (NotEq x y) s = s
-
-    intCondC (MoreEq x y) s = intCondC (LessEq y x) s
-    intCondC (Less x y) s = (intCondC (LessEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
-    intCondC (More x y) s = (intCondC (MoreEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
+    
+    -- intCondC (Less x y) s = (intCondC (LessEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
+    -- intCondC (More x y) s = (intCondC (MoreEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
     
     
     intCondC (Neg WTrue ) s = intCondC WFalse s
