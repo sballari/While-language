@@ -27,16 +27,16 @@ module CondCFunSign where
             aw = exprE (Var w) s
 
     signCondC (LessEq (Var v) y) s
-        | ay == Zero && ({-a1 == Zero ||-} a1 == MoreEqZero) = alter s v Zero
-        | ay == Zero && (a1 == SignTop {-|| a1 == LessEqZero-}) = alter s v LessEqZero
+        | ay == Zero && (a1 == MoreEqZero) = alter s v Zero
+        | ay == Zero && (a1 == SignTop) = alter s v LessEqZero
         | ay == LessEqZero && a1 == SignTop = alter s v LessEqZero
         | ay == LessEqZero && a1 == MoreEqZero = alter s v Zero
-        {-| ay == MoreEqZero = s-} 
-        {-| ay == SignTop = s-}
-        | otherwise = s -- collasso tutti gli altri casi all'identità
+        -- | ay == MoreEqZero = s
+        -- | ay == SignTop = s
+        | otherwise = s -- collasso tutti gli altri casi all'identità {ay = Zero e a1 == LessEqZero; ay = Zero e a1 == Zero}
         where 
             a1 = exprE (Var v) s
-            ay = exprE y s
+            ay = exprE y 
 
     signCondC (MoreEq (Var v) (Var w)) s =
         (if elem aw [Zero, MoreEqZero] then alter s v MoreEqZero else s)
