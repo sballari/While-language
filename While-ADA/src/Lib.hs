@@ -13,6 +13,8 @@ module Lib where
     import AbsCfgSem
     import CondCFunc
     import AbsDomain
+    import CondCFunSign
+    import CondCFunInt
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
