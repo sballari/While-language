@@ -5,6 +5,8 @@ module CondCFunInt where
     import WhileStructures
     import CondCFunc
     import CondCFunc
+    import CondCFunc
+    import CondCFunc
     import AbsEval
 {- ##################################
     #### COND PER DOMINIO INTERVALLI ####
