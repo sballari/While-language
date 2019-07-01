@@ -4,6 +4,7 @@ module CondCFunInt where
     import IntervalDomain
     import WhileStructures
     import CondCFunc
+    import CondCFunc
     import AbsEval
 {- ##################################
     #### COND PER DOMINIO INTERVALLI ####

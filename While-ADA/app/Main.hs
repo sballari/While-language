@@ -10,6 +10,8 @@ module Main where
     import CondCFunc
     import IntervalDomain
     import System.Environment
+    import CondCFunSign
+    import CondCFunInt
 
     filePath :: [String] -> String
     filePath = head
