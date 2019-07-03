@@ -27,10 +27,20 @@ module AbsDenSem where
                     r `AS.join` (semS w condC e (condC c x))
     
 
-    lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
-    lim f = (lim' f 0) Bottom
+    -- lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
+    -- lim f = (lim' f 0) Bottom
 
-    lim' ::(AbsDomain a) => (AbsState a -> AbsState a) -> Int -> (AbsState a -> AbsState a)
-    lim' f 0 = if (id Bottom) == (f Bottom) then id else lim' f 1
-    lim' f n = if  (f Bottom) == ((f.f) Bottom) then f
-            else lim' (f.f) (n+1)
+    -- lim' ::(AbsDomain a) => (AbsState a -> AbsState a) -> Int -> (AbsState a -> AbsState a)
+    -- lim' f 0 = if (id Bottom) == (f Bottom) then id else lim' f 1
+    -- lim' f n = if  (f Bottom) == ((f.f) Bottom) then f
+    --         else lim' (f.f) (n+1)
+
+    lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
+    lim f = (lub [pow n f | n <- [0..]]) Bottom
+        where pow 0 f = id
+              pow n f = f.(pow (n-1) f)
+        
+    lub (f:f':fs) = 
+        if f (Bottom) == f' Bottom
+        then f
+        else lub fs
