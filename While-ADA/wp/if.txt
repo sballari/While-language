@@ -1,3 +1,5 @@
-if R>=B then 
-    R:=R-B
-else skip
+x:=5;
+y:=-3;
+if x = y then 
+    x := 1  
+else x:= -2
