@@ -11,9 +11,16 @@ module CFG where
     type Graph a = [(Label, a, Label)] -- archi di un grafo generico
 
     freshLabel::ST (Label)
+    --prendo e aumento per il prossimo
     freshLabel = ST(\s -> (L s,s+1))
     takeLabel::ST (Label)
+    --prendo e la prossima volta che prento sara' la stessa
+    -- 1-->2-->3 :: [(1,..,2);(2,..,3)]
     takeLabel = ST(\s -> (L s,s))
+
+    convertS :: AbsDomain a => Stm -> AbsState a -> AbsState a
+    convertS Skip = id
+    convertS (Assign x y) = semSG (Assign x y)
 
     createCFG :: AbsDomain a => CondFun a -> Stm -> ST (CGraph a)
     createCFG condC s = cfg s convertS condC
@@ -21,7 +28,7 @@ module CFG where
     debugCFG :: Stm -> ST(Graph String)
     debugCFG s = cfg s debugS debugB
 
-    cfg ::  Stm -> (Stm -> b) -> (BExpr -> b) -> ST (Graph b)
+    cfg ::  Stm -> (Stm -> b) -> (BExpr -> b) -> ST (Graph b) 
     cfg (Assign v e) f g= 
         do
             l1 <- freshLabel 
@@ -66,11 +73,6 @@ module CFG where
             l4 <- freshLabel
             l5 <- takeLabel --WARNING
             return ([(l1,f Skip,l2), (l2, g c, l3), (l2,g (Neg c), l5), (l4,f Skip,l2)]++g1)
-           
-    convertS :: AbsDomain a => Stm -> AbsState a -> AbsState a
-    convertS Skip = id
-    convertS (Assign x y) = semSG (Assign x y)
-    
             
     debugS :: Stm -> String
     debugS s = show s
