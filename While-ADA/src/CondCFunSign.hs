@@ -68,15 +68,6 @@ module CondCFunSign where
             ax = exprE x s
             ay = exprE y s
 
-    signCondC (Eq (Var x) y) s 
-        | ay == SignBottom = Bottom
-        | ax == LessEqZero && ay == MoreEqZero =  alter s x Zero
-        | ax == MoreEqZero && ay == LessEqZero =  alter s x Zero
-        | otherwise = s
-        where 
-            ax = exprE (Var x) s
-            ay = exprE y s
-
     signCondC (Eq (Var x) (Var y)) s 
         | ay == SignBottom || ax == SignBottom = Bottom
         | ax == LessEqZero && ay == MoreEqZero =  alter (alter s x Zero) y Zero
@@ -86,8 +77,17 @@ module CondCFunSign where
             ax = exprE (Var x) s
             ay = exprE (Var y) s
 
+    signCondC (Eq (Var x) y) s 
+        | ay == SignBottom = Bottom
+        | ax == LessEqZero && ay == MoreEqZero =  alter s x Zero
+        | ax == MoreEqZero && ay == LessEqZero =  alter s x Zero
+        | otherwise = s
+        where 
+            ax = exprE (Var x) s
+            ay = exprE y s
+
     signCondC (Eq x y) s 
-        | ax == SignBottom || ay == SignBottom = Bottom
+        | ax == SignBottom || ay == SignBottom = Bottom -- 3/0 == 1
         | otherwise = s
         where 
             ax = exprE x s
@@ -102,13 +102,19 @@ module CondCFunSign where
             ay = exprE y s    
 
     signCondC (MoreEq x y) s = signCondC (LessEq y x) s
-    signCondC (Less x y) s = (signCondC (LessEq x y) s) `AS.meet` (signCondC (NotEq x y) s) --TODO PROP non bueno
-    signCondC (More x y) s = (signCondC (MoreEq x y) s) `AS.meet` (signCondC (NotEq x y) s) --
-    12:38 PM
 
-    --------------------------------
-    -- CONTROLLARE -----------------
-    --------------------------------
+    signCondC (Less v w) s
+        | av == Zero && aw == Zero = Bottom
+        | av == MoreEqZero && aw == Zero = Bottom
+        | av == Zero && aw == MoreEqZero = Bottom
+        | av == Zero && aw == LessEqZero = Bottom
+        | otherwise = signCondC (LessEq v w) s
+        where 
+            av = exprE v s
+            aw = exprE w s
+
+    signCondC (More x y) s = signCondC (Less y x) s
+
     signCondC (Neg WTrue ) s = signCondC WFalse s
     signCondC (Neg WFalse ) s = signCondC WTrue s
     signCondC (Neg (Eq a b)) s = signCondC  (NotEq a b) s
@@ -121,4 +127,4 @@ module CondCFunSign where
     signCondC (Neg (And a b) ) s = signCondC (Or (Neg a) (Neg b)) s
     signCondC (Neg (Or a b) ) s = signCondC (And (Neg a) (Neg b)) s
 
-    signCondC b s = s
+    --signCondC b s = s
