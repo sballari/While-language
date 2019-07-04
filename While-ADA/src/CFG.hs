@@ -7,29 +7,8 @@ module CFG where
 
 
     newtype Label = L Int deriving (Eq, Ord)
-    type CGraph a = [(Label,AbsState a -> AbsState a, Label)]
-    type Graph a = [(Label, a, Label)]
-
-    pedix :: Int -> String
-    pedix 0 = "\8320" 
-    pedix 1 = "\8321"
-    pedix 2 = "\8322"
-    pedix 3 = "\8323"
-    pedix 4 = "\8324"
-    pedix 5 = "\8325"
-    pedix 6 = "\8326"
-    pedix 7 = "\8327"
-    pedix 8 = "\8328" 
-    pedix 9 = "\8329" 
-
-    pedix n = (pedix firsts) ++ (pedix last)
-        where 
-            firsts = (n `div` 10)
-            last = (n `mod` 10)
-
-    instance Show Label where
-        show (L n) = '\8467':(pedix n)
-
+    type CGraph a = [(Label,AbsState a -> AbsState a, Label)] -- lista di archi del grafo computazionale
+    type Graph a = [(Label, a, Label)] -- archi di un grafo generico
 
     freshLabel::ST (Label)
     freshLabel = ST(\s -> (L s,s+1))
@@ -131,6 +110,7 @@ module CFG where
     -- TODO : ridefinire show label
 
     printLabProg :: [String] -> String 
+    -- stampa il programma labellato
     printLabProg = foldr (\ln r -> ln++"\n"++r) []
 
     addToEnd :: [String] -> String -> [String]
@@ -204,3 +184,40 @@ module CFG where
                     ++ (shiftRight1Tab g1)  
                     ++ ["["++(show l4)++"] )"])
     
+    ---------------------------------------------------
+    ------------ GRAPH UTILITY FUNCTIONS  -------------
+    ---------------------------------------------------
+    type Adjs a = [(Label,[(Label,a)])] 
+    -- Grafo visto come lista delle liste di adiacenza in entrata (convertitore)
+
+    labels :: Graph a -> [Label]
+    labels cfg = [L i|i <- [1..m]]
+        where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
+
+    in_adjs :: Graph a -> Adjs a
+    in_adjs cfg = [  (lj,[(li,f)|(li,f,lk)<-cfg, lj == lk])   | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
+
+
+    ---------------------------------------------------
+    ------------ GRAPH print FUNCTIONS  -------------
+    ---------------------------------------------------
+    
+    pedix :: Int -> String
+    pedix 0 = "\8320" 
+    pedix 1 = "\8321"
+    pedix 2 = "\8322"
+    pedix 3 = "\8323"
+    pedix 4 = "\8324"
+    pedix 5 = "\8325"
+    pedix 6 = "\8326"
+    pedix 7 = "\8327"
+    pedix 8 = "\8328" 
+    pedix 9 = "\8329" 
+
+    pedix n = (pedix firsts) ++ (pedix last)
+        where 
+            firsts = (n `div` 10)
+            last = (n `mod` 10)
+
+    instance Show Label where
+        show (L n) = '\8467':(pedix n)

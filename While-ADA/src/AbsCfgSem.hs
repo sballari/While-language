@@ -7,23 +7,7 @@ module AbsCfgSem where
 
     type W = [Label] --widening points 
     type Clm a = [(Label, a)]
-    type Adjs a = [(Label,[(Label,a)])] 
-    -- Grafo visto come lista delle liste di adiacenza in entrata (convertitore)
-
-    ---------------------------------------------------
-    ------------ GRAPH UTILITY FUNCTIONS  -------------
-    ---------------------------------------------------
-
-    labels :: Graph a -> [Label]
-    labels cfg = [L i|i <- [1..m]]
-        where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
-
-    in_adjs :: Graph a -> Adjs a
-    in_adjs cfg = [  (lj,[(li,f)|(li,f,lk)<-cfg, lj == lk])   | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
-
-    ---------------------------------------------------
-    --------------------- FINE  -----------------------
-    ---------------------------------------------------
+    
     analyze :: AbsDomain a =>
         CGraph a ->
         W -> -- punti di widening
