@@ -18,18 +18,17 @@ module CFG where
     -- 1-->2-->3 :: [(1,..,2);(2,..,3)]
     takeLabel = ST(\s -> (L s,s))
 
-    convertS :: AbsDomain a => Stm -> AbsState a -> AbsState a
-    convertS Skip = id
-    convertS (Assign x y) = semSG (Assign x y)
+    stm2Fun :: AbsDomain a => Stm -> AbsState a -> AbsState a
+    -- assegna la funzione semantica all'arco
+    stm2Fun Skip = id
+    stm2Fun (Assign x y) = semSG (Assign x y)
 
+    -- each arc corresponds to an assignment or a condition
     createCFG :: AbsDomain a => CondFun a -> Stm -> ST (CGraph a)
-    createCFG condC s = cfg s convertS condC
-
-    debugCFG :: Stm -> ST(Graph String)
-    debugCFG s = cfg s debugS debugB
+    createCFG condC s = cfg s stm2Fun condC
 
     cfg ::  Stm -> (Stm -> b) -> (BExpr -> b) -> ST (Graph b) 
-    cfg (Assign v e) f g= 
+    cfg (Assign v e) f g = 
         do
             l1 <- freshLabel 
             l2 <- takeLabel
@@ -56,10 +55,10 @@ module CFG where
         do
             l1 <- freshLabel
             l2 <- takeLabel
-            g1 <- cfg s1 f g-- l2 -> l3
+            g1 <- cfg s1 f g -- l2 -> l3
             l3 <- freshLabel
             l4 <- takeLabel
-            g2 <- cfg s2 f g-- l4 ->l5
+            g2 <- cfg s2 f g -- l4 ->l5
             l5 <- freshLabel 
             l6 <- takeLabel --join
             return ([(l1,g c,l2), (l1,g (Neg c), l4), (l3,f Skip,l6), (l5,f Skip,l6)]++g1++g2)
@@ -71,11 +70,19 @@ module CFG where
             l3 <-takeLabel 
             g1 <- cfg s f g -- l3 -> l4
             l4 <- freshLabel
-            l5 <- takeLabel --WARNING
+            l5 <- takeLabel 
             return ([(l1,f Skip,l2), (l2, g c, l3), (l2,g (Neg c), l5), (l4,f Skip,l2)]++g1)
-            
+    
+
+    ---------------------------------------------------
+    ----------- CFG DEBUG : ARCHI PRINTABILI ----------
+    ---------------------------------------------------
+    debugCFG :: Stm -> ST(Graph String)
+    debugCFG s = cfg s debugS debugB        
+    
     debugS :: Stm -> String
     debugS s = show s
+    
     debugB :: BExpr -> String 
     debugB c = show c
 
@@ -109,7 +116,6 @@ module CFG where
     ---------------------------------------------------
     -------- PRINT PROGRAM WITH LABEL CODE END --------
     ---------------------------------------------------
-    -- TODO : ridefinire show label
 
     printLabProg :: [String] -> String 
     -- stampa il programma labellato
@@ -169,9 +175,9 @@ module CFG where
             return (["["++(show l1)++"] if "++ (show c) ++" then "] 
                     ++ ["("] 
                     ++ g1 
-                    ++ [")","else","("]   
+                    ++ ["["++(show l3)++"])","else","("]   
                     ++g2
-                    ++[")"])
+                    ++["["++(show l5)++"])"])
     
     labelledCode (While c s) = 
         do
@@ -189,7 +195,7 @@ module CFG where
     ---------------------------------------------------
     ------------ GRAPH UTILITY FUNCTIONS  -------------
     ---------------------------------------------------
-    type Adjs a = [(Label,[(Label,a)])] 
+    type Adjs a = [(Label,[(Label,a)])]
     -- Grafo visto come lista delle liste di adiacenza in entrata (convertitore)
 
     labels :: Graph a -> [Label]
