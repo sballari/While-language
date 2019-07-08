@@ -75,7 +75,7 @@ module IntervalDomain where
             if c>0 then MinInf 
             else 
                 if c<0 then PlusInf
-                else (B 127)
+                else error "Division by zero"
         
         (B _ ) / (MinInf) = B 0
 
@@ -83,7 +83,7 @@ module IntervalDomain where
             if c>0 then PlusInf 
             else 
                 if c<0 then MinInf
-                else (B 127)
+                else error "Division by zero"
             
         (B _ ) / (PlusInf) = B 0
         (MinInf) / (MinInf) = B 0

@@ -29,7 +29,7 @@ module AbsState where
    -- D# = (V->(B#\{AD.Bottom})) U AS.Bottom                         
                           
   lookUp :: AbsDomain a => AbsState a -> String -> a
-  -- lookUp AbsState.Bottom name = AD.bottom -- bottom?
+  lookUp AbsState.Bottom name = AD.bottom -- bottom?
   lookUp (S []) name = AD.top
   lookUp (S (x:xs)) name = if (fst x) == name then (snd x) else lookUp (S xs) name
 
