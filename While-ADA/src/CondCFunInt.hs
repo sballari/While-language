@@ -11,15 +11,12 @@ module CondCFunInt where
 
     intCondC :: CondFun Interval 
     -- intCondC :: BExpr -> AbsState IntervalDomain -> AbsState IntervalDomain 
-
-    
+ 
     intCondC _ Bottom = Bottom
     intCondC (WTrue) s = s
     intCondC (WFalse) s = Bottom
     intCondC (And c1 c2) s = AS.meet (intCondC c1 s) (intCondC c2 s)
     intCondC (Or c1 c2) s =  AS.join (intCondC c1 s) (intCondC c2 s)
-
-    
 
     intCondC (LessEq (Var v) (Var w)) s 
         | a Prelude.<= d = alter (alter s v (Interval a (min b d))) w (Interval (max a c) d)
@@ -81,7 +78,7 @@ module CondCFunInt where
             left = if a Prelude.<= (B y) then (B y Prelude.+1) else a
     ------------------------------
     intCondC (LessEq x y) s = s --dubbio serve???
-    intCondC (NotEq x y) s = s
+    
     intCondC (MoreEq x y) s = s
 
     intCondC (Eq (Var x) (Var y)) s = 
@@ -128,11 +125,7 @@ module CondCFunInt where
         where 
             Interval a b = exprE (Var x) s
 
-    
-    -- intCondC (Less x y) s = (intCondC (LessEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
-    -- intCondC (More x y) s = (intCondC (MoreEq x y) s) `AS.meet` (intCondC (NotEq x y) s) --TODO per niente preciso
-    
-    
+    intCondC (NotEq x y) s = s       
     intCondC (Neg WTrue ) s = intCondC WFalse s
     intCondC (Neg WFalse ) s = intCondC WTrue s
     intCondC (Neg (Eq a b)) s = intCondC  (NotEq a b) s
