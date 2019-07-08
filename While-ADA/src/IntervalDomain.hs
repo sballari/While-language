@@ -143,6 +143,7 @@ module IntervalDomain where
         absMul _ IntervalBottom = IntervalBottom
 
         --absDiv :: Interval -> Interval -> Interval
+        absDiv _ IntervalBottom = IntervalBottom
         absDiv (Interval a b) (Interval c d) 
             | (B 1) Prelude.<= c = Interval (Prelude.minimum [a/c,a/d]) (Prelude.maximum [b/c,b/d])
             | d Prelude.<= (B (-1)) = Interval (Prelude.minimum [b / c, b / d] ) (Prelude.maximum [a/c,a/d])
@@ -152,12 +153,6 @@ module IntervalDomain where
                                 p1 = (Interval a b) `absDiv` x
                                 p2 = (Interval a b) `absDiv` y
                             in join p1 p2
-
-        absDiv (Interval a b) (Interval c d)
-                | c == 0 && c == d = IntervalBottom
-                | (B 0) Prelude.<= c = Interval (Prelude.minimum [a/c,a/d,b/c,b/d]) (Prelude.maximum [a/c,a/d,b/c,b/d])
-                | (B 0) Prelude.>= d = absDiv (Interval (negate b) (negate a)) (Interval (negate d) (negate c))
-                | otherwise = absDiv (Interval a b) (Interval c (B 0)) `join` absDiv (Interval a b) (Interval (B 0) d)
 
         --absMin::Interval -> Interval
         absMinus (Interval a b) = Interval (-b) (-a)
