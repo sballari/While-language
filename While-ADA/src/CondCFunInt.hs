@@ -84,6 +84,27 @@ module CondCFunInt where
     intCondC (NotEq x y) s = s
     intCondC (MoreEq x y) s = s
 
+    intCondC (Eq (Var x) (Var y)) s = 
+        if int==IntervalBottom then Bottom else alter (alter s x int) y int
+        where 
+            ax = exprE (Var x) s
+            ay = exprE (Var y) s
+            int = AD.meet ax ay
+
+    intCondC (Eq (Var x) y) s = 
+        if int==IntervalBottom then Bottom else alter s x int
+        where 
+            ax = exprE (Var x) s
+            ay = exprE y s
+            int = AD.meet ax ay
+
+    intCondC (Eq x (Var y)) s = 
+        if int==IntervalBottom then Bottom else alter s y int
+        where 
+            ax = exprE x s
+            ay = exprE (Var y) s
+            int = AD.meet ax ay
+
     intCondC (Eq x y) s = 
         if int==IntervalBottom then Bottom else s
         where 
