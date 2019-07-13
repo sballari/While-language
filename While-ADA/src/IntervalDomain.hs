@@ -2,7 +2,8 @@
 
 module IntervalDomain where
     import AbsDomain as AD
-    --import WhileStructures
+    import Prelude hiding ((/),(*),negate,(+),(-))
+    import qualified Prelude as P ((*),negate,(+),(-))
 
     data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord)
     data Interval = Interval Bound Bound        
@@ -19,78 +20,68 @@ module IntervalDomain where
         show (Interval MinInf PlusInf) = "\8868"++"int"
         show (Interval b1 b2) = "["++ (show b1) ++","++ (show b2) ++"]"
 
-    (+) :: Bound -> Int -> Bound
-    (B x) + n = B (x Prelude.+ n)
-    PlusInf + _ = PlusInf
-    MinInf + _ = MinInf
+    (+) :: Bound -> Bound ->Bound
+    (B x) + (B y) = B (x P.+ y) 
+    (MinInf) + (B _) = MinInf
+    (B _ ) + (MinInf) = MinInf
+    (PlusInf) + (B _) = PlusInf
+    (B _ ) + (PlusInf) = PlusInf
+    (MinInf) + (MinInf) = MinInf
+    (PlusInf) + (PlusInf) = PlusInf 
 
-    (-) :: Bound -> Int -> Bound
-    (B x) - n = B (x Prelude.- n)
-    PlusInf - _ = PlusInf
-    MinInf - _ = MinInf
+    (-) :: Bound -> Bound ->Bound
+    x - y = x + (negate y)
 
-
-    instance Num Bound where 
-        fromInteger x = (B (fromIntegral x))
-
-        (B x) + (B y) = B (x Prelude.+ y) 
-        (MinInf) + (B _) = MinInf
-        (B _ ) + (MinInf) = MinInf
-        (PlusInf) + (B _) = PlusInf
-        (B _ ) + (PlusInf) = PlusInf
-        (MinInf) + (MinInf) = MinInf
-        (PlusInf) + (PlusInf) = PlusInf 
-
-        (B x) * (B y) = B (x*y)
-        (MinInf) * (B c) = 
-            if c == 0 then B 0 
-            else if c<0 then PlusInf
-            else MinInf
-        (B c ) * (MinInf) = 
-            if c == 0 then B 0 
-            else if c<0 then PlusInf
-            else MinInf
-        (PlusInf) * (B c) = 
-            if c == 0 then B 0 
-            else if c<0 then MinInf
-            else PlusInf
-        (B c) * (PlusInf) = 
-            if c == 0 then B 0 
-            else if c<0 then MinInf
-            else PlusInf
-        (MinInf) * (MinInf) = PlusInf
-        (PlusInf) * (PlusInf) = PlusInf
-        (PlusInf) * (MinInf) = MinInf 
-        (MinInf) * (PlusInf) = MinInf
-
-        negate MinInf = PlusInf
-        negate PlusInf = MinInf 
-        negate (B c) = B (-c)
-
-
+    (*) :: Bound -> Bound -> Bound
+    (B x) * (B y) = B (x P.* y)   
+    (MinInf) * (B c) = 
+        if c == 0 then B 0 
+        else if c<0 then PlusInf
+        else MinInf
+    (B c ) * (MinInf) = 
+        if c == 0 then B 0 
+        else if c<0 then PlusInf
+        else MinInf
+    (PlusInf) * (B c) = 
+        if c == 0 then B 0 
+        else if c<0 then MinInf
+        else PlusInf
+    (B c) * (PlusInf) = 
+        if c == 0 then B 0 
+        else if c<0 then MinInf
+        else PlusInf
+    (MinInf) * (MinInf) = PlusInf
+    (PlusInf) * (PlusInf) = PlusInf
+    (PlusInf) * (MinInf) = MinInf 
+    (MinInf) * (PlusInf) = MinInf
     
-    instance Fractional Bound where 
-        -- divisione esatta
-        (B x) / (B y) = B (x `div` y)
-        (MinInf) / (B c) = 
-            if c>0 then MinInf 
-            else 
-                if c<0 then PlusInf
-                else error "Division by zero"
-        
-        (B _ ) / (MinInf) = B 0
+    negate :: Bound -> Bound
+    negate MinInf = PlusInf
+    negate PlusInf = MinInf 
+    negate (B c) = B (P.negate c)
+ 
+    (/) :: Bound -> Bound -> Bound
+    -- divisione esatta
+    (B x) / (B y) = B (x `div` y)
+    (MinInf) / (B c) = 
+        if c>0 then MinInf 
+        else 
+            if c<0 then PlusInf
+            else error "Division by zero"
+    
+    (B _ ) / (MinInf) = B 0
 
-        (PlusInf) / (B c) = 
-            if c>0 then PlusInf 
-            else 
-                if c<0 then MinInf
-                else error "Division by zero"
-            
-        (B _ ) / (PlusInf) = B 0
-        (MinInf) / (MinInf) = B 0
-        (PlusInf) / (PlusInf) = B 0
-        (PlusInf) / (MinInf) = B 0 
-        (MinInf) / (PlusInf) = B 0 
+    (PlusInf) / (B c) = 
+        if c>0 then PlusInf 
+        else 
+            if c<0 then MinInf
+            else error "Division by zero"
+        
+    (B _ ) / (PlusInf) = B 0
+    (MinInf) / (MinInf) = B 0
+    (PlusInf) / (PlusInf) = B 0
+    (PlusInf) / (MinInf) = B 0 
+    (MinInf) / (PlusInf) = B 0 
      
  
     instance AbsDomain Interval where
@@ -132,7 +123,7 @@ module IntervalDomain where
 
         --absSum :: Interval -> Interval -> Interval
         absSum (Interval a b) (Interval c d) =
-            Interval (a Prelude.+c ) (b Prelude.+ d)       
+            Interval (a + c ) (b + d)       
         absSum IntervalBottom _ = IntervalBottom
         absSum _ IntervalBottom = IntervalBottom
         
@@ -146,10 +137,11 @@ module IntervalDomain where
         --absDiv :: Interval -> Interval -> Interval
         absDiv _ IntervalBottom = IntervalBottom
         absDiv (Interval a b) (Interval c d) 
-        -- nel caso di divisione con 0: x y sono intersezioni vuote
+        -- nel caso di divisione per 0: x y sono intersezioni vuote
             | (B 1) Prelude.<= c = Interval (Prelude.minimum [a/c,a/d]) (Prelude.maximum [b/c,b/d])
             | d Prelude.<= (B (-1)) = Interval (Prelude.minimum [b / c, b / d] ) (Prelude.maximum [a/c,a/d])
             | otherwise =   let 
+                                -- nel caso di divisione per 0: x y sono intersezioni vuote
                                 x = meet (Interval c d) (Interval (B 1) PlusInf) 
                                 y = meet (Interval c d) (Interval MinInf (B (-1)))
                                 p1 = (Interval a b) `absDiv` x
@@ -157,7 +149,7 @@ module IntervalDomain where
                             in join p1 p2
 
         --absMin::Interval -> Interval
-        absMinus (Interval a b) = Interval (-b) (-a)
+        absMinus (Interval a b) = Interval (negate b) (negate a)
         absMinus (IntervalBottom) = IntervalBottom
 
         --widening :: a -> a -> a

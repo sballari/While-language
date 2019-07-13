@@ -37,15 +37,15 @@ module CondCFunInt where
         where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
-            rigth = if b Prelude.< d then b else d IntervalDomain.- 1
-            left = if a >= c then a IntervalDomain.+1 else  c
+            rigth = if b Prelude.< d then b else d IntervalDomain.- (B 1)
+            left = if a >= c then a IntervalDomain.+ (B 1) else  c
 
     intCondC (Less (Var v) (Num y)) s
             | a Prelude.< (B y) = alter s v (Interval a rigth)
             | otherwise = Bottom
             where 
                 Interval a b = lookUp s v
-                rigth = if b Prelude.< (B y) then b else (B y) IntervalDomain.- 1
+                rigth = if b Prelude.< (B y) then b else (B y) IntervalDomain.- (B 1)
     -----------------------------------------------------------
     intCondC (MoreEq (Var v) (Var w)) s 
         | b >= c = alter (alter s v (Interval (max c a) b)) w (Interval c (min d b))
@@ -67,15 +67,15 @@ module CondCFunInt where
         where
             Interval a b = lookUp s v
             Interval c d = lookUp s w
-            rigth = if a Prelude.> c then a else c IntervalDomain.+1
-            left = if b Prelude.<= d then b IntervalDomain.-1 else d
+            rigth = if a Prelude.> c then a else c IntervalDomain.+ (B 1)
+            left = if b Prelude.<= d then b IntervalDomain.- (B 1) else d
 
     intCondC(More (Var v) (Num y)) s
         | b > (B y) = alter s v (Interval left b)
         | otherwise = Bottom
         where 
             Interval a b = lookUp s v
-            left = if a Prelude.<= (B y) then (B y Prelude.+1) else a
+            left = if a Prelude.<= (B y) then B(y Prelude.+ 1) else a
     ------------------------------
     intCondC (LessEq x y) s = s --dubbio serve???
     
@@ -111,16 +111,16 @@ module CondCFunInt where
 
     intCondC (NotEq (Var x) (Num n)) s 
         | (B n) ==a && (B n)==b  = Bottom 
-        | a == (B n)    = alter s x (Interval (B n Prelude.+1) b)
-        | b == (B n)    = alter s x (Interval a (B n Prelude.-1)) 
+        | a == (B n)    = alter s x (Interval (B(n Prelude.+1)) b)
+        | b == (B n)    = alter s x (Interval a (B(n Prelude.-1))) 
         | otherwise     = s
         where 
             Interval a b = exprE (Var x) s
     
     intCondC (NotEq (Num n) (Var x)) s 
         | (B n)==a && (B n)==b  = Bottom 
-        | a == (B n)    = alter s x (Interval (B n Prelude.+1) b)
-        | b == (B n)    = alter s x (Interval a (B n Prelude.-1)) 
+        | a == (B n)    = alter s x (Interval (B (n Prelude.+1)) b)
+        | b == (B n)    = alter s x (Interval a (B (n Prelude.-1))) 
         | otherwise     = s
         where 
             Interval a b = exprE (Var x) s
