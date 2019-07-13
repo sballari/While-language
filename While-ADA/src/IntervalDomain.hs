@@ -15,7 +15,8 @@ module IntervalDomain where
         show (B n) = show n
 
     instance Show Interval where 
-        show IntervalBottom = "[]"
+        show IntervalBottom = "\8869"++"int"
+        show (Interval MinInf PlusInf) = "\8868"++"int"
         show (Interval b1 b2) = "["++ (show b1) ++","++ (show b2) ++"]"
 
     (+) :: Bound -> Int -> Bound

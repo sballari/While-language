@@ -9,7 +9,7 @@ module AbsCfgSem where
     type Clm a = [(Label, a)]
     
     analyze :: AbsDomain a =>
-        CGraph a ->
+        CGraph a -> -- grafo di computazione
         W -> -- punti di widening
         AbsState a -> -- initial state of the program
         [Clm (AbsState a)] -- invarianti per ogni program point

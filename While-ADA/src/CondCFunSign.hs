@@ -106,7 +106,7 @@ module CondCFunSign where
     signCondC (Less v w) s
         | av == Zero && aw == Zero = Bottom
         | av == MoreEqZero && aw == Zero = Bottom
-        | av == Zero && aw == MoreEqZero = Bottom
+        -- | av == Zero && aw == MoreEqZero = Bottom NOT SOUND
         | av == Zero && aw == LessEqZero = Bottom
         | otherwise = signCondC (LessEq v w) s
         where 
