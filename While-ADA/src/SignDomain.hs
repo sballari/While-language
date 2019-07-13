@@ -22,7 +22,7 @@ module SignDomain where
         soundC n
             |n == 0 = Zero
             |n >= 0 = MoreEqZero
-            |n Prelude.<= 0 = LessEqZero
+            |otherwise = LessEqZero
         
         soundRange (n, n')
             |n == 0 = MoreEqZero
@@ -30,6 +30,7 @@ module SignDomain where
             |n Prelude.<= 0 && n' >= 0 = SignTop
             |n >= 0 && n' >= 0 = MoreEqZero
             |n >= 0 && n' Prelude.<= 0 = SignBottom
+            |otherwise = SignBottom
           
         (<=) _ SignTop = True
         (<=) SignTop _ = False
