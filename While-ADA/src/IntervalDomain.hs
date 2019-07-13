@@ -146,6 +146,7 @@ module IntervalDomain where
         --absDiv :: Interval -> Interval -> Interval
         absDiv _ IntervalBottom = IntervalBottom
         absDiv (Interval a b) (Interval c d) 
+        -- nel caso di divisione con 0: x y sono intersezioni vuote
             | (B 1) Prelude.<= c = Interval (Prelude.minimum [a/c,a/d]) (Prelude.maximum [b/c,b/d])
             | d Prelude.<= (B (-1)) = Interval (Prelude.minimum [b / c, b / d] ) (Prelude.maximum [a/c,a/d])
             | otherwise =   let 

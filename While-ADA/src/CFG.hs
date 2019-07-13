@@ -201,7 +201,8 @@ module CFG where
     labels :: Graph a -> [Label]
     labels cfg = [L i|i <- [1..m]]
         where L m = maximum (concat [[li,lj]|(li,_,lj)<-cfg])
-
+    
+    -- prende in input un cfg e ritorna il grafo visto come una lista delle adiacenze in entrata.
     in_adjs :: Graph a -> Adjs a
     in_adjs cfg = [  (lj,[(li,f)|(li,f,lk)<-cfg, lj == lk])   | lj <-(labels cfg)] -- O(m+n*m): se denso n^3
 
