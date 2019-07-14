@@ -20,6 +20,9 @@ module AbsState where
   varName = fst
   varValue = snd
 
+  topVarsInit :: AbsDomain a => [VarName] -> AbsState a
+  topVarsInit vars = foldr (\x st -> alter st x top) (S []) vars
+
   alter :: AbsDomain a => AbsState a -> String -> a -> AbsState a
   alter Bottom _ _ = Bottom
   alter (S[]) name v = S [(name, v)] -- non dovrebbe mai succedere
@@ -81,3 +84,4 @@ module AbsState where
     S xs == S ys = (foldr (\x sr -> (elem x ys) && sr ) True xs ) && (foldr (\y sr-> (elem y xs) && sr ) True ys)
     Bottom == Bottom = True
     _ == _ = False
+

@@ -93,9 +93,6 @@ module Lib where
     stringToWPoints str = foldr (\x sr -> (L x):sr ) [] arr
         where arr = (read str)::[Int]
 
-    topVarsInit :: AbsDomain a => [Name] -> AbsState a
-    topVarsInit vars = foldr (\x st -> alter st x top) (S []) vars 
-
     printClm :: Show a => Clm a -> String
     printClm = foldr (\(l,val) sr -> (show l)++": "++(show val)++"\n"++sr  ) ""
 
