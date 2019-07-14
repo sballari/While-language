@@ -36,6 +36,7 @@ module WhileStructures where
         deriving (Show, Eq)
 
     instance Show AExpr where
+        show  (Sum a1 (Minus a2)) = (show a1)++" - "++show(a2)
         show  (Sum a1 a2) = show(a1)++" + "++show(a2)
         show  (Mul a1 a2) = show(a1)++" * "++show(a2)
         show  (Div a1 a2) = show(a1)++" / "++show(a2)
@@ -53,14 +54,6 @@ module WhileStructures where
         show (NotEq a1 a2) = (show a1) ++ " != "  ++ (show a2)
         show (More a1 a2)  = (show a1) ++ " > "  ++ (show a2)
         show (MoreEq a1 a2)= (show a1) ++ " >= "  ++ (show a2)
-        {-
-        show (Neg(Eq a1 a2))= show (NotEq a1 a2)
-        show (Neg(LessEq a1 a2))= show (More a1 a2)
-        show (Neg(Less a1 a2)  )= show (MoreEq a1 a2)
-        show (Neg(NotEq a1 a2) )= show (Eq a1 a2)
-        show (Neg(More a1 a2)  )= show (LessEq a1 a2)
-        show (Neg(MoreEq a1 a2))= show (Less a1 a2)
-        -}
         show (Neg b)   = "! ("++(show b)++")"
         show (And b1 b2)   =  (show b1) ++ " AND "  ++ (show b2)
         show (Or b1 b2)= (show b1) ++ " OR "  ++ (show b2)
