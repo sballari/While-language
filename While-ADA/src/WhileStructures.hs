@@ -33,7 +33,14 @@ module WhileStructures where
         | Cond BExpr Stm Stm -- if b then S1 else S2     
         | While BExpr Stm -- while b do S
         | Assert BExpr
-        deriving (Show, Eq)
+        deriving (Eq)
+
+    instance Show Stm where
+        show (Assign var val) = var++" = "++show(val)
+        show Skip = "Skip"
+        show (Comp st1 st2) = show(st1)++";\n"++show(st2)
+        show (While b s) = "while "++show(b)++" do\n"++show(s)
+        show (Assert b) = "assert "++show(b)
 
     instance Show AExpr where
         show  (Sum a1 (Minus a2)) = (show a1)++" - "++show(a2)
