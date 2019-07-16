@@ -102,11 +102,10 @@ module WhileParser where
     space = many (sat isSpace) >>= \x->return ()
 
     token ::Parser a -> Parser a 
-    token p = space >>= \s ->
+    token p = space >> -- ignoro il risultato
             p >>= \t ->
-            space >>= \s' ->
+            space >>
             return t
-
 
     variable :: Parser String 
     variable = token var
@@ -130,7 +129,7 @@ module WhileParser where
     parseAExpr1 :: Parser (AExpr)
     parseAExpr1 = 
         do 
-            a <- parseAExpr2
+            a <- parseAExpr2 --se fosse parseAexpr1 loop
             op <- symbol "+" <|> symbol "-"
             b <- parseAExpr1
             return (if op == "+" then Sum a b else Sum a (Minus b))
@@ -146,7 +145,7 @@ module WhileParser where
         <|>
         parseAExpr3
     
-    parseAExpr3 :: Parser (AExpr)
+    parseAExpr3 :: Parser (AExpr) --espressioni aritmetiche atomiche
     parseAExpr3 = 
         fmap Num natural <|> 
         pure (\x y -> Minus y) <*> symbol "-" <*> parseAExpr <|>
@@ -156,41 +155,38 @@ module WhileParser where
 
     --------------------------------------------------------------------------
     --BExpr
-    -- TODO: probabilmente il parser dei booleani non e' il top del top, rivedere  
+    -- il parser dei booleani ora e' il top del top
     parseBExpr :: Parser (BExpr)
-    parseBExpr = 
-        parseBExpr1 <|>
-        parseBExpr2 <|>
-        parseBExpr3
+    parseBExpr = parseBExpr1
+
+    parseRelOp :: Parser (AExpr -> AExpr -> BExpr)
+    parseRelOp = 
+        fmap (\_->Eq) (symbol "=")          <|>
+        fmap (\_->NotEq) (symbol "!=")      <|>
+        fmap (\_->LessEq) (symbol "<=")     <|>
+        fmap (\_->MoreEq) (symbol ">=")     <|>
+        fmap (\_->More) (symbol ">")        <|>
+        fmap (\_->Less) (symbol "<")        
 
 
     parseBExpr1 :: Parser (BExpr)
-    parseBExpr1 = 
+    parseBExpr1 = pure(\a op c-> case op of 
+                                    "&" -> And a c
+                                    "|" -> Or a c ) 
+                                    <*> parseBExpr2
+                                    <*> (symbol "&" <|> symbol "|") 
+                                    <*> parseBExpr1
+                  <|> parseBExpr2
+
+    parseBExpr2 :: Parser (BExpr)
+    parseBExpr2 = 
         do 
             a <- parseAExpr
             op <- parseRelOp
             b <- parseAExpr
             return (op a b)
-           
-    parseRelOp :: Parser (AExpr -> AExpr -> BExpr)
-    parseRelOp = 
-        fmap (\x->Eq) (symbol "=")          <|>
-        fmap (\x->NotEq) (symbol "!=")      <|>
-        fmap (\x->LessEq) (symbol "<=")     <|>
-        fmap (\x->MoreEq) (symbol ">=")     <|>
-        fmap (\x->More) (symbol ">")        <|>
-        fmap (\x->Less) (symbol "<")        
+        <|> parseBExpr3 
 
-
-    parseBExpr2 :: Parser (BExpr)
-    parseBExpr2 = pure(\a op c-> case op of 
-                                    "&" -> And a c
-                                    "|" -> Or a c ) 
-                                    <*> parseBExpr3 
-                                    <*> (symbol "&" <|> symbol "|") 
-                                    <*> parseBExpr2
-                  <|> parseBExpr3
-    
     parseBExpr3 :: Parser (BExpr)
     parseBExpr3 = 
         fmap (\x->WTrue) (symbol "true") <|>
@@ -253,7 +249,9 @@ module WhileParser where
     #   UTILITA' STM    #
     ################## -}
 
+
     variables :: Stm -> [Name]
+    --trova tutte le variabili che compaiono in Stm; serve per inizializzarle a top.
     variables stm = Data.Set.elems set
         where 
             set = Data.Set.fromList (variablesS stm)
@@ -287,3 +285,4 @@ module WhileParser where
     variablesB (Neg b1) = variablesB b1
     variablesB (And b1 b2) = (variablesB b1) ++ (variablesB b2)
     variablesB (Or b1 b2) = (variablesB b1) ++ (variablesB b2)
+    

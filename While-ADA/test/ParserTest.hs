@@ -4,7 +4,7 @@ module ParserTest (tests) where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [variablesT, testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP]
+    tests = [variablesT, testAExp, testBExpr, testSComp, testMComp, testStm, composedIf, composedIf2, oneStm,whileP,tb1]
 
     
 
@@ -28,7 +28,16 @@ module ParserTest (tests) where
                  resultP parseAExpr "(x*2)*y",
                  resultP parseAExpr "(x/3)*2",
                  resultP parseAExpr "x/3*2"]
-    
+
+                 
+    tb1 = testCase "parse x<2 & x<6" (assertEqual "" expected result)
+                 where 
+                     expected = 
+                          And (Less (Var "x") (Num 2)) (Less (Var "x") (Num 6))
+                     result =
+                         resultP parseBExpr "x<2 & x<6"
+
+
     testBExpr = testCase "parse BExpr" (assertEqual "" expected result)
         where 
             expected = 
