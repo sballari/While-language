@@ -8,7 +8,7 @@ module IntervalDomainTest  where
     import Test.Tasty.HUnit
     import AbsEval
     import AbsDenSem
-    import CondCFunc
+    import CondCFunInt
     
 
     tests = [a1,a2,a3]
@@ -28,5 +28,5 @@ module IntervalDomainTest  where
     a3 = testCase "[Interval Domain] intcond R<=B" (assertEqual "" expected result)
         where 
             expected = S [("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 3)),("B",Interval (B 1) (B 3)),("A",Interval (B 0) (B 150))]
-            result = intCondC (Less (Var "R") (Var "B")) state
+            result = intCondC (LessEq (Var "R") (Var "B")) state
             state =  S[("Q",Interval (B 0) (B 0)),("R",Interval MinInf (B 150)),("B", Interval (B 1) (B 3)), ("A", Interval (B 0) (B 150))]

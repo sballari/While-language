@@ -8,7 +8,7 @@ module SignDomainTest  where
     import Test.Tasty.HUnit
     import AbsEval
     import AbsDenSem
-    import CondCFunc
+    import CondCFunSign
     
     
 
@@ -65,7 +65,7 @@ module SignDomainTest  where
     s1b = testCase "[state sign] signCondC X<= 3 S[]" (assertEqual "" expected result)
         where
             expected = S [("X",SignTop)]
-            result =  signCondC (LessEq (Var "X") ((Num 3) ) ) (S[])
+            result =  signCondC (LessEq (Var "X") ((Num 3) ) ) ([("X",SignTop)])
     
     s2 = testCase "[state sign] signCondC X<=0 S[]" (assertEqual "" expected result)
         where
@@ -92,37 +92,37 @@ module SignDomainTest  where
 
     a1 = testCase "[sign dom] if R>=B then R=R-B else skip" (assertEqual "" expected result)
         where 
-            expected = S[("Q",MoreEqZero),("R",MoreEqZero),("B",SignTop)]
+            expected = S[("Q",Zero),("R",SignTop),("B",MoreEqZero)]
             testprog = Cond (MoreEq (Var "R") (Var "B")) (Assign ("R") (Sum (Var "R") (Minus(Var "B")))) Skip
             initState = S[("Q",Zero),("R",MoreEqZero),("B",MoreEqZero)]
             result = semS False signCondC testprog initState
             
     a2 = testCase "[sign dom] if R<=B then K=B-R else skip" (assertEqual "" expected result)
         where 
-            expected = S[("Q",MoreEqZero),("R",LessEqZero),("B",MoreEqZero)]
-            testprog = Cond (LessEq (Var "R") (Var "B")) (Assign ("B") (Sum (Var "B") (Minus(Var "R")))) Skip
-            initState = S[]
+            expected = S[("R",SignTop),("K",SignTop),("B",SignTop)]
+            testprog = Cond (LessEq (Var "R") (Var "B")) (Assign ("K") (Sum (Var "B") (Minus(Var "R")))) Skip
+            initState = topVarsInit (variables testprog)
             result = semS False signCondC testprog initState
 
     a3 = testCase "[sign dom] z:=[0,12];x:= 3; y:= -1;" (assertEqual "" expected result)
         where 
             expected = S[("z",MoreEqZero),("x",MoreEqZero),("y",LessEqZero)]
             testprog = Comp (Assign "z" (Range 1 12)) (Comp (Assign "x" (Num 3)) (Assign "y" (Minus (Num 1))))
-            initState = S[]
+            initState = topVarsInit (variables testprog)
             result = semS False signCondC testprog initState
 
     a4 = testCase "[sign dom] calc div esatta" (assertEqual "" expected result)
             where 
                 program = Comp (Assign "A" (Range 0 150)) (Comp (Assign "B" (Range 1 3)) (Comp (Assign "Q" (Num 0)) (Comp (Assign "R" (Var "A")) (While (MoreEq (Var "R") (Var "B")) (Comp (
                     Assign "R" (Sum (Var "R") (Minus (Var "B")))) (Assign "Q" (Sum (Var "Q") (Num 1))))))))
-                expected = S[]
+                expected = S[("A",MoreEqZero),("B",MoreEqZero),("Q",MoreEqZero),("R",SignTop)]
                 initState = S[]
                 result  = semS False signCondC program initState
 
     a5 = testCase "[sign dom] while true do Q=Q+1" (assertEqual "" expected result)
         where 
             program = While (WTrue) (Assign "Q" (Sum (Var "Q") (Num 1))) 
-            expected = S[("Q", MoreEqZero)]
+            expected = Bottom -- interessante (filtraggio negato)
             initState = S[("Q", Zero)]
             result  = semS False signCondC program initState
 

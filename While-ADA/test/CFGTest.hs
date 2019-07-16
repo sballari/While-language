@@ -18,37 +18,37 @@ module CFGTest (tests) where
 
     t2  = testCase "[CFG] book ex" (assertEqual "" expected result)
         where 
-            expected =  [(L 1,"Assign \"r\" (Var \"q\")",L 2),
+            expected =  [(L 1,"r = q",L 2),
                          (L 2,"Skip",L 3),
-                         (L 3,"MoreEq (Var \"r\") (Var \"b\")",L 4),
-                         (L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))",L 7),
+                         (L 3,"r >= b",L 4),
+                         (L 3,"! (r >= b)",L 7),
                          (L 6,"Skip",L 3),
-                         (L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))",L 5),
-                         (L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))",L 6)]
+                         (L 4,"r = r - b",L 5),
+                         (L 5,"q = q + 1",L 6)]
             result = fst (app (debugCFG program1) 1)
     
     t3  = testCase "[CFG] book ex + skip finale" (assertEqual "" expected result)
         where 
-            expected =  [   (L 1,"Assign \"r\" (Var \"q\")",L 2),
-                            (L 2,"Skip",L 3),
-                            (L 3,"MoreEq (Var \"r\") (Var \"b\")",L 4),
-                            (L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))",L 7),
-                            (L 6,"Skip",L 3),
-                            (L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))",L 5),
-                            (L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))",L 6),
-                            (L 7,"Skip",L 8)]
+            expected =  [(L 1,"r = q",L 2),
+                         (L 2,"Skip",L 3),
+                         (L 3,"r >= b",L 4),
+                         (L 3,"! (r >= b)",L 7),
+                         (L 6,"Skip",L 3),
+                         (L 4,"r = r - b",L 5),
+                         (L 5,"q = q + 1",L 6),
+                         (L 7,"Skip",L 8)]
             result = fst (app (debugCFG (Comp program1 Skip)) 1)
 
     t4 = testCase "[inadj] lista adiacenze in entrata book ex + skip finale" (assertEqual "" expected result)
             where 
                 expected = [
                     (L 1, []),
-                    (L 2, [(L 1,"Assign \"r\" (Var \"q\"))")]),
+                    (L 2, [(L 1,"r = q")]),
                     (L 3, [(L 2,"Skip"),(L 6,"Skip")]),
-                    (L 4, [(L 3,"MoreEq (Var \"r\") (Var \"b\")")]),
-                    (L 5, [(L 4,"Assign \"r\" (Sum (Var \"r\") (Minus (Var \"b\")))")]),
-                    (L 6, [(L 5,"Assign \"q\" (Sum (Var \"q\") (Num 1))")]),
-                    (L 7, [(L 3,"Neg (MoreEq (Var \"r\") (Var \"b\"))")]),
+                    (L 4, [(L 3,"r >= b")]),
+                    (L 5, [(L 4,"r = r - b")]),
+                    (L 6, [(L 5,"q = q + 1")]),
+                    (L 7, [(L 3,"! (r >= b)")]),
                     (L 8, [(L 7,"Skip")])
                     ]
                 result =  in_adjs (fst (app (debugCFG (Comp program1 Skip)) 1)) 
@@ -60,7 +60,7 @@ module CFGTest (tests) where
 
     lab1 = testCase "[labOut] x = 3+3" (assertEqual "" expected result)
         where
-            expected = ["[L 1] X := 3 + 3"]
+            expected = ["["++show (L 1)++"] X:= 3 + 3"]
             result = fst (app (labelledCode (Assign "X" (Sum (Num 3) (Num 3)))) 1)
 
 
