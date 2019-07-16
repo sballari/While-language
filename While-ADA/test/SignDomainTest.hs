@@ -65,7 +65,7 @@ module SignDomainTest  where
     s1b = testCase "[state sign] signCondC X<= 3 S[]" (assertEqual "" expected result)
         where
             expected = S [("X",SignTop)]
-            result =  signCondC (LessEq (Var "X") ((Num 3) ) ) ([("X",SignTop)])
+            result =  signCondC (LessEq (Var "X") ((Num 3) ) ) (S[("X",SignTop)])
     
     s2 = testCase "[state sign] signCondC X<=0 S[]" (assertEqual "" expected result)
         where

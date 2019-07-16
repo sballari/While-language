@@ -66,6 +66,12 @@ module CFGTest (tests) where
 
     lab2 = testCase "[labOut] ciao" (assertEqual "" expected result)
             where 
-                expected = []
-                result = printLabProg (fst (app (labelled program1) 1))
-            
+                expected = 
+                    "["++show(L 1)++"] r:= q;\n"
+                    ++"["++show(L 2)++"] while "++"["++show(L 3)++"] r >= b do \n"
+                    ++"(\n"
+                    ++"\t["++show(L 4)++"] r:= r - b;\n"
+                    ++"\t["++show(L 5)++"] q:= q + 1\n"
+                    ++"["++show(L 6)++"] )\n"
+                    ++"["++show(L 7)++"]\n"
+                result = printLabProg (fst (app (labelled program1) 1))      
