@@ -54,26 +54,68 @@ module Lib where
     snToBool "s" = True
     snToBool "n" = False
 
-    printDenRes:: Stm -> [Name] -> IO()
-    printDenRes prTree vars = 
+    askIntInitialState :: [Name] -> IO(AbsState Interval)
+    askIntInitialState vars = 
+        do 
+            putStrLn "\nSTATO INIZIALE INTERVALLI:"
+            putStrLn "Usare stato iniziale tutto a IntervalTop ? [s/n]"
+            getLine >>= \ans ->
+                if (snToBool ans) then 
+                    return (topVarsInit vars)
+                else 
+                    putStrLn "Fornire lo stato iniziale:">>
+                    putStrLn "es:">>
+                    putStrLn "S [(\"X\",Interval MinInf (B 100)),...] oppure Bottom">>
+                    putStrLn "Intervalli: Interval Bound Bound">>
+                    putStrLn "Bound: (B Int), MinInf, PlusInf">>
+                    getLine >>= \s -> 
+                        let 
+                            is = read s 
+                            topState = (topVarsInit vars)
+                        in 
+                        putStrLn ("stato iniziale: "++(show is))>>
+                        return (is `AbsState.meet` topState) 
+
+
+    askSignInitialState :: [Name] -> IO(AbsState Sign)
+    askSignInitialState vars = 
+        do 
+            putStrLn "\nSTATO INIZIALE SEGNI:"
+            putStrLn "Usare stato iniziale tutto a SignTop ? [s/n]"
+            getLine >>= \ans ->
+                if (snToBool ans) then 
+                    return (topVarsInit vars)
+                else 
+                    putStrLn "Fornire lo stato iniziale:">>
+                    putStrLn "es:">>
+                    putStrLn "S[(\"X\",LessEqZero),...] oppure Bottom">>
+                    putStrLn "segni: LessEqZero, MoreEqZero, Zero, SignTop, SignBottom" >>
+                    getLine >>= \s -> 
+                        let 
+                            is = read s 
+                            topState = (topVarsInit vars)
+                        in 
+                        putStrLn ("stato iniziale: "++(show is))>>
+                        return (is `AbsState.meet` topState) 
+
+
+    printDenRes:: Stm -> AbsState Sign -> AbsState Interval  -> [Name] -> IO()
+    printDenRes prTree signIS intIS vars = 
         do
             putStrLnCBold "\n-------ANALISI DEN----------" Red
             putStrLnCBold "DOMINIO: Segni" Blue
             putStrLn "Usare widening ? [s/n]" 
             fmap (snToBool) getLine >>= \wideningS ->
-                putStrLnResult  (show (semS wideningS signCondC prTree stateSign)) >>
+                putStrLnResult  (show (semS wideningS signCondC prTree signIS)) >>
 
                 putStrLnCBold "\nDOMINIO: Intervalli" Blue>> 
                 putStrLn "Usare widening ? [s/n]" >>
                 fmap (snToBool) getLine >>= \wideningI ->
-                putStrLnResult (show (semS wideningI intCondC prTree stateInt)) >>
+                putStrLnResult (show (semS wideningI intCondC prTree intIS)) >>
                 putStrLnCBold "----------FINE ANALISI--------" Red
-        where 
-            stateSign = (topVarsInit vars) ::AbsState (Sign)
-            stateInt =  (topVarsInit vars) ::AbsState (Interval)
 
-    printCFGRes:: (AbsDomain a, Show a) => CGraph(a)  -> [Name] -> String -> IO()
-    printCFGRes graph vars domain_name= 
+    printCFGRes:: (AbsDomain a, Show a) => CGraph(a) -> AbsState a -> [Name] -> String -> IO()
+    printCFGRes graph initialState vars domain_name= 
         do
             putStrLnCBold "\n-------ANALISI CFG----------" Red
             putStrLnCBold ("DOMINIO: "++domain_name) Blue

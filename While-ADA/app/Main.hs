@@ -47,11 +47,13 @@ module Main where
                 in 
                 -- printTree ([(tree,rest)]) >>
                 printLabCode tree >>
-                let (cfg,nf) = app (debugCFG tree) 1  in printCFG cfg >>
-                --let (cfg,nf) = app (debugCFG tree) 1  in printAdjList cfg >>
-                printDenRes tree vars >>
-                printCFGRes sign_cfg vars "Segni">>
-                printCFGRes int_cfg vars "Intervalli"
+                --let (cfg,nf) = app (debugCFG tree) 1  in printCFG cfg >>
+                do 
+                    signIS <- askSignInitialState vars
+                    intIS <- askIntInitialState vars
+                    printDenRes tree signIS intIS vars 
+                    printCFGRes sign_cfg signIS vars "Segni"
+                    printCFGRes int_cfg intIS vars "Intervalli"
 
             hClose handle 
             putStrLn "Arrivederci"
