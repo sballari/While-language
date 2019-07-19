@@ -18,5 +18,5 @@ main = do
               ++ SignDomainTest.tests
               ++ IntervalDomainTest.tests
               ++ ShowTest.tests
-               {- ++ AbsStateTest.tests -}
+              ++ AbsStateTest.tests
 
