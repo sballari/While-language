@@ -5,10 +5,10 @@ module IntervalDomain where
     import Prelude hiding ((/),(*),negate,(+),(-))
     import qualified Prelude as P ((*),negate,(+),(-))
 
-    data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord)
+    data Bound = MinInf | B Int | PlusInf deriving (Eq,Ord,Read)
     data Interval = Interval Bound Bound        
                     | IntervalBottom 
-                    deriving (Eq)
+                    deriving (Eq,Read)
 
     instance Show Bound where 
         show MinInf = '-':"\8734"
