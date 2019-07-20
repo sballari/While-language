@@ -46,7 +46,7 @@ module AbsStateTest  where
 
     m2  = testCase "meet 2" (assertEqual "" expected result)
         where 
-            expected = S[("x",Zero),("y",LessEqZero),("z",Zero),("j",SignTop)]
+            expected = S[("x",Zero),("y",LessEqZero),("z",Zero),("j",Zero)]
             result = AS.meet (S[("x",Zero),("y",LessEqZero),("z",LessEqZero)]) (S[("x",MoreEqZero),("z",Zero),("j",Zero)]) 
 
     u1  = testCase "join 1" (assertEqual "" expected result)
