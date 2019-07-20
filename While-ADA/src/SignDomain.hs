@@ -5,7 +5,7 @@ module SignDomain where
     import WhileStructures
 
     data Sign = SignBottom | Zero | LessEqZero | MoreEqZero | SignTop 
-                deriving (Eq)
+                deriving (Eq,Read)
 
     instance Show Sign where
         show SignBottom  = "\8869"++"sign"
@@ -57,9 +57,9 @@ module SignDomain where
         meet x y= glb x y
             where
                 glb a b
-                    | (AD.<=) a b == True = a
-                    | (AD.<=) a b == False && (AD.<=) b a == True = b 
-                    | otherwise = SignBottom -- inconfrontabili
+                    | a AD.<= b == True = a
+                    | a AD.<= b == False &&  b AD.<= a == True = b 
+                    | otherwise = Zero
 
         --UNARY OPERATORS
         --absMinus :: a -> a
