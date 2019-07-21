@@ -57,8 +57,8 @@ module Lib where
     askIntInitialState :: [Name] -> IO(AbsState Interval)
     askIntInitialState vars = 
         do 
-            putStrLn "\nSTATO INIZIALE INTERVALLI:"
-            putStrLn "Usare stato iniziale tutto a IntervalTop ? [s/n]"
+            putStrLn "\nSTATO INIZIALE - DOMINIO DEGLI INTERVALLI:"
+            putStrLn "Inizializzare lo stato a IntervalTop ? [s/n]"
             getLine >>= \ans ->
                 if (snToBool ans) then 
                     return (topVarsInit vars)
@@ -80,8 +80,8 @@ module Lib where
     askSignInitialState :: [Name] -> IO(AbsState Sign)
     askSignInitialState vars = 
         do 
-            putStrLn "\nSTATO INIZIALE SEGNI:"
-            putStrLn "Usare stato iniziale tutto a SignTop ? [s/n]"
+            putStrLn "\nSTATO INIZIALE - DOMINIO DEI SEGNI:"
+            putStrLn "Inizializzare lo stato a SignTop ? [s/n]"
             getLine >>= \ans ->
                 if (snToBool ans) then 
                     return (topVarsInit vars)
@@ -89,7 +89,7 @@ module Lib where
                     putStrLn "Fornire lo stato iniziale:">>
                     putStrLn "es:">>
                     putStrLn "S[(\"X\",LessEqZero),...] oppure Bottom">>
-                    putStrLn "segni: LessEqZero, MoreEqZero, Zero, SignTop, SignBottom" >>
+                    putStrLn "Segni: LessEqZero, MoreEqZero, Zero, SignTop, SignBottom" >>
                     getLine >>= \s -> 
                         let 
                             is = read s 
@@ -104,12 +104,12 @@ module Lib where
         do
             putStrLnCBold "\n-------ANALISI DEN----------" Red
             putStrLnCBold "DOMINIO: Segni" Blue
-            putStrLn "Usare widening ? [s/n]" 
+            putStrLn "widening ? [s/n]" 
             fmap (snToBool) getLine >>= \wideningS ->
                 putStrLnResult  (show (semS wideningS signCondC prTree signIS)) >>
 
                 putStrLnCBold "\nDOMINIO: Intervalli" Blue>> 
-                putStrLn "Usare widening ? [s/n]" >>
+                putStrLn "widening ? [s/n]" >>
                 fmap (snToBool) getLine >>= \wideningI ->
                 putStrLnResult (show (semS wideningI intCondC prTree intIS)) >>
                 putStrLnCBold "----------FINE ANALISI--------" Red
@@ -119,9 +119,9 @@ module Lib where
         do
             putStrLnCBold "\n-------ANALISI CFG----------" Red
             putStrLnCBold ("DOMINIO: "++domain_name) Blue
-            putStrLn "mostrare iterazioni ? [s/n]" 
+            putStrLn "mostrare le iterazioni ? [s/n]" 
             fmap (snToBool) getLine >>= \verbose ->
-                putStrLn "indicare punti di widening (es: [1,2,3,...]) :" >>
+                putStrLn "indicare i punti di widening (es: [1,2,3,...]) :" >>
                 fmap stringToWPoints getLine >>= \wideningPoints ->
                 putStrLn ("WIDENING POINTS = "++ (show wideningPoints)) >>
                 let fp_clm = analyze graph wideningPoints (topVarsInit vars) in 
