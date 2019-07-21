@@ -30,7 +30,7 @@ module CondCFunInt where
             | otherwise = Bottom
             where 
                 Interval a b = lookUp s v
-    --EXPERIMENTAL : operatori stretti. Bho ...
+
     intCondC (Less (Var v) (Var w)) s 
         | a Prelude.< d = alter (alter s v (Interval a rigth)) w (Interval left d)
         | otherwise = Bottom
@@ -46,7 +46,7 @@ module CondCFunInt where
             where 
                 Interval a b = lookUp s v
                 rigth = if b Prelude.< (B y) then b else (B y) IntervalDomain.- (B 1)
-    -----------------------------------------------------------
+    
     intCondC (MoreEq (Var v) (Var w)) s 
         | b >= c = alter (alter s v (Interval (max c a) b)) w (Interval c (min d b))
         | otherwise = Bottom
@@ -60,7 +60,7 @@ module CondCFunInt where
         | otherwise = Bottom
         where 
             Interval a b = lookUp s v
-    --EXPERIMENTAL---------------------------------
+
     intCondC (More (Var v) (Var w)) s 
         | b > c = alter (alter s v (Interval left b)) w (Interval c rigth)
         | otherwise = Bottom
@@ -76,10 +76,6 @@ module CondCFunInt where
         where 
             Interval a b = lookUp s v
             left = if a Prelude.<= (B y) then B(y Prelude.+ 1) else a
-    ------------------------------
-    intCondC (LessEq x y) s = s --dubbio serve???
-    
-    intCondC (MoreEq x y) s = s
 
     intCondC (Eq (Var x) (Var y)) s = 
         if int==IntervalBottom then Bottom else alter (alter s x int) y int
