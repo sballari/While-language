@@ -1,5 +1,0 @@
-x:=0/0;
-y:= x;
-if x = y then 
-    x := 1
-else x:= -2
