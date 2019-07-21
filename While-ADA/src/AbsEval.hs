@@ -3,9 +3,8 @@ module AbsEval where
     import AbsDomain as AD
     import AbsState as AS
 
-    --abstract semantic of expressions in a non-relational domain
- 
-    --usata solo da condC
+    --abstract semantic of expressions
+
     exprE ::  (AbsDomain a) => AExpr -> AbsState a -> a
     exprE (Var x) s = lookUp s x 
     exprE (Num n) _ = soundC n
@@ -15,7 +14,7 @@ module AbsEval where
     exprE (Mul e1 e2) s = absMul (exprE e1 s) (exprE e2 s)
     exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
 
-    -- semantica assegnazione: usata da semS in den e da CFG 
+    -- semantica assegnazione: usata da semS e da AbsCfgSem
     semSG :: (AbsDomain a) => Stm -> AbsState a -> AbsState a
     semSG (Assign var e) s      
                     | s == Bottom           = Bottom
