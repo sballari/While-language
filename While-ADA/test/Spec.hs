@@ -6,6 +6,7 @@ import ParserTest
 import SignDomainTest
 import AbsStateTest
 import CFGTest
+import GJTest
 import IntervalDomainTest
 import ShowTest
 
@@ -19,4 +20,5 @@ main = do
               ++ IntervalDomainTest.tests
               ++ ShowTest.tests
               ++ AbsStateTest.tests
+              ++ GJTest.tests
 
