@@ -2,7 +2,7 @@ module KarrDomain where
     
      
     data EQs = EQs (RowForm Double,[Double]) -- <M,X> 
-                 | EQsBottom
+                 | EQsBottom deriving Show
 
     type RowForm a = [[a]]
     type ColForm a = [[a]] 
@@ -35,25 +35,26 @@ module KarrDomain where
     firstCol :: RowForm a ->[a]
     firstCol = fmap head
 
-
-    gaussJordanEl ::(Num a) => RowForm a-> RowForm a
-    gaussJordanEl (EQs ([],[])) = ([],[])
+    gaussJordanEl :: EQs -> EQs 
+    gaussJordanEl (EQs ([],[])) = EQs ([],[])
     gaussJordanEl (EQs (m:ms,c:cs)) = 
         case (firstNZCol colf_ms) of
             Just (nz_el,ns_col) -> 
                 let 
-                    m' = fmap (/nz_el)
+                    m' = fmap (/nz_el) m
                     c' = c/nz_el
                     el_coef = fmap (*(-1)) ns_col
                     ms' = zerofication ms el_coef
+                    rc = gaussJordanEl (EQs (ms',cs) ) -- rec call
+                in EQs (m':(coefs rc), (consts rc))
 
-                in m':(gaussJordanEl (EQs (ms',cs) ))
-
-            Nothing -> m:(gaussJordanEl (EQs (ms',cs) ))
+            Nothing -> 
+                let rc = gaussJordanEl (EQs (ms,cs)) in -- rec call in 
+                    EQs (m:(coefs rc), (consts rc))
         where
             colf_ms = rowM2colM ms
             
-    zerofication ::(Num a) => RowForm a -> [a]
+    zerofication ::(Num a) => RowForm a -> [a] -> RowForm a
     zerofication [] _ = []
     zerofication (m:ms) (c:cs) = (zipWith (+) (fmap (*c) m) m) : (zerofication ms cs)
 
