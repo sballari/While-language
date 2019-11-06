@@ -63,12 +63,19 @@ module KarrDomain where
                     EQs (m:(coefs rc), c:(consts rc))
 
             
-    zerofication ::(Num a,Show a) => RowForm a -> [a] -> [a] -> RowForm a
+    zerofication ::(Num a) => RowForm a -> [a] -> [a] -> RowForm a
     -- sottomatrice da zeroficare
     -- riga regina 
     -- coefficiente di eliminazione 
     zerofication [] _ _ = []
     zerofication (m:ms) qr (ec:ecs) = (zipWith (+) (fmap (*ec) qr) m) : (zerofication ms qr ecs)
+
+    rowEchelonForm :: EQs -> EQs
+    rowEchelonForm eqs = 
+        let 
+            EQs (m,c) = gaussJordanEl eqs
+            EQs (m',c') = gaussJordanEl (EQs (reverse m, reverse c))
+        in EQs (reverse m', reverse c') -- in realta' non servirebbe fare la reverse
 
     main  = 
         let

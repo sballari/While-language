@@ -3,7 +3,7 @@ module GJTest where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [a0,a01,a1,a10,a11,a12,a2,a3,a4,a5,a5bis,a5ter,a5quad,a6,a7,a8]
+    tests = [a0,a01,a1,a10,a11,a12,a2,a3,a4,a5,a5bis,a5ter,a5quad,a6,a7,a8,a9]
 
     a0 = testCase "[GJtest] Transpose" (assertEqual "" expected result) 
         where 
@@ -114,3 +114,10 @@ module GJTest where
             el_coef = fmap (*(-1)) nz_col
             Just (nz_el,nz_col) = firstNZCol (m:ms)
             (m:ms) = [[0,0,1,2],[0,1,2,1]]
+
+    a9 = testCase "[GJtest][a9] RE [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
+        where 
+            expected = EQs([[ 1,0,0,2],[0,0,1,2],[0,1,0,-3]],[-1,3,-3])
+            result = rowEchelonForm (EQs (m,c))
+            m = [[1,2,3,2],[1,2,4,4],[0,1,2,1]]
+            c = [2,5,3]
