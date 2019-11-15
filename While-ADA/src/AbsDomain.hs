@@ -2,6 +2,7 @@ module AbsDomain where
     import WhileStructures
     
     class Eq a => AbsDomain a where
+        --this is the Value abstract domain
 
         top :: a
         bottom :: a 

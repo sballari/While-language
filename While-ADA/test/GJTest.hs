@@ -1,5 +1,5 @@
 module GJTest where
-    import KarrDomain as KR 
+    import MatrixUtilities as MU
     import Test.Tasty
     import Test.Tasty.HUnit
 
@@ -17,28 +17,28 @@ module GJTest where
 
     a1 = testCase "[GJtest][a1] [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
         where 
-            expected = EQs([[ 1,2,3,2],[0,0,1,2],[0,1,0,-3]],[2,3,-3])
-            result = gaussJordanEl (EQs (m,c))
+            expected = ([[ 1,2,3,2],[0,0,1,2],[0,1,0,-3]],[2,3,-3])
+            result = gaussJordanEl  (m,c)
             m = [[1,2,3,2],[1,2,4,4],[0,1,2,1]]
             c = [2,5,3]
 
     a10 = testCase "[GJtest] [[1,2,3,2]], [2]" (assertEqual "" expected result)
             where 
-                expected = EQs (m,c)
-                result = gaussJordanEl (EQs (m,c))
+                expected = (m,c)
+                result = gaussJordanEl  (m,c)
                 m = [[1,2,3,2]]
                 c = [2]
     a11 = testCase "[GJtest] [[0,1,2,1],[0,0,1,2]], [3,3]" (assertEqual "" expected result)
         where 
-            expected = EQs([[0,1,2,1],[0,0,1,2]],[3,3])
-            result = gaussJordanEl (EQs (m,c))
+            expected = ([[0,1,2,1],[0,0,1,2]],[3,3])
+            result = gaussJordanEl (m,c)
             m = [[0,1,2,1],[0,0,1,2]]
             c = [3,3]
 
     a12 = testCase "[GJtest][a12] [[0,1,2,1]], [3]" (assertEqual "" expected result)
         where 
-            expected = EQs([[0,0,1,2]],[3])
-            result = gaussJordanEl (EQs (m,c))
+            expected = ([[0,0,1,2]],[3])
+            result = gaussJordanEl (m,c)
             m = [[0,0,1,2]]
             c = [3]
 
@@ -117,7 +117,7 @@ module GJTest where
 
     a9 = testCase "[GJtest][a9] RE [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
         where 
-            expected = EQs([[ 1,0,0,2],[0,0,1,2],[0,1,0,-3]],[-1,3,-3])
-            result = rowEchelonForm (EQs (m,c))
+            expected = ([[ 1,0,0,2],[0,0,1,2],[0,1,0,-3]],[-1,3,-3])
+            result = rowEchelonForm (m,c)
             m = [[1,2,3,2],[1,2,4,4],[0,1,2,1]]
             c = [2,5,3]
