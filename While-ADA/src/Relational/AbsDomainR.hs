@@ -13,7 +13,7 @@ module AbsDomainR where
         join :: a -> a -> a -- abs lub
         meet :: a -> a -> a -- abs glb
         
-
+        {-
         -- sound binary operators 
         absSum :: a -> a -> a
         absMul :: a -> a -> a               
@@ -23,4 +23,4 @@ module AbsDomainR where
         
         widening :: a -> a -> a
 
-        
+        -}

@@ -2,14 +2,32 @@
 module KarrDomain where
     import AbsDomainR
     import MatrixUtilities
+    import Text.Printf
     
     data EQs = EQs (RowForm Double,[Double]) -- <M,X> in a row-echelon form
-                 | EQsBottom deriving (Show, Eq)
+                 | EQsBottom deriving (Eq)
 
     applyST :: ((RowForm Double,[Double])-> (RowForm Double,[Double])) -> EQs -> EQs
     -- this function applies an algebraic system transformation
     applyST f (EQs (m,c)) = EQs (f (m,c))
-    
+    {-  ##################
+       #print stuff     #
+      ################## -} 
+    printCell :: Double -> String
+    printCell el = if el>=0 then (' ':strN) else strN
+        where strN = (printf "%.2f" el)
+
+    print_row :: [Double] -> String
+    --TODO: strange behavior 
+    print_row = foldr (\el r-> (printCell el)++"\t"++r ) "" 
+
+    instance Show EQs where
+        --show ::EQs -> String
+        show EQsBottom = "\8869"++"Karr"
+        show (EQs (m,c)) = 
+            "\n"++(foldr (\(r,ch) rest -> (print_row r)++"|"++(show ch)++"\n"++rest  ) "" z)
+            where
+                z = zip m c 
     {-  ##################
        #JOIN SUB ROUTINE#
       ################## -}    
@@ -19,7 +37,7 @@ module KarrDomain where
     -- varN is |W1|=|W2|=|V|
     -- [V   |W1   | W2    |l1|l2]
     -- [-1..|11...|11.....|0| 0]
-    linearCombinationVar4join varN = (replicate varN (-1))++ [0,0]++(ones (2*varN))
+    linearCombinationVar4join varN = (replicate varN (-1))++(ones (2*varN))++ [0,0]
 
     lambdaRule4join :: Int -> [Double]
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
@@ -27,16 +45,16 @@ module KarrDomain where
     -- varN is |W1|=|W2|=|V|
     -- [V   |W1   | W2    |l1|l2]
     -- [00..|00...|00.....|1| 1]
-    lambdaRule4join varN = (zeros (4*varN)) ++ [1,1]
+    lambdaRule4join varN = (zeros (3*varN)) ++ [1,1]
 
     sysCoef4join :: EQs -> Int -> RowForm Double
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
     --it performs JUST the coefficients matrix of the join system
     --this function is a subroutine for explicit join
-    -- position : Int variabel (in our case just 0-1) that provide the position of the poblem in
+    -- position : Int variable (in our case just 0-1) that provide the position of the problem in
     --            variable vector. 
     --            i.e. : in the system { prob1 ^ prob2 ^ ...} the two problems have different set of variables
-    --                   hence it's importa have an order in the variable vector [x_1var,x_2var], to remain 
+    --                   hence it's import have an order in the variable vector [x_1var,x_2var], to remain 
     --                   consistent to the linearization [W1,W2] (see the notes at page 109)
     -- row i = [V    |W1   | W2    |l1|l2]
     -- row i = [00..|M1i   |0...   |-ci|0 ] or [00..|00..  |M2i   |0|-ci]
@@ -83,7 +101,7 @@ module KarrDomain where
         -- (<=) :: EQs -> EQs -> Bool
         -- A C= B <-> A meet B = A p.108
         EQs (m1,c1) <= EQs (m2,c2) = (EQs (m1,c1) `meet` EQs (m2,c2)) == EQs (m1,c1) 
-        --NOTE: this comparision has sense iff both the side are in a rowEchelon form
+        --NOTE: this comparison has sense iff both the side are in a rowEchelon form
 
         -- join :: EQs -> EQs -> EQs -- abs lub
         sys1 `join` sys2 = applyST rowEchelonForm (explicit_join sys1 sys2)
