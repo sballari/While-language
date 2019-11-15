@@ -1,0 +1,97 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 30148aa537d42e71eeb780d678bdb985415f7fcf7c38f2b544984b7b42b3c7bc
+
+name:           While-ADA
+version:        0.2.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/While-ADA#readme>
+homepage:       https://github.com/githubuser/While-ADA#readme
+bug-reports:    https://github.com/githubuser/While-ADA/issues
+author:         Simone Ballarin and Alessio Gobbo
+maintainer:     ballarinsimone@gmail.com
+copyright:      2018 IPiratiAnalizzatori
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/While-ADA
+
+library
+  exposed-modules:
+      AbsCfgSem
+      AbsDenSem
+      AbsDomain
+      AbsEval
+      AbsState
+      CFG
+      Lib
+      SignDomain
+      CondCFunc
+      IntervalDomain
+      KarrDomain
+      AbsDomainR
+      WhileParser
+      WhileStructures
+      CondCFunInt
+      CondCFunSign
+      MatrixUtilities
+  other-modules:
+      Paths_While_ADA
+  hs-source-dirs:
+      src
+      src/Relational
+      src/NonRelational
+      src/Relational/KarrDomain
+      src/NonRelational/SignDomain
+      src/NonRelational/IntervalDomain
+  build-depends:
+      base >=4.7 && <5
+      , containers
+      , ansi-terminal
+      , transformers
+  default-language: Haskell2010
+
+executable While-ADA-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_While_ADA
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      While-ADA
+    , base >=4.7 && <5
+    , ansi-terminal
+  default-language: Haskell2010
+
+test-suite While-ADA-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      AbsStateTest
+      CFGTest
+      ParserTest
+      SignDomainTest
+      IntervalDomainTest
+      GJTest
+      Paths_While_ADA
+      ShowTest
+      KarrDomainTest
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fwarn-incomplete-patterns
+  build-depends:
+      While-ADA
+    , base >=4.7 && <5
+    , tasty
+    , tasty-hunit
+  default-language: Haskell2010
