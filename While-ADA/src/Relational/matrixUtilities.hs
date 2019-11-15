@@ -2,6 +2,12 @@ module MatrixUtilities where
     type RowForm a = [[a]]
     type ColForm a = [[a]] 
 
+    zeros :: (Num a) => Int -> [a]
+    zeros n = replicate n 0
+
+    ones :: (Num a) => Int -> [a]
+    ones n = replicate n 1
+
     coefs :: (RowForm Double,[Double]) -> RowForm Double
     coefs =fst 
     consts :: (RowForm Double,[Double]) -> [Double]
