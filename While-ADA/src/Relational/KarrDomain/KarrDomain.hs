@@ -38,7 +38,7 @@ module KarrDomain where
     --            i.e. : in the system { prob1 ^ prob2 ^ ...} the two problems have different set of variables
     --                   hence it's importa have an order in the variable vector [x_1var,x_2var], to remain 
     --                   consistent to the linearization [W1,W2] (see the notes at page 109)
-    -- row i = [V \   |W1   | W2    |l1|l2]
+    -- row i = [V    |W1   | W2    |l1|l2]
     -- row i = [00..|M1i   |0...   |-ci|0 ] or [00..|00..  |M2i   |0|-ci]
     sysCoef4join (EQs (m,c)) position = 
         foldr 
