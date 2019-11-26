@@ -129,7 +129,7 @@ module WhileParser where
     parseAExpr1 :: Parser (AExpr)
     parseAExpr1 = 
         do 
-            a <- parseAExpr2 --se fosse parseAexpr1 loop
+            a <- parseAExpr2 --se fosse parse Aexpr1 loop
             op <- symbol "+" <|> symbol "-"
             b <- parseAExpr1
             return (if op == "+" then Sum a b else Sum a (Minus b))
