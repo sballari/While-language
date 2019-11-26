@@ -70,7 +70,7 @@ module KarrDomain where
                     ((zeros varN)++coefficients_W1W2++coef_lambdas):sr
                  )) [] zipMC            
         where 
-            zipMC = zip m c
+            zipMC = zip m c 
             varN = length (head m) -- cardinality of V
         
     
@@ -89,9 +89,11 @@ module KarrDomain where
             lin_comb_coef = linearCombinationVar4join varN
             lambdas_coef = lambdaRule4join varN
             constants_vector = 0:1:(zeros (constraintsN1+constraintsN2))
-    {-  ######################
-       #JOIN SUB ROUTINE END#
-      ###################### -}  
+    
+
+    {-  #######################
+       #AbsDomainR instance  #
+      ####################### -}  
     
     instance AbsDomainR EQs where 
         -- top :: EQs
@@ -108,4 +110,17 @@ module KarrDomain where
         -- meet :: EQs -> EQs -> EQs 
         EQs (m1,c1) `meet` EQs (m2,c2) = EQs (rowEchelonForm (m1++m2, c1++c2))
 
-    
+        -- condC :: BExpr -> EQs  -> EQs
+        {- 
+            we handle only the affine case : (Sum{j in Vars} c*V[j] ) = b
+            BExpr := ...| Eq AExpr AExpr |...
+            TODO: we can't deal the non deterministic variable (i'm not sure about that)
+            AExpr := ...|Sum AExpr AExpr | Var Name |Mul AExpr AExpr|Num Int|...
+            TODO:here we have a Num Int because the analyzer was initially design just for Integer variable analyse
+            we should change the parser in order to consider the real variable (and maybe adjust the NR analyzer) 
+        -}
+        {-
+        condC (Eq a1 a2) sys = 
+        condC _ = id
+
+            -}

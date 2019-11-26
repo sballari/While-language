@@ -13,6 +13,7 @@ module AbsDomainR where
         join :: a -> a -> a -- abs lub
         meet :: a -> a -> a -- abs glb
         
+        condC :: BExpr -> a -> a
         {-
         -- sound binary operators 
         absSum :: a -> a -> a
