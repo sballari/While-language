@@ -8,10 +8,10 @@ module MatrixUtilities where
     ones :: (Num a) => Int -> [a]
     ones n = replicate n 1
 
-    coefs :: (RowForm Double,[Double]) -> RowForm Double
-    coefs =fst 
-    consts :: (RowForm Double,[Double]) -> [Double]
-    consts = snd 
+    coefs :: (RowForm Double,[Double],[String]) -> RowForm Double
+    coefs (a,b,c) = a  
+    consts :: (RowForm Double,[Double],[String]) -> [Double]
+    consts (a,b,c)= b 
 
     firstNZRow :: (Eq a, Num a) => RowForm a -> Maybe (a,[a])
     -- nonzero element
@@ -37,14 +37,14 @@ module MatrixUtilities where
     firstCol :: RowForm a ->[a]
     firstCol ms = fmap head ms
 
-    gaussJordanEl :: (RowForm Double,[Double]) -> (RowForm Double,[Double]) 
-    gaussJordanEl ([],[]) = ([],[]) --maybe useless
-    gaussJordanEl (m:[],[c]) = 
+    gaussJordanEl :: (RowForm Double,[Double],[String]) -> (RowForm Double,[Double],[String]) 
+    gaussJordanEl ([],[],[]) = ([],[],[]) --maybe useless
+    gaussJordanEl (m:[],[c],o) = 
         case firstNZCol ([m]) of
-            Just (nz_el,nz_col) -> ([fmap (/nz_el) m], [c/nz_el])
-            Nothing -> ([m],[c])
+            Just (nz_el,nz_col) -> ([fmap (/nz_el) m], [c/nz_el],o)
+            Nothing -> ([m],[c],o)
 
-    gaussJordanEl (m:ms,c:cs) = 
+    gaussJordanEl (m:ms,c:cs,o) = 
         case (firstNZCol (m:ms)) of 
             Just (nz_el,nz_col) -> 
                 let 
@@ -54,12 +54,12 @@ module MatrixUtilities where
                     ms' = zerofication ms m' el_coef
                     [cs'] = transpose (zerofication (transpose [cs]) [c'] el_coef ) --actung!
                     --TODO: si potrebbe scrivere una zerofication ad hoc senza dover fare la trasporta
-                    rc = gaussJordanEl (ms',cs') -- rec call
-                in (m':(coefs rc), c':(consts rc))
+                    rc = gaussJordanEl (ms',cs',o) -- rec call
+                in (m':(coefs rc), c':(consts rc),o)
 
             Nothing -> 
-                let rc = gaussJordanEl (ms,cs) in -- rec call 
-                    (m:(coefs rc), c:(consts rc))
+                let rc = gaussJordanEl (ms,cs,o) in -- rec call 
+                    (m:(coefs rc), c:(consts rc),o)
 
 
     zerofication ::(Num a) => RowForm a -> [a] -> [a] -> RowForm a
@@ -69,9 +69,9 @@ module MatrixUtilities where
     zerofication [] _ _ = []
     zerofication (m:ms) qr (ec:ecs) = (zipWith (+) (fmap (*ec) qr) m) : (zerofication ms qr ecs)
 
-    rowEchelonForm :: (RowForm Double,[Double]) -> (RowForm Double,[Double])
+    rowEchelonForm :: (RowForm Double,[Double],[String]) -> (RowForm Double,[Double],[String])
     rowEchelonForm eqs = 
         let 
-            (m,c) = gaussJordanEl eqs
-            (m',c') = gaussJordanEl (reverse m, reverse c)
-        in (reverse m', reverse c') -- in realta' non servirebbe fare la reverse
+            (m,c,o) = gaussJordanEl eqs
+            (m',c',o') = gaussJordanEl (reverse m, reverse c, reverse o)
+        in (reverse m', reverse c', reverse o') -- in realta' non servirebbe fare la reverse. Serve o non serve! Non confondermi Mona!

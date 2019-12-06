@@ -17,30 +17,34 @@ module GJTest where
 
     a1 = testCase "[GJtest][a1] [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
         where 
-            expected = ([[ 1,2,3,2],[0,0,1,2],[0,1,0,-3]],[2,3,-3])
-            result = gaussJordanEl  (m,c)
+            expected = ([[ 1,2,3,2],[0,0,1,2],[0,1,0,-3]],[2,3,-3],o)
+            result = gaussJordanEl  (m,c,o)
             m = [[1,2,3,2],[1,2,4,4],[0,1,2,1]]
             c = [2,5,3]
+            o = ["x","y","z"]
 
     a10 = testCase "[GJtest] [[1,2,3,2]], [2]" (assertEqual "" expected result)
             where 
-                expected = (m,c)
-                result = gaussJordanEl  (m,c)
+                expected = (m,c,o)
+                result = gaussJordanEl  (m,c,o)
                 m = [[1,2,3,2]]
                 c = [2]
+                o = ["x"]
     a11 = testCase "[GJtest] [[0,1,2,1],[0,0,1,2]], [3,3]" (assertEqual "" expected result)
         where 
-            expected = ([[0,1,2,1],[0,0,1,2]],[3,3])
-            result = gaussJordanEl (m,c)
+            expected = ([[0,1,2,1],[0,0,1,2]],[3,3],o)
+            result = gaussJordanEl (m,c,o)
             m = [[0,1,2,1],[0,0,1,2]]
             c = [3,3]
+            o = ["x","y"]
 
     a12 = testCase "[GJtest][a12] [[0,1,2,1]], [3]" (assertEqual "" expected result)
         where 
-            expected = ([[0,0,1,2]],[3])
-            result = gaussJordanEl (m,c)
+            expected = ([[0,0,1,2]],[3],o)
+            result = gaussJordanEl (m,c,o)
             m = [[0,0,1,2]]
             c = [3]
+            o = ["x"]
 
     a2 = testCase "[GJtest] zerofication [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
         where 
@@ -117,7 +121,8 @@ module GJTest where
 
     a9 = testCase "[GJtest][a9] RE [[1,2,3,2],[1,2,4,4],[0,1,2,1]], [2,5,3]" (assertEqual "" expected result)
         where 
-            expected = ([[ 1,0,0,2],[0,0,1,2],[0,1,0,-3]],[-1,3,-3])
-            result = rowEchelonForm (m,c)
+            expected = ([[ 1,0,0,2],[0,0,1,2],[0,1,0,-3]],[-1,3,-3],o)
+            result = rowEchelonForm (m,c,o)
             m = [[1,2,3,2],[1,2,4,4],[0,1,2,1]]
             c = [2,5,3]
+            o = ["x","y","z"]

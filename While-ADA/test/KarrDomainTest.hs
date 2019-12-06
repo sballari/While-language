@@ -15,10 +15,11 @@ module KarrDomainTest where
                             [0,0,0,1,0,0,0,10],
                             [0,0,0,0,1,0,0,-2],
                             [0,0,0,0,0,1,0,-12]]
-                            ,[11,1,1,10,0,0])
+                            ,[11,1,1,10,0,0],o)
             result = join p1 p2
-            p1 = EQs ([[1,0],[0,1]],[1,10]) -- programs s.t. x1 = 1 and x2 = 10
-            p2 = EQs ([[1,0],[0,1]],[2,12]) -- programs s.t. x1 = 2 and x2 = 12
+            p1 = EQs ([[1,0],[0,1]],[1,10],o) -- programs s.t. x1 = 1 and x2 = 10
+            p2 = EQs ([[1,0],[0,1]],[2,12],o) -- programs s.t. x1 = 2 and x2 = 12
+            o = ["x","y"]
 
     a1 = testCase "[KarrDomain Test][a1] explicit_join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -29,7 +30,8 @@ module KarrDomainTest where
                 [0,0,0,1,0,0,-10,0],
                 [0,0,0,0,1,0,0,-2],
                 [0,0,0,0,0,1,0,-12]]
-                ,[0,1,0,0,0,0])
+                ,[0,1,0,0,0,0],o)
             result = explicit_join p1 p2
-            p1 = EQs ([[1,0],[0,1]],[1,10]) -- programs s.t. x1 = 1 and x2 = 10
-            p2 = EQs ([[1,0],[0,1]],[2,12]) -- programs s.t. x1 = 2 and x2 = 12
+            p1 = EQs ([[1,0],[0,1]],[1,10],o) -- programs s.t. x1 = 1 and x2 = 10
+            p2 = EQs ([[1,0],[0,1]],[2,12],o) -- programs s.t. x1 = 2 and x2 = 12
+            o = ["x","y","z"]

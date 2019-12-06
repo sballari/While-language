@@ -2,14 +2,17 @@
 module KarrDomain where
     import AbsDomainR
     import MatrixUtilities
+    import WhileStructures
+    import PolyUtils
     import Text.Printf
     
-    data EQs = EQs (RowForm Double,[Double]) -- <M,X> in a row-echelon form
+    data EQs = EQs (RowForm Double,[Double],[String]) -- <M,X> in a row-echelon form,
+    -- [String]: variables name in the same order that they appears in X
                  | EQsBottom deriving (Eq)
 
-    applyST :: ((RowForm Double,[Double])-> (RowForm Double,[Double])) -> EQs -> EQs
+    applyST :: ((RowForm Double,[Double],[String])-> (RowForm Double,[Double],[String])) -> EQs -> EQs
     -- this function applies an algebraic system transformation
-    applyST f (EQs (m,c)) = EQs (f (m,c))
+    applyST f (EQs (m,c,o)) = EQs (f (m,c,o))
     {-  ##################
        #print stuff     #
       ################## -} 
@@ -24,7 +27,8 @@ module KarrDomain where
     instance Show EQs where
         --show ::EQs -> String
         show EQsBottom = "\8869"++"Karr"
-        show (EQs (m,c)) = 
+        show (EQs (m,c,o)) = 
+            "\n"++(show o)++ 
             "\n"++(foldr (\(r,ch) rest -> (print_row r)++"|"++(show ch)++"\n"++rest  ) "" z)
             where
                 z = zip m c 
@@ -58,7 +62,7 @@ module KarrDomain where
     --                   consistent to the linearization [W1,W2] (see the notes at page 109)
     -- row i = [V    |W1   | W2    |l1|l2]
     -- row i = [00..|M1i   |0...   |-ci|0 ] or [00..|00..  |M2i   |0|-ci]
-    sysCoef4join (EQs (m,c)) position = 
+    sysCoef4join (EQs (m,c,_)) position = 
         foldr 
             (\(mh,ch) sr -> (
                 let 
@@ -77,12 +81,16 @@ module KarrDomain where
     explicit_join :: EQs -> EQs -> EQs -- lub
     --computes the joining system without performing any elimination (page 109)
     -- CONSTRAINt ORDER { V=W1+W2 ^ l1+l2=1 ^ sys1 ^ sys2} (for complexity reasons)
+    --the vars list refers only to V (the first n vars in x) and NOT to the others aux vars like l1,l2,w1,w2
+    -- TODO : is it correct that
     
-    EQs (m1,c1) `explicit_join` EQs (m2,c2) = 
-        EQs (lin_comb_coef:lambdas_coef:sys1_coef++sys2_coef, constants_vector)
+    EQs (m1,c1,o) `explicit_join` EQs (m2,c2,o')  
+        -- the two system must have the same variables ordering 
+        | o /= o' = error "not compatible systems"
+        | otherwise = EQs (lin_comb_coef:lambdas_coef:sys1_coef++sys2_coef, constants_vector,o)
         where 
-            sys1_coef = sysCoef4join (EQs (m1,c1)) 0
-            sys2_coef = sysCoef4join (EQs (m2,c2)) 1
+            sys1_coef = sysCoef4join (EQs (m1,c1,o)) 0
+            sys2_coef = sysCoef4join (EQs (m2,c2,o)) 1
             varN = length (head m1)
             constraintsN1 = length m1
             constraintsN2 = length m2
@@ -97,30 +105,39 @@ module KarrDomain where
     
     instance AbsDomainR EQs where 
         -- top :: EQs
-        top = EQs ([],[])
+        top = EQs ([],[],[])
         -- bottom :: EQs
         bottom = EQsBottom
         -- (<=) :: EQs -> EQs -> Bool
         -- A C= B <-> A meet B = A p.108
-        EQs (m1,c1) <= EQs (m2,c2) = (EQs (m1,c1) `meet` EQs (m2,c2)) == EQs (m1,c1) 
+        EQs (m1,c1,o) <= EQs (m2,c2,o') 
+            | o /=o' = error "not compatible systems"
+            | otherwise = (EQs (m1,c1,o) `meet` EQs (m2,c2,o)) == EQs (m1,c1,o) 
         --NOTE: this comparison has sense iff both the side are in a rowEchelon form
 
         -- join :: EQs -> EQs -> EQs -- abs lub
         sys1 `join` sys2 = applyST rowEchelonForm (explicit_join sys1 sys2)
         -- meet :: EQs -> EQs -> EQs 
-        EQs (m1,c1) `meet` EQs (m2,c2) = EQs (rowEchelonForm (m1++m2, c1++c2))
+        EQs (m1,c1,o) `meet` EQs (m2,c2,o') 
+            | o /=o' = error "not compatible systems"
+            | otherwise =EQs (rowEchelonForm (m1++m2, c1++c2,o))
 
         -- condC :: BExpr -> EQs  -> EQs
         {- 
             we handle only the affine case : (Sum{j in Vars} c*V[j] ) = b
+            IMPORTANT : the condC wrongs when there are vars in the new constrain that doesn't appear in the starting system
             BExpr := ...| Eq AExpr AExpr |...
             TODO: we can't deal the non deterministic variable (i'm not sure about that)
             AExpr := ...|Sum AExpr AExpr | Var Name |Mul AExpr AExpr|Num Int|...
-            TODO:here we have a Num Int because the analyzer was initially design just for Integer variable analyse
+            TODO:here we have a Num Int because the analyzer was initially design just for Integer variable analyses
             we should change the parser in order to consider the real variable (and maybe adjust the NR analyzer) 
         -}
-        {-
-        condC (Eq a1 a2) sys = 
-        condC _ = id
-
-            -}
+        condC (Eq a1 a2) (EQs (m,x,o)) = 
+            case mc of 
+                Nothing -> EQs (m,x,o) --the constraint is non-linear
+                Just lp -> 
+                    let (cl,const) = order o lp in 
+                    EQs (m++[cl],x++[const],o)
+            where 
+                mc = minimize (Sum a1 (Minus a2))        
+        condC _ sys = sys
