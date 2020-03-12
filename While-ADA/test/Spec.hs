@@ -24,7 +24,7 @@ main = do
               -- ShowTest.tests ++
               -- AbsStateTest.tests ++ 
               -- GJTest.tests ++
-              -- KarrDomainTest.tests ++
+              KarrDomainTest.tests ++
               MinimizePTest.tests
                  
 

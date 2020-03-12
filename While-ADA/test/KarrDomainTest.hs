@@ -5,7 +5,7 @@ module KarrDomainTest where
     import Test.Tasty
     import Test.Tasty.HUnit
 
-    tests = [a0,a1,c1,c2,c3]
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -58,3 +58,31 @@ module KarrDomainTest where
             sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
             o = ["x","y","z"]
             bExpr =  Eq (Mul (Var "z")(  (Sum (Var "x") (Var "y")))) (Sum (Mul (Num 3) (Var "x")) (Minus (Num 2)) )
+
+    d1 = testCase "[KarrDomain Test][d1] varPos [x,y,z] x" (assertEqual "" expected result) 
+        where
+            expected = Just  0
+            result = varPos sys "x"  
+            sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
+            o = ["x","y","z"]
+
+
+    d2 = testCase "[KarrDomain Test][d2] varPos [x,y,z] y" (assertEqual "" expected result) 
+        where
+            expected = Just 1
+            result = varPos sys "y"  
+            sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
+            o = ["x","y","z"]
+    d3 = testCase "[KarrDomain Test][d3] varPos [x,y,z] z" (assertEqual "" expected result) 
+        where
+            expected = Just 2
+            result = varPos sys "z"  
+            sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
+            o = ["x","y","z"]
+    
+    d4 = testCase "[KarrDomain Test][d4] varPos [x,y,z] pippo" (assertEqual "" expected result) 
+        where
+            expected = Nothing
+            result = varPos sys "pippo"  
+            sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
+            o = ["x","y","z"]
