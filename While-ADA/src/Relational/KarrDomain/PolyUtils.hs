@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 {-  ######################
        #condC SUB ROUTINE   #
       ###################### -}  
@@ -131,6 +132,11 @@ module PolyUtils where
     minimize :: AExpr -> Maybe LPolynomial
     minimize (Num x) = Just [MC (fromIntegral x)] --TODO: just to run the code
     minimize (Var name) = Just [M 1 name]
+    minimize (Sum a1 a2) = 
+        do 
+            mp1 <- (minimize a1) 
+            mp2 <- (minimize a2)
+            return (compact (mp1++mp2))
     minimize (Mul a1 a2) = 
         do 
             mp1 <- (minimize a1) 
