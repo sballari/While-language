@@ -14,6 +14,9 @@ module AbsDomainR where
         meet :: a -> a -> a -- abs glb
         
         condC :: BExpr -> a -> a
+
+        assignS :: Stm -> a -> a --TODO dove metterlo ??????
+        
         {-
         -- sound binary operators 
         absSum :: a -> a -> a
