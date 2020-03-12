@@ -7,8 +7,20 @@ module KarrDomain where
     import Text.Printf
     
     data EQs = EQs (RowForm Double,[Double],[String]) -- <M,X> in a row-echelon form,
-    -- [String]: variables name in the same order that they appears in X
+    -- [String]: variables name in the same order they appears in X
                  | EQsBottom deriving (Eq)
+
+    varPos :: EQs -> String -> Maybe Int
+    -- returns the position (from zero) of the var given as second arg in the system provide in first arg
+    varPos eqs v = varPos' eqs v 0 
+    varPos' :: EQs -> String -> Int -> Maybe Int
+    -- returns the position of the var given as second arg in the system provide in first arg
+    --third arg is a counter, initialize with 0
+    varPos' EQsBottom _ _ = Nothing
+    varPos' (EQs (_,_,[])) var _ = Nothing
+    varPos' (EQs (s,c,(v:vs))) var cnt =
+        if (v==var) then (Just cnt)
+            else varPos' (EQs (s,c,(vs))) var (cnt+1)
 
     applyST :: ((RowForm Double,[Double],[String])-> (RowForm Double,[Double],[String])) -> EQs -> EQs
     -- this function applies an algebraic system transformation
@@ -98,6 +110,16 @@ module KarrDomain where
             lambdas_coef = lambdaRule4join varN
             constants_vector = 0:1:(zeros (constraintsN1+constraintsN2))
     
+    {-  #######################
+       #utilities for assign #
+      ####################### -} 
+      {- WORK IN PROGRESS
+        nonDetAssign :: 
+            String -> -- name of the non deterministic variable
+            EQs ->
+            EQs
+        nonDetAssign var s = 
+       -} 
 
     {-  #######################
        #AbsDomainR instance  #
@@ -137,7 +159,12 @@ module KarrDomain where
                 Nothing -> EQs (m,x,o) --the constraint is non-linear
                 Just lp -> 
                     let (cl,const) = order o lp in 
-                    EQs (m++[cl],x++[const],o)
+                    EQs (m++[cl],x++[-const],o)
             where 
                 mc = minimize (Sum a1 (Minus a2))        
-        condC _ sys = sys
+        condC _ sys = sys --identity
+
+        {- WORK IN PROGRESS
+        --assignS :: Assign Name AExpr -> a -> a 
+        assignS (Assign x _) a a = nonDetAssign x a  -- todo : capire come introdurre meglio il -inf,+inf (non e' nel linguaggio)
+        -}
