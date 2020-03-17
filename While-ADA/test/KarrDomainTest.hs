@@ -4,8 +4,9 @@ module KarrDomainTest where
     import WhileStructures
     import Test.Tasty
     import Test.Tasty.HUnit
+    import MatrixUtilities
 
-    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4]
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -86,3 +87,16 @@ module KarrDomainTest where
             result = varPos sys "pippo"  
             sys = EQs ([[1,0,0],[0,1,0],[0,0,1]],[1,10,2],o)
             o = ["x","y","z"]
+
+    e1 = testCase "[MatrixUtilities Test][e1] elimination vj" (assertEqual "" expected result) 
+        where
+            expected = [[1,0,0,-3/2,11/2],[0,0,1,-15,-13]]
+            result = log_elimination sys 1 
+            sys = [[0,1/3,0,1,1],[1,1/2,0,0,7],[0,5,1,0,2]]
+            
+    e2 = testCase "[MatrixUtilities Test][e2] two const elimination vj" (assertEqual "" expected result) 
+        where
+            expected = [1,0,0,-3/2,11/2]
+            result = two_row_el a c 1 
+            a = [1,1/2,0,0,7]
+            c = [0,1/3,0,1,1]

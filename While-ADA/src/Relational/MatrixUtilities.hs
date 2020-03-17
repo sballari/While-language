@@ -75,3 +75,38 @@ module MatrixUtilities where
             (m,c,o) = gaussJordanEl eqs
             (m',c',o') = gaussJordanEl (reverse m, reverse c, reverse o)
         in (reverse m', reverse c', reverse o') -- in realta' non servirebbe fare la reverse. Serve o non serve! Non confondermi Mona!
+
+    {- ##########################
+    Utilities for assignment, logical elimination, and other reduction ...
+    ########################## -}
+    two_row_el :: 
+        [Double] -> -- row a 
+        [Double] -> -- row b
+        Int -> -- index of column of the variable to elimanate 
+        [Double] -- new constrain
+    two_row_el rowa rowb i = 
+        {-  
+            descr : new constr with var i 0 , the col i will be 0col
+            a : element in position i of row a
+            b : element in position i of row b
+            return : row_a + (-b/a)*row_b 
+        -}
+        foldr (\(e1,e2) rc -> (e1+e2):rc) [] (zip rowa mult_row_b) --rowa + mult_row_b 
+        where
+            a = rowa!!i
+            b = rowb!!i
+            mult = -(a/b)
+            mult_row_b = foldr (\b rc -> (b*mult):rc ) [] rowb
+        
+    log_elimination :: 
+        RowForm Double -> -- original matrix in row-echelon form
+        Int ->  -- index of column of the variable to elimanate 
+        RowForm Double -- matrix without column i, still in row-echelon form
+    {-descr : algorithm of cap 5.2.3 p110 -}
+    
+    log_elimination (ref:rs) i = 
+        foldr (\r rc-> (two_row_el r ref i):rc ) [] rs 
+
+        
+
+
