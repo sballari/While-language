@@ -6,7 +6,7 @@ module KarrDomainTest where
     import Test.Tasty.HUnit
     import MatrixUtilities
 
-    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2]
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -100,3 +100,16 @@ module KarrDomainTest where
             result = two_row_el a c 1 
             a = [1,1/2,0,0,7]
             c = [0,1/3,0,1,1]
+
+    f1 = testCase "[KarrDomain Test][f1] y<-unbounded" (assertEqual "" expected result) 
+            where
+                expected = EQs ([[1,0,0,-3/2],[0,0,1,-15]],[11/2,-13],["x","y","z","w"])
+                result = assignUnbounded sys "y"
+                sys = EQs ([[0,1/3,0,1],[1,1/2,0,0],[0,5,1,0]],[1,7,2],["x","y","z","w"])
+                
+    f2 = testCase "[KarrDomain Test][f2] x<-unbounded" (assertEqual "" expected result) 
+            where
+                expected =EQs ([[0,1/3,0,1],[0,5,1,0]],[1,2],["x","y","z","w"])
+                result = assignUnbounded sys "x"
+                sys = EQs ([[0,1/3,0,1],[1,1/2,0,0],[0,5,1,0]],[1,7,2],["x","y","z","w"])
+                

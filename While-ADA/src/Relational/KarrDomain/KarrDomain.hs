@@ -10,17 +10,83 @@ module KarrDomain where
     -- [String]: variables name in the same order they appears in X
                  | EQsBottom deriving (Eq)
 
+    {-  ##################
+       #Assign sub routines     #
+      ################## -} 
+
     varPos :: EQs -> String -> Maybe Int
-    -- returns the position (from zero) of the var given as second arg in the system provide in first arg
+    -- returns the position (from zero) of the given var as second arg in the system provided as first arg
     varPos eqs v = varPos' eqs v 0 
     varPos' :: EQs -> String -> Int -> Maybe Int
-    -- returns the position of the var given as second arg in the system provide in first arg
+    -- returns the position of the var given as second arg in the system provide as first arg
     --third arg is a counter, initialize with 0
     varPos' EQsBottom _ _ = Nothing
     varPos' (EQs (_,_,[])) var _ = Nothing
     varPos' (EQs (s,c,(v:vs))) var cnt =
         if (v==var) then (Just cnt)
             else varPos' (EQs (s,c,(vs))) var (cnt+1)
+
+    assignUnbounded :: 
+        EQs ->
+        String -> -- var name
+        EQs
+    {-
+        PRE :  EQs is in a row-echelon form
+        descr: this function is semS[Vj <- [-inf,+inf]] 
+        two case : 1 vj in leading pos, 2 vj not in leading pos
+    -}
+    assignUnbounded EQsBottom _ = EQsBottom
+    assignUnbounded (EQs (rs,b,vars)) vj = 
+        if is_leading then
+            let (newRs,newB) = remove_Lc (rs,b) var_index in 
+                (EQs (newRs,newB,vars))
+        else {- is not in leading position -}
+            let 
+                augMatrix = transpose (b:(transpose rs)) -- aggiungo in testa per comodita'
+                newAugM = log_elimination augMatrix (var_index+1) -- +1 perche ho messo b in testa
+                -- de aumento la matrice
+                newAugMT = (transpose newAugM)
+                newRs = transpose (tail newAugMT)
+                newB = head newAugMT
+            in 
+                (EQs (newRs,newB,vars))
+
+        where 
+            Just var_index = varPos (EQs (rs,b,vars)) vj
+            vj_columnT = (transpose rs)!!var_index
+            is_leading = if lead_check == (1,True) then True else  False
+            lead_check  =  foldr (\c (sum,j01) ->
+                        if j01 then 
+                            case c of 
+                                1 -> (sum+1,True)
+                                0 -> (sum, True)
+                                _ -> (0,False)
+                        else (0,False)
+                     ) (0,True) vj_columnT
+
+    remove_Lc ([],[]) index_vj = ([],[])
+    remove_Lc ((r:rs),(b:bs)) index_vj = 
+        {-
+        PRE : vj is in leading
+        descr : remove the row i where a[i,indexVj] = 1
+        -}
+        if (r!!index_vj) == 0 then 
+            let (rs',bs') = remove_Lc (rs,bs) index_vj in
+            ((r:rs'),(b:bs'))
+        else {- ==1 -} (rs,bs)
+
+        
+        
+            
+
+
+
+
+            
+
+    {-  ##################
+       #print stuff     #
+      ################## -} 
 
     applyST :: ((RowForm Double,[Double],[String])-> (RowForm Double,[Double],[String])) -> EQs -> EQs
     -- this function applies an algebraic system transformation
@@ -164,7 +230,7 @@ module KarrDomain where
                 mc = minimize (Sum a1 (Minus a2))        
         condC _ sys = sys --identity
 
-        {- WORK IN PROGRESS
+        {- CURRENT WORK IN PROGRESS-}
         --assignS :: Assign Name AExpr -> a -> a 
-        assignS (Assign x _) a a = nonDetAssign x a  -- todo : capire come introdurre meglio il -inf,+inf (non e' nel linguaggio)
-        -}
+        --assignS (Assign Vj _) a a = nonDetAssign x a
+        
