@@ -2,11 +2,12 @@ module KarrDomainTest where
     import KarrDomain as KD
     import AbsDomainR
     import WhileStructures
+    import PolyUtils
     import Test.Tasty
     import Test.Tasty.HUnit
     import MatrixUtilities
 
-    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2]
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -112,4 +113,75 @@ module KarrDomainTest where
                 expected =EQs ([[0,1/3,0,1],[0,5,1,0]],[1,2],["x","y","z","w"])
                 result = assignUnbounded sys "x"
                 sys = EQs ([[0,1/3,0,1],[1,1/2,0,0],[0,5,1,0]],[1,7,2],["x","y","z","w"])
-                
+    
+    g1 = testCase "[KarrDomain Test][g1] x<-expr_lin (invertible)" (assertEqual "" expected result) 
+            {-
+                assignS z<-z+1 {x+z=1 ^ y+2z=0 } = {x+z=-1 ^ y+2z=2 }
+            -}
+            where
+                expected = EQs ([[1,0,1],[0,1,2]],[2,2],["x","y","z"])
+                result = assignS (Assign "z" (Sum (Var "z") (Num 1))) sys
+                sys = EQs ([[1,0,1],[0,1,2]],[1,0],["x","y","z"])
+
+    g2 = testCase "[KarrDomain Test][g2] x<-expr_lin (invertible)" (assertEqual "" expected result) 
+            {-
+                assignS z<-z+1 {x+z=1 ^ y+2z=0 } = {x+z=-1 ^ y+2z=2 }
+            -}
+            where
+                expected = EQs ([[1,0,1],[0,1,2]],[2,2],["x","y","z"])
+                result = invertible_assign 2 ([0,0,1],-1) sys
+                sys = EQs ([[1,0,1],[0,1,2]],[1,0],["x","y","z"])
+
+    g3 = testCase "[KarrDomain Test][g3] coefficienti z=z++" (assertEqual "" expected result) 
+            {-
+                assignS z<-z+1 {x+z=1 ^ y+2z=0 } = {x+z=-1 ^ y+2z=2 }
+            -}
+            where
+                expected = ([0,0,1],1)
+                result = order o l_pol
+                Just l_pol = (minimize e)
+                e = Sum (Var "z") (Num 1)
+                o = ["x","y","z"]
+    g4 = testCase "[KarrDomain Test][g4] inv_coef" (assertEqual "" expected result) 
+            {-
+                assignS z<-z+1 {x+z=1 ^ y+2z=0 } = {x+z=-1 ^ y+2z=2 }
+            -}
+            where
+                expected = ([0,0,1],-1)
+                result = inversion_coefficients cb 2 1
+                cb = ([0,0,1],1)
+
+
+    g5 = testCase "[KarrDomain Test][g5] x<-expr_lin (notn-invertible)" (assertEqual "" expected result) 
+            {-
+                assignS z<-z+1 {x+z=1 ^ y+2z=0 } = {x+z=-1 ^ y+2z=2 }
+            -}
+            where
+                expected = EQs ([[0,1,2],[1,-1,0]],[0,0],["x","y","z"])
+                result = assignS (Assign "x" (Var "y")) sys
+                sys = EQs ([[1,0,1],[0,1,2]],[1,0],["x","y","z"])
+    g6 = testCase "[KarrDomain Test][g6] x<-y (notn-invertible x<-unbAssing)" (assertEqual "" expected result) 
+            {-
+                assignS x<-y {x+z=1 ^ y+2z=0 } = 
+            -}
+            where
+                expected = EQs ([[0,1,2]],[0],["x","y","z"])
+                result = assignUnbounded sys "x"
+                sys = EQs ([[1,0,1],[0,1,2]],[1,0],["x","y","z"])
+    g7 = testCase "[KarrDomain Test][g7] x<-y (notn-invertible new constr creation)" (assertEqual "" expected result) 
+            {-
+                assignS x<-y {x+z=1 ^ y+2z=0 } = 
+            -}
+            where
+                expected = Eq (Sum (Var "x") (Minus (Var "y"))) (Num 0)
+                result = assign_to_newConstr "x" (Var "y")
+    g8 = testCase "[KarrDomain Test][g8] x<-y (notn-invertible filter)" (assertEqual "" expected result) 
+            {-
+                assignS x<-y {x+z=1 ^ y+2z=0 } = 
+            -}
+            where
+                expected = EQs ([[0,1,2],[1,-1,0]],[0,0],o)
+                result = condC new_constr sys2 
+                new_constr = Eq (Sum (Var "x") (Minus (Var "y"))) (Num 0)
+                sys2 = EQs ([[0,1,2]],[0],o)
+                o = ["x","y","z"]

@@ -48,9 +48,6 @@ module PolyUtils where
         ) (Just []) lp
     
     -----------------------------------------------------------------
-    {- 
-        TODO : Division
-    -}
     divide :: LPolynomial -> LPolynomial -> Maybe LPolynomial
     -- this code isn't understandable like my girlfriend
     divide l1 [] = Just l1
@@ -130,6 +127,14 @@ module PolyUtils where
             m -> (rSum, m:rPol)
 -----------------------------------------------------------------------------
     minimize :: AExpr -> Maybe LPolynomial
+    {-
+        descr:
+        this function tries to transform the given aexpr in a linear expression.
+        returns: 
+        If the aexpr contains a non deterministic variable the fun returs Nothing
+        If the aexpr isn't linear the fun returns Nothing
+        Otherwise the function returns a compact rappresentation of aexpr
+    -}
     minimize (Num x) = Just [MC (fromIntegral x)] --TODO: just to run the code
     minimize (Var name) = Just [M 1 name]
     minimize (Sum a1 a2) = 

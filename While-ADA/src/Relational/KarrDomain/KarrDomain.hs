@@ -19,7 +19,7 @@ module KarrDomain where
     varPos eqs v = varPos' eqs v 0 
     varPos' :: EQs -> String -> Int -> Maybe Int
     -- returns the position of the var given as second arg in the system provide as first arg
-    --third arg is a counter, initialize with 0
+    -- third arg is a counter, initialize with 0
     varPos' EQsBottom _ _ = Nothing
     varPos' (EQs (_,_,[])) var _ = Nothing
     varPos' (EQs (s,c,(v:vs))) var cnt =
@@ -74,16 +74,61 @@ module KarrDomain where
             let (rs',bs') = remove_Lc (rs,bs) index_vj in
             ((r:rs'),(b:bs'))
         else {- ==1 -} (rs,bs)
-
         
-        
-            
+    inversion_coefficients ::   -- (invertible case)
+        ([Double],Double) ->    -- assign expr e,  vj<-e
+        Int ->                  -- index of vj
+        Double ->               -- a_vj : coef of vj in e
+        ([Double],Double)       -- inversion coefficients
+    inversion_coefficients (coefficients,b) var_index a_vj = ((
+                                    foldr (
+                                        \(a,i) rc -> 
+                                            if i==var_index then (1/a_vj):rc
+                                            else (-a/a_vj):rc
+                                        ) [] (zip coefficients [0..])
+                                ), -b/a_vj)
+    invertible_assign :: 
+        Int -> -- index of the reexpressed variable
+        ([Double],Double) -> -- re expressed coeff Vj_old = f(Vj_new), coef of f
+        EQs -> --current state
+        EQs -- updated state
+    invertible_assign index re_expr (EQs (rs,bs,o)) =  
+        let (rs',bs') = invertible_assign' index re_expr (rs,bs) in 
+            EQs (rs',bs',o)
+    invertible_assign' :: 
+        Int -> ([Double],Double) -> (RowForm Double,[Double]) -> (RowForm Double,[Double])
+    invertible_assign' index re_expr ([],[]) = ([],[])
+    invertible_assign' index (inv_coef,inv_const_part)  ((r:rs),(b:bs)) = 
+        let (rs',bs') = invertible_assign' index (inv_coef,inv_const_part) (rs,bs) in
+            ((r':rs'),(b':bs'))
+        where
+            sys_vj_coef = r!!index --vj's coef in the system matrix
+            additional_qts = foldr (\c rc-> (c*sys_vj_coef):rc) [] inv_coef
+            additional_const_part = sys_vj_coef*inv_const_part
+            r' = foldr (\(x1,x2,i) rc -> 
+                                if i /= index then (x1+x2):rc 
+                                else {- i == var_index -} x2:rc
+                        ) [] (zip3 r additional_qts [0..])
+            b' = b-additional_const_part
+    non_invertible_assign :: -- vj <- e
+        String  -> -- name of the var vj
+        AExpr   -> -- aexpr e
+        EQs     -> -- state before assignment
+        EQs        -- result 
+    non_invertible_assign var_name expr sys = 
+            condC new_constr (assignUnbounded sys var_name) 
+        where 
+            new_constr = assign_to_newConstr var_name expr 
 
+    assign_to_newConstr :: -- x<-e
+        String  -> -- name of var x
+        AExpr   -> -- expression e
+        BExpr      -- x-e=0
+    {- utility function for non invertible case -}
+    assign_to_newConstr var_name expr =
+        Eq (Sum (Var var_name) (Minus expr)) (Num 0) -- vj - e = 0
 
-
-
-            
-
+     
     {-  ##################
        #print stuff     #
       ################## -} 
@@ -131,8 +176,8 @@ module KarrDomain where
 
     sysCoef4join :: EQs -> Int -> RowForm Double
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
-    --it performs JUST the coefficients matrix of the join system
-    --this function is a subroutine for explicit join
+    -- it performs JUST the coefficients matrix of the join system
+    -- this function is a subroutine for explicit join
     -- position : Int variable (in our case just 0-1) that provide the position of the problem in
     --            variable vector. 
     --            i.e. : in the system { prob1 ^ prob2 ^ ...} the two problems have different set of variables
@@ -157,9 +202,9 @@ module KarrDomain where
         
     
     explicit_join :: EQs -> EQs -> EQs -- lub
-    --computes the joining system without performing any elimination (page 109)
+    -- computes the joining system without performing any elimination (page 109)
     -- CONSTRAINt ORDER { V=W1+W2 ^ l1+l2=1 ^ sys1 ^ sys2} (for complexity reasons)
-    --the vars list refers only to V (the first n vars in x) and NOT to the others aux vars like l1,l2,w1,w2
+    -- the vars list refers only to V (the first n vars in x) and NOT to the others aux vars like l1,l2,w1,w2
     -- TODO : is it correct that
     
     EQs (m1,c1,o) `explicit_join` EQs (m2,c2,o')  
@@ -175,17 +220,6 @@ module KarrDomain where
             lin_comb_coef = linearCombinationVar4join varN
             lambdas_coef = lambdaRule4join varN
             constants_vector = 0:1:(zeros (constraintsN1+constraintsN2))
-    
-    {-  #######################
-       #utilities for assign #
-      ####################### -} 
-      {- WORK IN PROGRESS
-        nonDetAssign :: 
-            String -> -- name of the non deterministic variable
-            EQs ->
-            EQs
-        nonDetAssign var s = 
-       -} 
 
     {-  #######################
        #AbsDomainR instance  #
@@ -230,7 +264,41 @@ module KarrDomain where
                 mc = minimize (Sum a1 (Minus a2))        
         condC _ sys = sys --identity
 
-        {- CURRENT WORK IN PROGRESS-}
-        --assignS :: Assign Name AExpr -> a -> a 
-        --assignS (Assign Vj _) a a = nonDetAssign x a
+        --assignS :: Stm -> a -> a 
+        {-
+            descr: Vj <- e
+            we have different possibilities:
+            1) e isn't a lin exrp -> identity function
+            2) e is a linear expr ->
+                a) invertible , z'=z+1 -> z=z'-1 -> substitution in EQs 
+                b) not invertible, condC(Vj-e=0).assignUnb 
+        -}
+        assignS _ EQsBottom = EQsBottom
+        assignS (Assign var_name e) (EQs (rs,bs,o)) = 
+            case conversion of 
+                Nothing -> (EQs (rs,bs,o))    -- case 1 
+                Just l_pol ->   -- case 2
+                    let
+                        (coefficients,b) = order o l_pol
+                        Just var_index = varPos (EQs (rs,bs,o)) var_name
+                        a_vj = coefficients!!var_index
+                    in 
+                        if a_vj == 0 then 
+                            -- case 2b
+                            non_invertible_assign var_name e (EQs (rs,bs,o)) 
+                        else 
+                            -- case 2a
+                            let 
+                                --p111 
+                                inv_c = inversion_coefficients (coefficients,b) var_index a_vj
+                            in 
+                                invertible_assign var_index inv_c (EQs (rs,bs,o))
+                                
+
+
+            where
+                conversion = minimize e
+                
+
+        
         
