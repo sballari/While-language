@@ -1,7 +1,8 @@
 module AbsState where  
-  import AbsValueDomain as AD
+  import AbsValueDomain as AVD
   import qualified  WhileStructures as WS
   import Data.List
+  import AbsDomain
 
   
   type VarName = String
@@ -33,7 +34,7 @@ module AbsState where
                                 S xs -> S(x:xs)                  
                           
   lookUp :: AbsValueDomain a => AbsState a -> String -> a
-  lookUp AbsState.Bottom name = AD.bottom 
+  lookUp AbsState.Bottom name = AVD.bottom 
   -- x:=0/0;
   -- y:= x;
   -- if x = y then 
@@ -41,7 +42,7 @@ module AbsState where
   --      //altrmenti bisognerebbe aggiungere questa clausola ad ogni occorrenza di CondC 
   --     x := 1
   -- else x:= -2 
-  lookUp (S []) name = AD.top
+  lookUp (S []) name = AVD.top
   lookUp (S (x:xs)) name = if (varName x) == name then (varValue x) else lookUp (S xs) name
 
    
@@ -50,7 +51,7 @@ module AbsState where
   (<=) :: (AbsValueDomain a) => AbsState a -> AbsState a -> Bool  
   (<=) AbsState.Bottom _  = True
   (<=) (S xs) (S ys) = 
-    foldr (\var sr-> ((lookUp (S xs) var)  AD.<= (lookUp (S ys) var) ) && sr ) True vars
+    foldr (\var sr-> ((lookUp (S xs) var)  AVD.<= (lookUp (S ys) var) ) && sr ) True vars
     where 
       vars = (explicitVars (S xs)) `Data.List.union` (explicitVars (S ys))
   (<=) _ _ = False
@@ -64,23 +65,13 @@ module AbsState where
           b = lookUp (S ys) var in
           return (var, op a b))
 
-  join :: (AbsValueDomain a) => AbsState a -> AbsState a -> AbsState a
-  join x Bottom = x
-  join Bottom y = y  
-  join (S xs) (S ys) = componentwise2StateOp AD.join (S xs) (S ys)
 
-  meet :: (AbsValueDomain a) => AbsState a -> AbsState a -> AbsState a
-  meet _ AbsState.Bottom = AbsState.Bottom
-  meet AbsState.Bottom _ = AbsState.Bottom
-  meet (S xs) (S ys) = 
-    let (S i) = componentwise2StateOp AD.meet (S xs) (S ys) in 
-    if (findEl bottom i) then AbsState.Bottom --controllo smashedBottom
-                                else (S i)  
+  
                                   
   widening :: (AbsValueDomain a) => AbsState a -> AbsState a -> AbsState a
   widening Bottom y = y
   widening x Bottom = x
-  widening (S xs) (S ys) = componentwise2StateOp AD.widening (S xs) (S ys)
+  widening (S xs) (S ys) = componentwise2StateOp AVD.widening (S xs) (S ys)
                           
   --utility function
   findEl :: (Eq a) => a -> [(b,a)] -> Bool 
@@ -97,3 +88,23 @@ module AbsState where
     S xs == S ys = (foldr (\x sr -> (elem x ys) && sr ) True xs ) && (foldr (\y sr-> (elem y xs) && sr ) True ys)
     Bottom == Bottom = True
     _ == _ = False
+
+
+  instance AbsValueDomain a => AbsDomain (AbsState a) where
+    bottom = AbsState.Bottom
+
+    --join :: (AbsValueDomain a) => AbsState a -> AbsState a -> AbsState a
+    join x Bottom = x
+    join Bottom y = y  
+    join (S xs) (S ys) = componentwise2StateOp AVD.join (S xs) (S ys)
+
+    --meet :: (AbsValueDomain a) => AbsState a -> AbsState a -> AbsState a
+    meet _ AbsState.Bottom = AbsState.Bottom
+    meet AbsState.Bottom _ = AbsState.Bottom
+    meet (S xs) (S ys) = 
+      let 
+        (S i) = componentwise2StateOp AVD.meet (S xs) (S ys) 
+      in 
+        if (findEl AVD.bottom i) 
+          then AbsState.Bottom --controllo smashedBottom
+          else (S i)  

@@ -1,7 +1,7 @@
 module AbsDenSem where
     import AbsEval
     import AbsValueDomain
-    import AbsState as AS
+    import AbsDomain as AS
     import WhileStructures
     import CondCFunc
 

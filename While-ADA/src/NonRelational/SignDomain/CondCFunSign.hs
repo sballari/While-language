@@ -1,5 +1,6 @@
 module CondCFunSign where
-    import AbsValueDomain as AD
+    import AbsValueDomain as AVD
+    import AbsDomain as AD
     import AbsState as AS
     import SignDomain
     import WhileStructures
@@ -10,17 +11,17 @@ module CondCFunSign where
     ##### COND PER DOMINIO SEGNI #####
     ################################## -} 
 
-    signCondC :: CondFun Sign -- BExpr -> AbsState Sign -> AbsState Sign --
+    signCondC :: CondFun (AbsState Sign) -- BExpr -> AbsState Sign -> AbsState Sign --
     signCondC (WTrue) s = s
-    signCondC (WFalse) s = Bottom
-    signCondC (And c1 c2) s = AS.meet (signCondC c1 s) (signCondC c2 s)
-    signCondC (Or c1 c2) s =  AS.join (signCondC c1 s) (signCondC c2 s)
+    signCondC (WFalse) s = AD.bottom
+    signCondC (And c1 c2) s = AD.meet (signCondC c1 s) (signCondC c2 s)
+    signCondC (Or c1 c2) s =  AD.join (signCondC c1 s) (signCondC c2 s)
 
 
     signCondC (LessEq (Var v) (Var w)) s
         | av == SignBottom || aw == SignBottom = Bottom
         | otherwise = (if elem aw [Zero, LessEqZero] then (alter s v LessEqZero) else s)
-                        `AS.meet`
+                        `AD.meet`
                       (if elem av [Zero, MoreEqZero] then (alter s w MoreEqZero) else s)
         where 
             av = exprE (Var v) s
@@ -42,7 +43,7 @@ module CondCFunSign where
     signCondC (MoreEq (Var v) (Var w)) s
         | av == SignBottom || aw == SignBottom = Bottom
         | otherwise = (if elem aw [Zero, MoreEqZero] then alter s v MoreEqZero else s)
-                        `AS.meet`
+                        `AD.meet`
                       (if elem av [Zero, LessEqZero] then alter s w LessEqZero else s)
         where 
             av = exprE (Var v) s

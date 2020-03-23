@@ -1,11 +1,11 @@
 module AbsEval where
     import WhileStructures
-    import AbsValueDomain as AD
+    import AbsDomain as AD
     import AbsState as AS
 
     --abstract semantic of expressions
 
-    exprE ::  (AbsValueDomain a) => AExpr -> AbsState a -> a
+    exprE ::  (AbsDomain a) => AExpr -> AbsState a -> a
     exprE (Var x) s = lookUp s x 
     exprE (Num n) _ = soundC n
     exprE (Range x y) _ = soundRange (x, y)
@@ -15,8 +15,8 @@ module AbsEval where
     exprE (Div e1 e2) s = absDiv (exprE e1 s) (exprE e2 s)
 
     -- semantica assegnazione: usata da semS e da AbsCfgSem
-    semSG :: (AbsValueDomain a) => Stm -> AbsState a -> AbsState a
+    semSG :: (AbsDomain a) => Stm -> a -> a
     semSG (Assign var e) s      
-                    | s == Bottom           = Bottom
-                    | (exprE e s) == bottom = Bottom
+                    | s == bottom           = bottom
+                    | (exprE e s) == bottom = bottom
                     | otherwise             = alter s var (exprE e s)

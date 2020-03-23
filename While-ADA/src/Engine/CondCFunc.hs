@@ -1,20 +1,20 @@
 module CondCFunc where
-    import AbsValueDomain as AD
-    import AbsState as AS
+    --import AbsValueDomain as AVD
+    import AbsDomain as AD
     import WhileStructures
     import AbsEval
 
-    type CondFun a = BExpr -> AbsState a -> AbsState a
+    type CondFun a = BExpr -> a -> a
 
 {-  ##################################
     ##### COND GENERICA          #####
     ################################## -}
 
-    condC :: (AbsValueDomain a) => CondFun a 
+    condC :: (AbsDomain a) => CondFun a
     --fina ultra grossa p. 54
-    condC _ Bottom = Bottom
+    condC _ bottom = AD.bottom
     condC (WTrue) s = s
-    condC (WFalse) s = Bottom
-    condC (And c1 c2) s = AS.meet (condC c1 s) (condC c2 s)
-    condC (Or c1 c2) s =  AS.join (condC c1 s) (condC c2 s)
+    condC (WFalse) s = AD.bottom
+    condC (And c1 c2) s = AD.meet (condC c1 s) (condC c2 s)
+    condC (Or c1 c2) s =  AD.join (condC c1 s) (condC c2 s)
     condC _ s = s 

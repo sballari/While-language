@@ -1,5 +1,6 @@
 module CondCFunInt where
-    import AbsValueDomain as AD
+    import AbsValueDomain as AVD
+    import AbsDomain as AD
     import AbsState as AS
     import IntervalDomain
     import WhileStructures
@@ -9,14 +10,14 @@ module CondCFunInt where
     #### COND PER DOMINIO INTERVALLI ####
     ################################## -} 
 
-    intCondC :: CondFun Interval 
+    intCondC :: CondFun (AbsState Interval) 
     -- intCondC :: BExpr -> AbsState IntervalDomain -> AbsState IntervalDomain 
  
-    intCondC _ Bottom = Bottom
+    intCondC _ bottom = Bottom
     intCondC (WTrue) s = s
     intCondC (WFalse) s = Bottom
-    intCondC (And c1 c2) s = AS.meet (intCondC c1 s) (intCondC c2 s)
-    intCondC (Or c1 c2) s =  AS.join (intCondC c1 s) (intCondC c2 s)
+    intCondC (And c1 c2) s = AD.meet (intCondC c1 s) (intCondC c2 s)
+    intCondC (Or c1 c2) s =  AD.join (intCondC c1 s) (intCondC c2 s)
 
     intCondC (LessEq (Var v) (Var w)) s 
         | a Prelude.<= d = alter (alter s v (Interval a (min b d))) w (Interval (max a c) d)
@@ -82,28 +83,28 @@ module CondCFunInt where
         where 
             ax = exprE (Var x) s
             ay = exprE (Var y) s
-            int = AD.meet ax ay
+            int = AVD.meet ax ay
 
     intCondC (Eq (Var x) y) s = 
         if int==IntervalBottom then Bottom else alter s x int
         where 
             ax = exprE (Var x) s
             ay = exprE y s
-            int = AD.meet ax ay
+            int = AVD.meet ax ay
 
     intCondC (Eq x (Var y)) s = 
         if int==IntervalBottom then Bottom else alter s y int
         where 
             ax = exprE x s
             ay = exprE (Var y) s
-            int = AD.meet ax ay
+            int = AVD.meet ax ay
 
     intCondC (Eq x y) s = 
-        if int==IntervalBottom then Bottom else s
+        if int==IntervalBottom then AD.bottom else s
         where 
             ax = exprE x s
             ay = exprE y s
-            int = AD.meet ax ay
+            int = AVD.meet ax ay
 
     intCondC (NotEq (Var x) (Num n)) s 
         | (B n) ==a && (B n)==b  = Bottom 
