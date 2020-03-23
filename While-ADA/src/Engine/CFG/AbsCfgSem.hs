@@ -1,6 +1,6 @@
 module AbsCfgSem where
     import AbsEval
-    import AbsDomain
+    import AbsValueDomain
     import AbsState as AS
     import WhileStructures
     import CFG
@@ -8,7 +8,7 @@ module AbsCfgSem where
     type W = [Label] --widening points 
     type Clm a = [(Label, a)]
     
-    analyze :: AbsDomain a =>
+    analyze :: AbsValueDomain a =>
         CGraph a -> -- grafo di computazione
         W -> -- punti di widening
         AbsState a -> -- initial state of the program
@@ -20,7 +20,7 @@ module AbsCfgSem where
             clm0 = [(li,Bottom)|li <- ls] 
             inGraph = in_adjs cfg
 
-    invariantCalc :: AbsDomain a =>
+    invariantCalc :: AbsValueDomain a =>
         Adjs (AbsState a -> AbsState a) -> -- lista adiacenze in entrata
         [Label] -> -- label del programma
         W -> -- punti di widening
@@ -36,7 +36,7 @@ module AbsCfgSem where
    
     -- singola iterazione clm e' il risultato precedente
     -- applico la funzione nell'arco allo stato del nodo di partenza nell'iterazione precedente
-    updataClm :: (AbsDomain a) => -- Mine' pag. 61 eq 3.3
+    updataClm :: (AbsValueDomain a) => -- Mine' pag. 61 eq 3.3
         Adjs (AbsState a -> AbsState a) -- grafo visto con lista adiacenze in entrata
         -> [Label] -- insieme delle label nel cfg (per semplicita')
         -> W -- punti di widening
@@ -60,7 +60,7 @@ module AbsCfgSem where
             
 
                 
-    inUnion :: AbsDomain a => 
+    inUnion :: AbsValueDomain a => 
         Clm (AbsState a)  -- risultati iterazione k per ogni program point
         -> [(Label,AbsState a -> AbsState a)] -- lista degli archi in entrata
         -> AbsState a --risultato dell'unione

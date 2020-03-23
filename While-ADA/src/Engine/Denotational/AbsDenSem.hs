@@ -1,13 +1,13 @@
 module AbsDenSem where
     import AbsEval
-    import AbsDomain
+    import AbsValueDomain
     import AbsState as AS
     import WhileStructures
     import CondCFunc
 
     type Widening = Bool -- fare widening?
 
-    semS :: (AbsDomain a) => Widening -> CondFun a -> Stm -> AbsState a -> AbsState a
+    semS :: (AbsValueDomain a) => Widening -> CondFun a -> Stm -> AbsState a -> AbsState a
     semS w condC (Assign var e) s = semSG (Assign var e) s
     semS w condC (Assert b) s = condC b s
     semS w condC (Skip) s = s
@@ -27,15 +27,15 @@ module AbsDenSem where
                     r `AS.join` (semS w condC e (condC c x))
     
 
-    -- lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
+    -- lim ::(AbsValueDomain a) => (AbsState a -> AbsState a) ->  AbsState a
     -- lim f = (lim' f 0) Bottom
 
-    -- lim' ::(AbsDomain a) => (AbsState a -> AbsState a) -> Int -> (AbsState a -> AbsState a)
+    -- lim' ::(AbsValueDomain a) => (AbsState a -> AbsState a) -> Int -> (AbsState a -> AbsState a)
     -- lim' f 0 = if (id Bottom) == (f Bottom) then id else lim' f 1
     -- lim' f n = if  (f Bottom) == ((f.f) Bottom) then f
     --         else lim' (f.f) (n+1)
 
-    lim ::(AbsDomain a) => (AbsState a -> AbsState a) ->  AbsState a
+    lim ::(AbsValueDomain a) => (AbsState a -> AbsState a) ->  AbsState a
     lim f = (lub [pow n f | n <- [0..]]) Bottom
         where pow 0 f = id
               pow n f = f.(pow (n-1) f)

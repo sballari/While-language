@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 
 module SignDomain where
-    import AbsDomain as AD
+    import AbsValueDomain as AD
     import WhileStructures
 
     data Sign = SignBottom | Zero | LessEqZero | MoreEqZero | SignTop 
@@ -15,7 +15,7 @@ module SignDomain where
         show SignTop     =  '\8868':"sign"
 
 
-    instance AbsDomain Sign where
+    instance AbsValueDomain Sign where
         top = SignTop
         bottom = SignBottom
   

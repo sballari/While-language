@@ -1,7 +1,7 @@
 --{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
 
 module IntervalDomain where
-    import AbsDomain as AD
+    import AbsValueDomain as AD
     import Prelude hiding ((/),(*),negate,(+),(-))
     import qualified Prelude as P ((*),negate,(+),(-))
 
@@ -84,7 +84,7 @@ module IntervalDomain where
     (MinInf) / (PlusInf) = B 0 
      
  
-    instance AbsDomain Interval where
+    instance AbsValueDomain Interval where
         --top::Interval
         top = Interval MinInf PlusInf
         --bottom::Interval

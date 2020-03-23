@@ -1,7 +1,7 @@
-module AbsDomain where
+module AbsValueDomain where
     import WhileStructures
     
-    class Eq a => AbsDomain a where
+    class Eq a => AbsValueDomain a where
         --this is the Value abstract domain
 
         top :: a

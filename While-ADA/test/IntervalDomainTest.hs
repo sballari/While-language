@@ -1,7 +1,7 @@
 module IntervalDomainTest  where
     import IntervalDomain as SD
     import AbsState as AS
-    import AbsDomain as AD
+    import AbsValueDomain as AD
     import WhileParser
     import WhileStructures as WS
     import Test.Tasty

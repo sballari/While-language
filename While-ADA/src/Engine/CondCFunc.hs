@@ -1,5 +1,5 @@
 module CondCFunc where
-    import AbsDomain as AD
+    import AbsValueDomain as AD
     import AbsState as AS
     import WhileStructures
     import AbsEval
@@ -10,7 +10,7 @@ module CondCFunc where
     ##### COND GENERICA          #####
     ################################## -}
 
-    condC :: (AbsDomain a) => CondFun a 
+    condC :: (AbsValueDomain a) => CondFun a 
     --fina ultra grossa p. 54
     condC _ Bottom = Bottom
     condC (WTrue) s = s

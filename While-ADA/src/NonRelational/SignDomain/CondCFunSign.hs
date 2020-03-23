@@ -1,5 +1,5 @@
 module CondCFunSign where
-    import AbsDomain as AD
+    import AbsValueDomain as AD
     import AbsState as AS
     import SignDomain
     import WhileStructures

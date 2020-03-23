@@ -12,7 +12,7 @@ module Lib where
     import IntervalDomain
     import AbsCfgSem
     import CondCFunc
-    import AbsDomain
+    import AbsValueDomain
     import CondCFunSign
     import CondCFunInt
 
@@ -114,7 +114,7 @@ module Lib where
                 putStrLnResult (show (semS wideningI intCondC prTree intIS)) >>
                 putStrLnCBold "----------FINE ANALISI--------" Red
 
-    printCFGRes:: (AbsDomain a, Show a) => CGraph(a) -> AbsState a -> [Name] -> String -> IO()
+    printCFGRes:: (AbsValueDomain a, Show a) => CGraph(a) -> AbsState a -> [Name] -> String -> IO()
     printCFGRes graph initialState vars domain_name= 
         do
             putStrLnCBold "\n-------ANALISI CFG----------" Red

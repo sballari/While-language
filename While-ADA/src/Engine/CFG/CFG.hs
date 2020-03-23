@@ -1,6 +1,6 @@
 module CFG where 
     import WhileStructures
-    import AbsDomain
+    import AbsValueDomain
     import AbsEval
     import AbsState as AS
     import CondCFunc
@@ -18,13 +18,13 @@ module CFG where
     -- 1-->2-->3 :: [(1,..,2);(2,..,3)]
     takeLabel = ST(\s -> (L s,s))
 
-    stm2Fun :: AbsDomain a => Stm -> AbsState a -> AbsState a
+    stm2Fun :: AbsValueDomain a => Stm -> AbsState a -> AbsState a
     -- assegna la funzione semantica all'arco
     stm2Fun Skip = id
     stm2Fun (Assign x y) = semSG (Assign x y)
 
     -- each arc corresponds to an assignment or a condition
-    createCFG :: AbsDomain a => CondFun a -> Stm -> ST (CGraph a)
+    createCFG :: AbsValueDomain a => CondFun a -> Stm -> ST (CGraph a)
     createCFG condC s = cfg s stm2Fun condC
 
     cfg ::  Stm -> (Stm -> b) -> (BExpr -> b) -> ST (Graph b) 

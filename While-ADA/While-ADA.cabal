@@ -29,7 +29,7 @@ library
   exposed-modules:
       AbsCfgSem
       AbsDenSem
-      AbsDomain
+      AbsValueDomain
       AbsEval
       AbsState
       CFG
@@ -54,6 +54,9 @@ library
       src/Relational/KarrDomain
       src/NonRelational/SignDomain
       src/NonRelational/IntervalDomain
+      src/Engine
+      src/Engine/Denotational
+      src/Engine/CFG
   build-depends:
       base >=4.7 && <5
       , containers
