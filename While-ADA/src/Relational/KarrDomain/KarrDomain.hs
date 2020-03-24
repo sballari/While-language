@@ -158,18 +158,34 @@ module KarrDomain where
     {-  ##################
        #JOIN SUB ROUTINE#
       ################## -}    
-    linearCombinationVar4join:: Int -> [Double]
+    linearCombinationVar4join:: Int -> [[Double]]
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
     -- single constraint coefficients for V = W1 + W2
-    -- varN is |W1|=|W2|=|V|
+    -- varN is |W1|=|W2|=|V| (the number of variables in the origianal system)
     -- [V   |W1   | W2    |l1|l2]
     -- [-1..|11...|11.....|0| 0]
-    linearCombinationVar4join varN = (replicate varN (-1))++(ones (2*varN))++ [0,0]
+    linearCombinationVar4join varN = --(replicate varN (-1))++(ones (2*varN))++ [0,0]
+        foldr (
+            \i rc -> 
+                let 
+                    v_coef = zerosWith1NZelement varN i (-1)
+                    w1_coef = zerosWith1NZelement varN i (1)
+                    w2_coef = zerosWith1NZelement varN i (1)
+                in
+                (v_coef ++ w1_coef++w2_coef++[0,0]):rc
+        ) [] [0..(varN-1)]
+    zerosWith1NZelement :: --3 1 66 -> [0,66,0]
+        Int -> --lenght of the vector of zeros
+        Int -> -- position of non zero element
+        Double -> -- element non zero
+        [Double] 
+    zerosWith1NZelement len ind el = 
+        foldr (\i rc -> if i==ind then (el:rc) else (0:rc)) [] [0..(len-1)]
 
     lambdaRule4join :: Int -> [Double]
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
     -- single constraint coefficients for 1 = lambda1 + lambda2
-    -- varN is |W1|=|W2|=|V|
+    -- varN is |W1|=|W2|=|V| 
     -- [V   |W1   | W2    |l1|l2]
     -- [00..|00...|00.....|1| 1]
     lambdaRule4join varN = (zeros (3*varN)) ++ [1,1]
@@ -210,7 +226,7 @@ module KarrDomain where
     EQs (m1,c1,o) `explicit_join` EQs (m2,c2,o')  
         -- the two system must have the same variables ordering 
         | o /= o' = error "not compatible systems"
-        | otherwise = EQs (lin_comb_coef:lambdas_coef:sys1_coef++sys2_coef, constants_vector,o)
+        | otherwise = EQs (sys1_coef++sys2_coef++lin_comb_coef++[lambdas_coef], constants_vector,o)
         where 
             sys1_coef = sysCoef4join (EQs (m1,c1,o)) 0
             sys2_coef = sysCoef4join (EQs (m2,c2,o)) 1
@@ -219,7 +235,7 @@ module KarrDomain where
             constraintsN2 = length m2
             lin_comb_coef = linearCombinationVar4join varN
             lambdas_coef = lambdaRule4join varN
-            constants_vector = 0:1:(zeros (constraintsN1+constraintsN2))
+            constants_vector =  (zeros (constraintsN1+constraintsN2+ varN))++[1]
 
     {-  #######################
        #AbsDomainR instance  #
