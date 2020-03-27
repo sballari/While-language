@@ -5,6 +5,7 @@ module KarrDomain where
     import WhileStructures
     import PolyUtils
     import Text.Printf
+    import qualified Data.List as L
     
     data EQs = EQs (RowForm Double,[Double],[String]) -- <M,X> in a row-echelon form,
     -- [String]: variables name in the same order they appears in X
@@ -13,6 +14,9 @@ module KarrDomain where
     {-  ##################
        #Assign sub routines     #
       ################## -} 
+
+    var_number :: EQs -> Int
+    var_number (EQs (_,_,o)) = length o 
 
     varPos :: EQs -> String -> Maybe Int
     -- returns the position (from zero) of the given var as second arg in the system provided as first arg
@@ -54,15 +58,22 @@ module KarrDomain where
         where 
             Just var_index = varPos (EQs (rs,b,vars)) vj
             vj_columnT = (transpose rs)!!var_index
-            is_leading = if lead_check == (1,True) then True else  False
-            lead_check  =  foldr (\c (sum,j01) ->
-                        if j01 then 
-                            case c of 
-                                1 -> (sum+1,True)
-                                0 -> (sum, True)
-                                _ -> (0,False)
-                        else (0,False)
-                     ) (0,True) vj_columnT
+            is_leading = lead_check vj_columnT 
+    
+    lead_check :: 
+        [Double] -> --column
+        Bool -- returns true iff the coeff are all one exept for one 1
+    lead_check l =  
+        if r  == (1,True) then True else  False
+        where 
+         r= foldr (\c (sum,j01) ->
+                    if j01 then 
+                        case c of 
+                            1 -> (sum+1,True)
+                            0 -> (sum, True)
+                            _ -> (0,False)
+                    else (0,False)
+                    ) (0,True) l
 
     remove_Lc ([],[]) index_vj = ([],[])
     remove_Lc ((r:rs),(b:bs)) index_vj = 
@@ -221,7 +232,7 @@ module KarrDomain where
     -- computes the joining system without performing any elimination (page 109)
     -- CONSTRAINt ORDER { V=W1+W2 ^ l1+l2=1 ^ sys1 ^ sys2} (for complexity reasons)
     -- the vars list refers only to V (the first n vars in x) and NOT to the others aux vars like l1,l2,w1,w2
-    -- TODO : is it correct that
+    -- [V   |W1   | W2    |l1|l2]
     
     EQs (m1,c1,o) `explicit_join` EQs (m2,c2,o')  
         -- the two system must have the same variables ordering 
@@ -236,6 +247,69 @@ module KarrDomain where
             lin_comb_coef = linearCombinationVar4join varN
             lambdas_coef = lambdaRule4join varN
             constants_vector =  (zeros (constraintsN1+constraintsN2+ varN))++[1]
+
+
+    {- #######################
+       JOIN AUX VAR ELIMINATION 
+    ####################### -}
+
+    row_filter ::
+        {-
+            descr: this func keeps in the sys' matrix just the rows where the coefficient
+            of one of the original variable is one.
+            Pre: original variables are for sure in leading position
+        -}
+        (RowForm Double,[Double]) -> -- explicit join sys in row echelon form
+        [(Bool,Int,Int)] ->      -- [(leading col bool, column index, index of element 1)]
+        Int -> --number of variables of the original system
+        (RowForm Double, [Double])
+    row_filter (m,c) lead_info varN =
+            ([ r | (r,i) <- (zip m [0..]) , i2k<-row2keep , i==i2k], --log elimination in base non-original var 
+            [ b | (b,i) <- (zip c [0..]) , i2k<-row2keep , i==i2k])
+        where
+            row2keep = foldr (\(_,_,i) rc -> i:rc) [] (L.genericTake varN lead_info)
+    in_base_elimination4Join ::
+        {-
+            descr: this function removes the column that corresponds to in base variable (except the original vars)
+            the original vars will remains (they are the only leading vars that remain)
+            PROVIDE JUST THE COEFFICIENTS (NOT THE AUG MATRIX)
+        -}
+        RowForm Double ->   -- filtered join matrix (given by row_filter)
+        [(Bool,Int,Int)] ->      -- [(leading col bool, column index, index of element 1)]
+        Int ->              -- varN : number of the vars of the original system (the first varN colums)
+        RowForm Double 
+    in_base_elimination4Join f_matrix info varN=
+        transpose ([ col | (col,(isLead,i,_)) <- colForm_info, (remain_condition isLead i)])
+        where 
+            remain_condition = \is_lead i -> (is_lead == False || i<varN)
+            colForm_info = zip (transpose f_matrix) info
+    out_base_elimination4join :: 
+        RowForm Double->  -- augmented matrix with only varN variable to keep and the other out of base (given by in baseElim4join)
+        Int ->      -- varN : number of vars in the orig sys
+        RowForm Double
+    out_base_elimination4join mat varN =
+        foldr (\i rc -> 
+                    log_elimination mat varN
+            ) [] [(varN+1)..((length (mat!!0))-1)] -- the last is the const term (augmented matrix)
+            
+    leading_matrix_info :: 
+        RowForm Double -> -- system in row-echelon form
+        Int ->            -- number of varibles in the sys
+        [(Bool,Int,Int)]  -- foreach col : is_leading or not , index of the col, index of the row where the coeff isn't 0 
+        {-
+        descr : returns (check ,col_index,index of NZ element) of leading column
+        -}
+    leading_matrix_info join_system varN = foldr 
+                                (\(column,col_index) rc -> 
+                                    let 
+                                        check = lead_check column
+                                        Just o_i = if check then L.findIndex (==1) column else Nothing
+                                    in 
+                                    (check,col_index,o_i):rc
+                                ) [] (zip (transpose join_system) [0..(varN-1)])
+         
+
+
 
     {-  #######################
        #AbsDomainR instance  #
@@ -254,8 +328,30 @@ module KarrDomain where
         --NOTE: this comparison has sense iff both the side are in a rowEchelon form
 
         -- join :: EQs -> EQs -> EQs -- abs lub
-        sys1 `join` sys2 = applyST rowEchelonForm (explicit_join sys1 sys2)
+        EQsBottom `join` x = x
+        x `join` EQsBottom = x
+        sys1 `join` sys2 = 
+            let 
+                (f_matrix,f_b) = row_filter (join_system,b) leading varN
+                elim1_coef = in_base_elimination4Join f_matrix leading varN
+                aug_matrix = transpose ((f_b:transpose elim1_coef)) -- NOTA : b aggiunto all'inizio
+                final = out_base_elimination4join aug_matrix varN
+                final_coeff = transpose (tail (transpose aug_matrix))
+                final_b = head (transpose aug_matrix)
+            in
+                EQs (final_coeff,final_b,o)
+            where 
+                EQs (join_system,b,o) = applyST rowEchelonForm (explicit_join sys1 sys2)
+                --join_system var order [V   |W1   | W2    |l1|l2]
+                varN  = var_number sys1
+                -- leading : (check ,col_index,index of NZ element) of leading column
+                leading = leading_matrix_info join_system varN
+                
+
+                
         -- meet :: EQs -> EQs -> EQs 
+        EQsBottom `meet` _ = EQsBottom
+        _ `meet` EQsBottom = EQsBottom
         EQs (m1,c1,o) `meet` EQs (m2,c2,o') 
             | o /=o' = error "not compatible systems"
             | otherwise =EQs (rowEchelonForm (m1++m2, c1++c2,o))

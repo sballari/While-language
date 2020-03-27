@@ -98,9 +98,9 @@ module MatrixUtilities where
             mult = -(a/b)
             mult_row_b = foldr (\b rc -> (b*mult):rc ) [] rowb
         
-    log_elimination :: 
+    log_elimination :: --VAR OUT OF BASE (NON LEADING POSITION!!!!)
         RowForm Double -> -- original matrix in row-echelon form
-        Int ->  -- index of column of the variable to elimanate 
+        Int ->  -- index of column of the NON LEADING variable to elimanate 
         RowForm Double -- matrix without column i, still in row-echelon form
     {-descr : logical elimination of variable in 
             column i ,algorithm of cap 5.2.3 p110 -}
