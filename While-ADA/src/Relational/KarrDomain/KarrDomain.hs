@@ -59,21 +59,6 @@ module KarrDomain where
             Just var_index = varPos (EQs (rs,b,vars)) vj
             vj_columnT = (transpose rs)!!var_index
             is_leading = lead_check vj_columnT 
-    
-    lead_check :: 
-        [Double] -> --column
-        Bool -- returns true iff the coeff are all one exept for one 1
-    lead_check l =  
-        if r  == (1,True) then True else  False
-        where 
-         r= foldr (\c (sum,j01) ->
-                    if j01 then 
-                        case c of 
-                            1 -> (sum+1,True)
-                            0 -> (sum, True)
-                            _ -> (0,False)
-                    else (0,False)
-                    ) (0,True) l
 
     remove_Lc ([],[]) index_vj = ([],[])
     remove_Lc ((r:rs),(b:bs)) index_vj = 
@@ -86,18 +71,7 @@ module KarrDomain where
             ((r:rs'),(b:bs'))
         else {- ==1 -} (rs,bs)
         
-    inversion_coefficients ::   -- (invertible case)
-        ([Double],Double) ->    -- assign expr e,  vj<-e
-        Int ->                  -- index of vj
-        Double ->               -- a_vj : coef of vj in e
-        ([Double],Double)       -- inversion coefficients
-    inversion_coefficients (coefficients,b) var_index a_vj = ((
-                                    foldr (
-                                        \(a,i) rc -> 
-                                            if i==var_index then (1/a_vj):rc
-                                            else (-a/a_vj):rc
-                                        ) [] (zip coefficients [0..])
-                                ), -b/a_vj)
+    
     invertible_assign :: 
         Int -> -- index of the reexpressed variable
         ([Double],Double) -> -- re expressed coeff Vj_old = f(Vj_new), coef of f
@@ -185,13 +159,7 @@ module KarrDomain where
                 in
                 (v_coef ++ w1_coef++w2_coef++[0,0]):rc
         ) [] [0..(varN-1)]
-    zerosWith1NZelement :: --3 1 66 -> [0,66,0]
-        Int -> --lenght of the vector of zeros
-        Int -> -- position of non zero element
-        Double -> -- element non zero
-        [Double] 
-    zerosWith1NZelement len ind el = 
-        foldr (\i rc -> if i==ind then (el:rc) else (0:rc)) [] [0..(len-1)]
+    
 
     lambdaRule4join :: Int -> [Double]
     -- VARIABLE ORDER := [V|W1|W2|lambda1|lambda2]
@@ -291,25 +259,6 @@ module KarrDomain where
         foldr (\i rc -> 
                     log_elimination rc i
             ) mat [(varN+1)..((length (mat!!0))-1) ] --the first is the const term
-            
-    leading_matrix_info :: 
-        RowForm Double -> -- system in row-echelon form
-        Int ->            -- number of varibles in the sys
-        [(Bool,Int,Int)]  -- foreach col : is_leading or not , index of the col, index of the row where the coeff isn't 0 
-        {-
-        descr : returns (check ,col_index,index of NZ element) of leading column
-        -}
-    leading_matrix_info join_system varN = foldr 
-                                (\(column,col_index) rc -> 
-                                    let 
-                                        check = lead_check column
-                                        Just o_i = if check then L.findIndex (==1) column else (Just (-1))
-                                    in 
-                                    (check,col_index,o_i):rc
-                                ) [] (zip (transpose join_system) [0..])
-         
-
-
 
     {-  #######################
        #AbsDomainR instance  #
