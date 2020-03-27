@@ -281,7 +281,7 @@ module KarrDomain where
     in_base_elimination4Join f_matrix info varN=
         transpose ([ col | (col,(isLead,i,_)) <- colForm_info, (remain_condition isLead i)])
         where 
-            remain_condition = \is_lead i -> (is_lead == False || i<varN)
+            remain_condition = \is_lead i -> is_lead == False || i<varN
             colForm_info = zip (transpose f_matrix) info
     out_base_elimination4join :: 
         RowForm Double->  -- augmented matrix with only varN variable to keep and the other out of base (given by in baseElim4join)
@@ -289,8 +289,8 @@ module KarrDomain where
         RowForm Double
     out_base_elimination4join mat varN =
         foldr (\i rc -> 
-                    log_elimination mat varN
-            ) [] [(varN+1)..((length (mat!!0))-1)] -- the last is the const term (augmented matrix)
+                    log_elimination rc i
+            ) mat [(varN+1)..((length (mat!!0))-1) ] --the first is the const term
             
     leading_matrix_info :: 
         RowForm Double -> -- system in row-echelon form
@@ -303,10 +303,10 @@ module KarrDomain where
                                 (\(column,col_index) rc -> 
                                     let 
                                         check = lead_check column
-                                        Just o_i = if check then L.findIndex (==1) column else Nothing
+                                        Just o_i = if check then L.findIndex (==1) column else (Just (-1))
                                     in 
                                     (check,col_index,o_i):rc
-                                ) [] (zip (transpose join_system) [0..(varN-1)])
+                                ) [] (zip (transpose join_system) [0..])
          
 
 
@@ -332,20 +332,22 @@ module KarrDomain where
         x `join` EQsBottom = x
         sys1 `join` sys2 = 
             let 
-                (f_matrix,f_b) = row_filter (join_system,b) leading varN
-                elim1_coef = in_base_elimination4Join f_matrix leading varN
-                aug_matrix = transpose ((f_b:transpose elim1_coef)) -- NOTA : b aggiunto all'inizio
-                final = out_base_elimination4join aug_matrix varN
-                final_coeff = transpose (tail (transpose aug_matrix))
-                final_b = head (transpose aug_matrix)
-            in
-                EQs (final_coeff,final_b,o)
-            where 
-                EQs (join_system,b,o) = applyST rowEchelonForm (explicit_join sys1 sys2)
+                EQs (join_system,b,o) = applyST rowEchelonForm (explicit_join sys1 sys2) --STEP1
                 --join_system var order [V   |W1   | W2    |l1|l2]
                 varN  = var_number sys1
-                -- leading : (check ,col_index,index of NZ element) of leading column
+                -- leading : for each col -> (isLeading ,col_index,index of NZ element) of leading column
                 leading = leading_matrix_info join_system varN
+                (f_matrix,f_b) = row_filter (join_system,b) leading varN --STEP2
+                elim1_coef = in_base_elimination4Join f_matrix leading varN --STEP3
+                aug_matrix = transpose ((f_b:(transpose elim1_coef))) -- NOTA : b aggiunto all'inizio
+                final = out_base_elimination4join aug_matrix varN -- STEP4
+                final_coeff = transpose ( L.genericTake varN (tail (transpose final)) )
+                final_b = head (transpose final)
+            in
+                EQs (final_coeff,final_b,o)
+             
+                
+                
                 
 
                 
