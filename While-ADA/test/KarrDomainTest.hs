@@ -6,20 +6,13 @@ module KarrDomainTest where
     import Test.Tasty
     import Test.Tasty.HUnit
     import MatrixUtilities
+    import qualified Data.List as L
 
-    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8]
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
-            expected = EQs ([
-                            [1,0,0,0,0,0,0,-1],
-                            [0,1,0,0,0,0,0,-2],
-                            [0,0,1,0,0,0,0,1],
-                            [0,0,0,1,0,0,0,10],
-                            [0,0,0,0,1,0,0,-2],
-                            [0,0,0,0,0,1,0,-12],
-                            [0,0,0,0,0,0,0,1]]
-                            ,[1,10,1,10,0,0,1],o)
+            expected = EQs ([[-2,1]],[8],o)
             result = join p1 p2
             p1 = EQs ([[1,0],[0,1]],[1,10],o) -- programs s.t. x1 = 1 and x2 = 10
             p2 = EQs ([[1,0],[0,1]],[2,12],o) -- programs s.t. x1 = 2 and x2 = 12
@@ -187,3 +180,93 @@ module KarrDomainTest where
                 new_constr = Eq (Sum (Var "x") (Minus (Var "y"))) (Num 0)
                 sys2 = EQs ([[0,1,2]],[0],o)
                 o = ["x","y","z"]
+
+
+    h1 = testCase "[KarrDomain Test][h1] Step2 (riduzione join)" (assertEqual "" expected result) 
+            where
+                expected = ([[1,0,0,0,0,0,0,-1],[0,1,0,0,0,0,0,-2]],[1,10])
+                result = row_filter exp_join_RE leading 2 --STEP2
+                exp_join_RE = 
+                    ([
+                    [1,0,0,0,0,0,0,-1],
+                    [0,1,0,0,0,0,0,-2],
+                    [0,0,1,0,0,0,0,1],
+                    [0,0,0,1,0,0,0,10],
+                    [0,0,0,0,1,0,0,-2],
+                    [0,0,0,0,0,1,0,-12],
+                    [0,0,0,0,0,0,1,0]]
+                    ,[1,10,1,10,0,0,1])
+                leading = [(True,0,0),(True,1,1),(True,2,2),(True,3,3),(True,4,4),(True,5,5),(True,6,6),(False,7,-1)]
+                o = ["x","y"]
+
+
+    h2 = testCase "[KarrDomain Test][h2] Step2 (riduzione join)" (assertEqual "" expected result) 
+        where
+            expected = ([[1,0,0,0,0,0,0,-1],[0,1,0,0,0,0,0,-2]],[1,10])
+            result = row_filter exp_join_RE leading 2 --STEP2
+            exp_join_RE = 
+                ([
+                [0,0,1,0,0,0,0,1],
+                [0,0,0,0,0,1,0,-12],
+                [0,0,0,1,0,0,0,10],
+                [1,0,0,0,0,0,0,-1],
+                [0,0,0,0,1,0,0,-2],
+                [0,1,0,0,0,0,0,-2],
+                [0,0,0,0,0,0,1,0]]
+                ,[1,10,1,1,0,10,1])
+            leading = [(True,0,3),(True,1,5),(True,2,0),(True,3,2),(True,4,4),(True,5,1),(True,6,6),(False,7,-1)]
+            o = ["x","y"]
+
+
+    h3 = testCase "[KarrDomain Test][h3] Step3 (riduzione join)" (assertEqual "" expected result) 
+        where
+            expected = [[1,0,-1],[0,1,-2]]
+            result = in_base_elimination4Join step2_res leading 2
+            step2_res = 
+                [[1,0,0,0,0,0,0,-1],[0,1,0,0,0,0,0,-2]]
+            leading = [(True,0,0),(True,1,1),(True,2,2),(True,3,3),(True,4,4),(True,5,5),(True,6,6),(False,7,-1)]
+            o = ["x","y"]
+
+
+     
+    h4 = testCase "[KarrDomain Test][h4] Step4 (riduzione join)" (assertEqual "" expected result) 
+            where
+                expected = [[8.0,-2.0,1.0,0.0]] -- [[-4,1,-1/2]]
+                result = out_base_elimination4join aug_matrix 2
+                aug_matrix = [[1,1,0,-1],[10,0,1,-2]]
+                
+
+    h5 = testCase "[KarrDomain Test][h5] augmentation step3-4 (riduzione join)" (assertEqual "" expected result) 
+            where
+                expected = [[1,1,0,-1],[10,0,1,-2]]
+                result = transpose ((f_b:(transpose step3_res)))
+                step3_res = [[1,0,-1],[0,1,-2]]
+                f_b = [1,10]
+                
+    
+    h6 = testCase "[KarrDomain Test][h6] final (riduzione join)" (assertEqual "" expected result) 
+            where
+                f_result = [[8.0,-2.0,1.0,0.0]] -- [[-4,1,-1/2]]
+                final_coeff = transpose ( L.genericTake 2 (tail (transpose f_result)) )
+                final_b = head (transpose f_result)
+                result = EQs (final_coeff,final_b,["x","y"])
+                expected = EQs ([[-2,1]],[8],["x","y"])
+
+
+    h7 = testCase "[KarrDomain Test][h7] leadingMatrix inof (riduzione join)" (assertEqual "" expected result) 
+            where
+                result = leading_matrix_info join_system 2
+                join_system = 
+                    [
+                    [0,0,1,0,0,0,0,1],
+                    [0,0,0,0,0,1,0,-12],
+                    [0,0,0,1,0,0,0,10],
+                    [1,0,0,0,0,0,0,-1],
+                    [0,0,0,0,1,0,0,-2],
+                    [0,1,0,0,0,0,0,-2],
+                    [0,0,0,0,0,0,1,0]]
+                    
+                expected = [(True,0,3),(True,1,5),(True,2,0),(True,3,2),(True,4,4),(True,5,1),(True,6,6),(False,7,-1)]
+                
+
+                
