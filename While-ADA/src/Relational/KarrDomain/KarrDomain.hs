@@ -40,6 +40,7 @@ module KarrDomain where
         two case : 1 vj in leading pos, 2 vj not in leading pos
     -}
     assignUnbounded EQsBottom _ = EQsBottom
+    assignUnbounded (EQs ([],[],vars)) _ = (EQs ([],[],vars))
     assignUnbounded (EQs (rs,b,vars)) vj = 
         if is_leading then
             let (newRs,newB) = remove_Lc (rs,b) var_index in 
@@ -136,7 +137,7 @@ module KarrDomain where
         --show ::EQs -> String
         show EQsBottom = "\8869"++"Karr"
         show (EQs (m,c,o)) = 
-            "\n"++(show o)++ 
+            "\n"++(show o)++
             "\n"++(foldr (\(r,ch) rest -> (print_row r)++"|"++(show ch)++"\n"++rest  ) "" z)
             where
                 z = zip m c 
@@ -271,6 +272,8 @@ module KarrDomain where
         bottom = EQsBottom
         -- (<=) :: EQs -> EQs -> Bool
         -- A C= B <-> A meet B = A p.108
+        EQsBottom <= _ = True
+        _ <= EQsBottom = False
         EQs (m1,c1,o) <= EQs (m2,c2,o') 
             | o /=o' = error "not compatible systems"
             | otherwise = (EQs (m1,c1,o) `meet` EQs (m2,c2,o)) == EQs (m1,c1,o) 
@@ -279,6 +282,8 @@ module KarrDomain where
         -- join :: EQs -> EQs -> EQs -- abs lub
         EQsBottom `join` x = x
         x `join` EQsBottom = x
+        sys `join` (EQs ([],[],vs)) = (EQs ([],[],vs))
+        (EQs ([],[],vs)) `join` sys = (EQs ([],[],vs))
         sys1 `join` sys2 = 
             let 
                 EQs (join_system,b,o) = applyST rowEchelonForm (explicit_join sys1 sys2) --STEP1
@@ -291,9 +296,9 @@ module KarrDomain where
                 aug_matrix = transpose ((f_b:(transpose elim1_coef))) -- NOTA : b aggiunto all'inizio
                 final = out_base_elimination4join aug_matrix varN -- STEP4
                 final_coeff = transpose ( L.genericTake varN (tail (transpose final)) )
-                final_b = head (transpose final)
+                final_b = head (transpose final) 
             in
-                EQs (final_coeff,final_b,o)
+                EQs (final_coeff,final_b,o) --this is in row-echelon
              
                 
                 
@@ -317,6 +322,8 @@ module KarrDomain where
             TODO:here we have a Num Int because the analyzer was initially design just for Integer variable analyses
             we should change the parser in order to consider the real variable (and maybe adjust the NR analyzer) 
         -}
+        condC _ EQsBottom = EQsBottom
+        condC (Neg (NotEq a1 a2)) s  = condC (Eq a1 a2) s
         condC (Eq a1 a2) (EQs (m,x,o)) = 
             case mc of 
                 Nothing -> EQs (m,x,o) --the constraint is non-linear
@@ -331,15 +338,15 @@ module KarrDomain where
         {-
             descr: Vj <- e
             we have different possibilities:
-            1) e isn't a lin exrp -> identity function
+            1) e isn't a lin exrp -> assignUnb
             2) e is a linear expr ->
                 a) invertible , z'=z+1 -> z=z'-1 -> substitution in EQs 
-                b) not invertible, condC(Vj-e=0).assignUnb 
+                b) not invertible, condC(Vj-e==0).assignUnb 
         -}
         assignS _ EQsBottom = EQsBottom
         assignS (Assign var_name e) (EQs (rs,bs,o)) = 
             case conversion of 
-                Nothing -> (EQs (rs,bs,o))    -- case 1 
+                Nothing -> assignUnbounded (EQs (rs,bs,o)) var_name   -- case 1 
                 Just l_pol ->   -- case 2
                     let
                         (coefficients,b) = order o l_pol
@@ -356,12 +363,7 @@ module KarrDomain where
                                 inv_c = inversion_coefficients (coefficients,b) var_index a_vj
                             in 
                                 invertible_assign var_index inv_c (EQs (rs,bs,o))
-                                
-
-
             where
                 conversion = minimize e
-                
-
         
-        
+        widening = join
