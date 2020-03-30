@@ -6,9 +6,10 @@ module KarrDomainTest where
     import Test.Tasty
     import Test.Tasty.HUnit
     import MatrixUtilities
+    import WhileParser
+    import AbsDenSemR
     import qualified Data.List as L
 
-    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7]
 
     a0 = testCase "[KarrDomain Test][a0] join (ex5.5 p109)" (assertEqual "" expected result) 
         where
@@ -89,6 +90,7 @@ module KarrDomainTest where
             expected = [[1,0,0,-3/2,11/2],[0,0,1,-15,-13]]
             result = log_elimination sys 1 
             sys = [[0,1/3,0,1,1],[1,1/2,0,0,7],[0,5,1,0,2]]
+
             
     e2 = testCase "[MatrixUtilities Test][e2] two const elimination vj" (assertEqual "" expected result) 
         where
@@ -269,4 +271,80 @@ module KarrDomainTest where
                 expected = [(True,0,3),(True,1,5),(True,2,0),(True,3,2),(True,4,4),(True,5,1),(True,6,6),(False,7,-1)]
                 
 
+    i1 = testCase "[KarrDomain Test][i1] analisi assign" (assertEqual "" expected result) 
+            where
+                expected = EQs ([[1,0],[0,1]],[1,0],["I","X"]) 
+                result = semS False progTree  (EQs ([],[],["I","X"]))
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "I:=1; X := 0;"
+
+    i2 = testCase "[KarrDomain Test][i2] analisi ex5.8 pag 112" (assertEqual "" expected result) 
+            where
+                expected = EQs ([],[],["I","X"]) 
+                result = semS False progTree  (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "while I <= 1000 do  (I:=0; X:=X+1)"
+
+    i3 = testCase "[KarrDomain Test][i3] while body 1;" (assertEqual "" expected result) 
+            where
+                expected = EQs ([[1,0],[0,1]],[2,1],["I","X"]) 
+                result = semS False progTree  (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "I:=I+1; X:=X+1;"
+    i4 = testCase "[KarrDomain Test][i4] while body 2;" (assertEqual "" expected result) 
+            where
+                expected = (EQs ([[-1,1]],[-1],["I","X"]) )
+
+                result = semS False progTree  (EQs ([[-1,1]],[-1],["I","X"]) )
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "I:=I+1; X:=X+1;"
+
+    i4a = testCase "[KarrDomain Test][i4a] eq join;" (assertEqual "" expected result) 
+            where
+                expected = (EQs ([[-1,1]],[-1],["I","X"]) )
+                result = (EQs ([[-1,1]],[-1],["I","X"]) ) `join` (EQs ([[-1,1]],[-1],["I","X"]) )
                 
+    i4b = testCase "[KarrDomain Test][i4b] while body 2 join;" (assertEqual "" expected result) 
+            where
+                expected = (EQs ([[-1,1]],[-1],["I","X"]) )
+                result = r `join` (EQs ([[-1,1]],[-1],["I","X"]) )
+                r = (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
+
+    i4c = testCase "[KarrDomain Test][i4c] while body 2 ex_join;" (assertEqual "" expected result) 
+            where
+                expected = (EQs ([[-1,1]],[-1],["I","X"]) )
+                result = r `explicit_join` (EQs ([[-1,1]],[-1],["I","X"]) )
+                r = (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
+
+    i5 = testCase "[KarrDomain Test][i5] r join sys1;" (assertEqual "" expected result) 
+            where
+                sys1 = EQs ([[1,0],[0,1]],[2,1],["I","X"]) 
+                sys0 = EQs ([[1,0],[0,1]],[1,0],["I","X"]) 
+                result = sys0 `join` sys1
+                expected = EQs ([[-1,1]],[-1],["I","X"]) 
+
+    i6 = testCase "[KarrDomain Test][i6] r join bottom;" (assertEqual "" expected result) 
+            where
+                sys0 = EQsBottom
+                sysR = EQs ([[1,0],[0,1]],[1,0],["I","X"]) 
+                result = sysR `join` sys0
+                expected = EQs ([[1,0],[0,1]],[1,0],["I","X"]) 
+
+    i7 = testCase "[KarrDomain Test][i7] I<=1000" (assertEqual "" expected result) 
+            where
+                expected =  EQs ([[0,1]],[0],["I","X"])
+                result = semS False progTree  sysR
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "if I<=1000 then I:=1 else I:=0" 
+                sysR = EQs ([[1,0],[0,1]],[1,0],["I","X"]) 
+
+    i8 = testCase "[KarrDomain Test][i8]  join" (assertEqual "" expected result) 
+            where
+                sysA = EQs ([[-1,1]],[-1],["I","X"]) 
+                sysB = EQs ([],[],["I","X"]) 
+                result = sysA `join` sysB
+                expected = sysB
+
+
+    tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7,
+            i1,i1,i2,i3,i4,i4a,i4b,i4c,i5,i6,i7,i8]

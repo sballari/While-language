@@ -38,6 +38,7 @@ library
       CondCFunc
       IntervalDomain
       KarrDomain
+      AbsDenSemR
       AbsDomainR
       WhileParser
       WhileStructures
