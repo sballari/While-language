@@ -318,8 +318,8 @@ module KarrDomainTest where
 
     i4d = testCase "[KarrDomain Test][i4c] eliminazione annichilente STEP 4" (assertEqual "" expected result) 
             where
-                expected = [[-1,-1,1]]
-                result = out_base_elimination4join aug_matrix 2 -- STEP4
+                expected = [[-1,-1,1,0,0]]
+                result = log_elimination aug_matrix 2 -- STEP4
                 aug_matrix = [[1.0,1.0,0.0,-1.0,0.0],[0.0,0.0,1.0,-1.0,0.0]]
 
     i5 = testCase "[KarrDomain Test][i5] r join sys1;" (assertEqual "" expected result) 

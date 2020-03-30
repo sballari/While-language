@@ -257,7 +257,7 @@ module KarrDomain where
         Int ->      -- varN : number of vars in the orig sys
         RowForm Double
     out_base_elimination4join mat varN =
-        foldr (\i rc -> 
+        foldl (\rc i -> 
                     log_elimination rc i
             ) mat [(varN+1)..((length (mat!!0))-1) ] --the first is the const term
 

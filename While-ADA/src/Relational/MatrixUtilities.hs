@@ -110,7 +110,7 @@ module MatrixUtilities where
         if ref!!i==0
         then (ref:[]) else []  --TODO : pensarci meglio [X+Y=2] [1,0|2] s
     log_elimination (ref:rs) i = 
-        foldl (\rc r-> (two_row_el r ref i):rc ) [] rs 
+        foldr (\r rc-> (two_row_el r ref i):rc ) [] rs 
 
         
 
