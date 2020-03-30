@@ -316,6 +316,12 @@ module KarrDomainTest where
                 result = r `explicit_join` (EQs ([[-1,1]],[-1],["I","X"]) )
                 r = (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
 
+    i4d = testCase "[KarrDomain Test][i4c] eliminazione annichilente STEP 4" (assertEqual "" expected result) 
+            where
+                expected = [[-1,-1,1]]
+                result = out_base_elimination4join aug_matrix 2 -- STEP4
+                aug_matrix = [[1.0,1.0,0.0,-1.0,0.0],[0.0,0.0,1.0,-1.0,0.0]]
+
     i5 = testCase "[KarrDomain Test][i5] r join sys1;" (assertEqual "" expected result) 
             where
                 sys1 = EQs ([[1,0],[0,1]],[2,1],["I","X"]) 
@@ -346,5 +352,6 @@ module KarrDomainTest where
                 expected = sysB
 
 
+
     tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7,
-            i1,i1,i2,i3,i4,i4a,i4b,i4c,i5,i6,i7,i8]
+            i1,i1,i2,i3,i4,i4a,i4b,i4c,i5,i6,i7,i8,i4d]

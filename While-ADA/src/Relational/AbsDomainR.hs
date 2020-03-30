@@ -15,16 +15,9 @@ module AbsDomainR where
         
         condC :: BExpr -> a -> a
 
-        assignS :: Stm -> a -> a --TODO dove metterlo ??????
+        assignS :: Stm -> a -> a 
         
-        {-
-        -- sound binary operators 
-        absSum :: a -> a -> a
-        absMul :: a -> a -> a               
-        absDiv :: a -> a -> a  
-        -- sound unary operators
-        absMinus :: a -> a
         
         widening :: a -> a -> a
 
-        -}
+        
