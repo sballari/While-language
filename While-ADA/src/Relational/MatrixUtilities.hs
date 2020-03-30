@@ -106,8 +106,11 @@ module MatrixUtilities where
         RowForm Double -- matrix without column i, still in row-echelon form
     {-descr : logical elimination of variable in 
             column i ,algorithm of cap 5.2.3 p110 -}
+    log_elimination (ref:[]) i = 
+        if ref!!i==0
+        then (ref:[]) else []  --TODO : pensarci meglio [X+Y=2] [1,0|2] s
     log_elimination (ref:rs) i = 
-        foldr (\r rc-> (two_row_el r ref i):rc ) [] rs 
+        foldl (\rc r-> (two_row_el r ref i):rc ) [] rs 
 
         
 
