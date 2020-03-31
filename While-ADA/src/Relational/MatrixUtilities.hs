@@ -40,7 +40,7 @@ module MatrixUtilities where
     firstCol ms = fmap head ms
 
     gaussJordanEl :: (RowForm Double,[Double],[String]) -> (RowForm Double,[Double],[String]) 
-    gaussJordanEl ([],[],[]) = ([],[],[]) --maybe useless
+    gaussJordanEl ([],[],[]) = ([],[],[])
     gaussJordanEl (m:[],[c],o) = 
         case firstNZCol ([m]) of
             Just (nz_el,nz_col) -> ([fmap (/nz_el) m], [c/nz_el],o)
@@ -86,20 +86,24 @@ module MatrixUtilities where
         [Double] -> -- row b
         Int -> -- index of column of the variable to elimanate 
         [Double] -- new constrain
-    two_row_el rowa rowb i = 
+    two_row_el rowa ref i 
         {-  
             descr : new constr with var i 0 , the col i will be 0col
             a : element in position i of row a
             b : element in position i of row b
             return : row_a + (-b/a)*row_b 
         -}
-        foldr (\(e1,e2) rc -> (e1+e2):rc) [] (zip rowa mult_row_b) --rowa + mult_row_b 
-        where
+        | a==0 && b==0      = rowa    
+        | b == 0 && a/=0    = two_row_el ref rowa i 
+        | otherwise         =
+            let
+                mult = -(a/b)
+                mult_row_b = foldr (\b rc -> (b*mult):rc ) [] ref
+            in 
+                foldr (\(e1,e2) rc -> (e1+e2):rc) [] (zip rowa mult_row_b) --rowa + mult_row_b 
+        where 
             a = rowa!!i
-            b = rowb!!i
-            mult = -(a/b)
-            mult_row_b = foldr (\b rc -> (b*mult):rc ) [] rowb
-        
+            b = ref!!i
     log_elimination :: --VAR OUT OF BASE (NON LEADING POSITION!!!!)
         RowForm Double -> -- original matrix in row-echelon form
         Int ->  -- index of column of the NON LEADING variable to elimanate 
@@ -109,8 +113,14 @@ module MatrixUtilities where
     log_elimination (ref:[]) i = 
         if ref!!i==0
         then (ref:[]) else []  --TODO : pensarci meglio [X+Y=2] [1,0|2] s
+    
     log_elimination (ref:rs) i = 
-        foldr (\r rc-> (two_row_el r ref i):rc ) [] rs 
+        if already_elim then  (ref:rs)
+        else 
+            foldr (\r rc-> (two_row_el r ref i):rc ) [] rs 
+        where 
+            already_elim = foldr (\e rc-> (e==0) && rc) True ((transpose (ref:rs))!!i)
+            -- the column i has only zero elements
 
         
 
