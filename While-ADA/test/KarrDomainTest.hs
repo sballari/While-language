@@ -280,10 +280,10 @@ module KarrDomainTest where
 
     i2 = testCase "[KarrDomain Test][i2] analisi ex5.8 pag 112" (assertEqual "" expected result) 
             where
-                expected = EQs ([],[],["I","X"]) 
+                expected = EQs ([[-1,1]],[-1],["I","X"]) 
                 result = semS False progTree  (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
                 [(progTree,_)] = parse parseStms source_code 
-                source_code = "while I <= 1000 do  (I:=0; X:=X+1)"
+                source_code = "while I <= 1000 do  (I:=I+1; X:=X+1)"
 
     i3 = testCase "[KarrDomain Test][i3] while body 1;" (assertEqual "" expected result) 
             where
@@ -310,18 +310,19 @@ module KarrDomainTest where
                 result = r `join` (EQs ([[-1,1]],[-1],["I","X"]) )
                 r = (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
 
-    i4c = testCase "[KarrDomain Test][i4c] while body 2 ex_join;" (assertEqual "" expected result) 
-            where
-                expected = (EQs ([[-1,1]],[-1],["I","X"]) )
-                result = r `explicit_join` (EQs ([[-1,1]],[-1],["I","X"]) )
-                r = (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
 
-    i4d = testCase "[KarrDomain Test][i4c] eliminazione annichilente STEP 4" (assertEqual "" expected result) 
+
+    i4d = testCase "[KarrDomain Test][i4d] eliminazione annichilente STEP 4" (assertEqual "" expected result) 
             where
                 expected = [[-1,-1,1,0,0]]
-                result = log_elimination aug_matrix 2 -- STEP4
+                result = log_elimination (log_elimination aug_matrix 3) 4 -- STEP4
                 aug_matrix = [[1.0,1.0,0.0,-1.0,0.0],[0.0,0.0,1.0,-1.0,0.0]]
 
+    i4dbis = testCase "[KarrDomain Test][i4dbis] id4 con outbase elim" (assertEqual "" expected result) 
+            where
+                expected = [[-1,-1,1,0,0]]
+                result = out_base_elimination4join aug_matrix 2
+                aug_matrix = [[1.0,1.0,0.0,-1.0,0.0],[0.0,0.0,1.0,-1.0,0.0]]
     i5 = testCase "[KarrDomain Test][i5] r join sys1;" (assertEqual "" expected result) 
             where
                 sys1 = EQs ([[1,0],[0,1]],[2,1],["I","X"]) 
@@ -351,7 +352,20 @@ module KarrDomainTest where
                 result = sysA `join` sysB
                 expected = sysB
 
+    i9 = testCase "[KarrDomain Test][i9] analisi ex5.8 pag 112" (assertEqual "" expected result) 
+            where
+                expected = EQs ([],[],["I","X"]) 
+                result = semS False progTree  (EQs ([[1,0],[0,1]],[1,0],["I","X"]))
+                [(progTree,_)] = parse parseStms source_code 
+                source_code = "while I <= 1000 do  (I:=0; X:=X+1)"
 
+    i9a = testCase "[KarrDomain Test][i9a] r join --" (assertEqual "" expected result) 
+            where
+                expected = EQs ([[1,0]],[0],["I","X"]) 
+                result = r `join`  (EQs ([[1,0],[0,1]],[0,2],["I","X"]))
+                r = (EQs ([[1,0],[0,1]],[0,1],["I","X"]))
+
+    
 
     tests = [a0,a1,c1,c2,c3,d1,d2,d3,d4,e1,e2,f1,f2,g1,g2,g3,g4,g5,g6,g7,g8,h1,h2,h3,h4,h5,h6,h7,
-            i1,i1,i2,i3,i4,i4a,i4b,i4c,i5,i6,i7,i8,i4d]
+            i1,i1,i2,i3,i4,i4a,i4b,i5,i6,i7,i8,i4d,i4dbis,i9,i9a]
