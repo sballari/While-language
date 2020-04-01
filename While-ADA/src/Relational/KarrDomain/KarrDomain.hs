@@ -11,7 +11,7 @@ module KarrDomain where
     
     data EQs = EQs (RowForm Double,[Double],[String]) -- <M,X> in a row-echelon form,
     -- [String]: variables name in the same order they appears in X
-                 | EQsBottom deriving (Eq)
+                 | EQsBottom deriving (Eq,Read)
 
     {-  ##################
        #Assign sub routines     #
