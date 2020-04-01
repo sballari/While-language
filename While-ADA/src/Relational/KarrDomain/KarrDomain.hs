@@ -6,6 +6,8 @@ module KarrDomain where
     import PolyUtils
     import Text.Printf
     import qualified Data.List as L
+    import WhileParser --todo da togliere
+    import AbsDenSemR -- todo da togliere
     
     data EQs = EQs (RowForm Double,[Double],[String]) -- <M,X> in a row-echelon form,
     -- [String]: variables name in the same order they appears in X
@@ -256,6 +258,7 @@ module KarrDomain where
         RowForm Double->  -- augmented matrix with only varN variable to keep and the other out of base (given by in baseElim4join)
         Int ->      -- varN : number of vars in the orig sys
         RowForm Double
+    out_base_elimination4join [] _ = []
     out_base_elimination4join mat varN =
         foldl (\rc i -> 
                     log_elimination rc i
@@ -293,12 +296,17 @@ module KarrDomain where
                 leading = leading_matrix_info join_system varN
                 (f_matrix,f_b) = row_filter (join_system,b) leading varN --STEP2
                 elim1_coef = in_base_elimination4Join f_matrix leading varN --STEP3
-                aug_matrix = transpose ((f_b:(transpose elim1_coef))) -- NOTA : b aggiunto all'inizio
+                aug_matrix = transpose ((f_b:(transpose elim1_coef))) -- NOTA : b aggiunto all'inizio   
                 final = out_base_elimination4join aug_matrix varN -- STEP4
-                final_coeff = transpose ( L.genericTake varN (tail (transpose final)) )
-                final_b = head (transpose final) 
             in
-                EQs (final_coeff,final_b,o) --this is in row-echelon
+                if final==[] 
+                    then (EQs ([],[],o))
+                    else 
+                        let 
+                            
+                            final_coeff = transpose ( L.genericTake varN (tail (transpose final)) )
+                            final_b = head (transpose final)  
+                        in EQs (final_coeff,final_b,o)
              
                 
                 
@@ -367,3 +375,27 @@ module KarrDomain where
                 conversion = minimize e
         
         widening = join
+
+
+    r = EQs ([[1,0],[0,1]],[1,0],["I","X"])
+    [((While c e),_)] = parse parseStms source_code 
+    source_code = "while I <= 1000 do  (I:=0; X:=X+1)"
+    progTree = (While c e)
+    pow 0 f = id
+    pow n f = f.(pow (n-1) f)
+    fun = \x -> r `join` (semS False  e (condC c x))
+
+    
+    ha = [(pow n fun bottom) | n <- [0..]]
+    ass = [(pow n (semS False e) (EQs ([],[],["I","X"])))| n<-[0..5]]
+    hi  = r `join`  EQs ([[1,0]],[0],["I","X"])
+
+    
+
+
+        --semS False progTree  r
+
+
+
+
+
