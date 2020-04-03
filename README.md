@@ -1,3 +1,4 @@
 # While-language
 Analizzatore statico non relazionale (domini: Segni - Intervalli)
-Analizzatore relazionale (domini: Karr)
+
+Analizzatore statico relazionale (domini: Karr)
