@@ -81,6 +81,7 @@ module MatrixUtilities where
     {- ##########################
     Utilities for assignment, logical elimination, and other reduction ...
     ########################## -}
+
     two_row_el :: 
         [Double] -> -- row a 
         [Double] -> -- row b
@@ -104,6 +105,9 @@ module MatrixUtilities where
         where 
             a = rowa!!i
             b = ref!!i
+
+
+
     log_elimination :: --VAR OUT OF BASE (NON LEADING POSITION!!!!)
         RowForm Double -> -- original matrix in row-echelon form
         Int ->  -- index of column of the NON LEADING variable to elimanate 
@@ -126,7 +130,7 @@ module MatrixUtilities where
 
     lead_check :: 
         [Double] -> --column
-        Bool -- returns true iff the coeff are all one exept for one 1
+        Bool -- returns true iff the coeff are all zero exept for one 1
     lead_check l =  
         if r  == (1,True) then True else  False
         where 

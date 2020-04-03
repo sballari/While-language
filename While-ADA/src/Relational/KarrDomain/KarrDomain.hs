@@ -52,16 +52,19 @@ module KarrDomain where
                 augMatrix = transpose (b:(transpose rs)) -- aggiungo in testa per comodita'
                 newAugM = log_elimination augMatrix (var_index+1) -- +1 perche ho messo b in testa
                 -- de aumento la matrice
-                newAugMT = (transpose newAugM)
-                newRs = transpose (tail newAugMT)
-                newB = head newAugMT
+                newAugMT = (transpose newAugM)   
             in 
-                (EQs (newRs,newB,vars))
-
+                if  newAugMT==[] 
+                    then (EQs ([],[],o))
+                    else 
+                        let 
+                           newRs = transpose (tail newAugMT)
+                           newB = head newAugMT   
+                        in EQs (newRs,newB,vars)
         where 
             Just var_index = varPos (EQs (rs,b,vars)) vj
             vj_columnT = (transpose rs)!!var_index
-            is_leading = lead_check vj_columnT 
+            is_leading = lead_check vj_columnT
 
     remove_Lc ([],[]) index_vj = ([],[])
     remove_Lc ((r:rs),(b:bs)) index_vj = 
@@ -156,7 +159,7 @@ module KarrDomain where
         foldr (
             \i rc -> 
                 let 
-                    v_coef = zerosWith1NZelement varN i (-1)
+                    v_coef = zerosWith1NZelement varN i (-1) 
                     w1_coef = zerosWith1NZelement varN i (1)
                     w2_coef = zerosWith1NZelement varN i (1)
                 in
@@ -179,7 +182,7 @@ module KarrDomain where
     -- position : Int variable (in our case just 0-1) that provide the position of the problem in
     --            variable vector. 
     --            i.e. : in the system { prob1 ^ prob2 ^ ...} the two problems have different set of variables
-    --                   hence it's import have an order in the variable vector [x_1var,x_2var], to remain 
+    --                   hence it's important to have an order in the variable vector [x_1var,x_2var], to remain 
     --                   consistent to the linearization [W1,W2] (see the notes at page 109)
     -- row i = [V    |W1   | W2    |l1|l2]
     -- row i = [00..|M1i   |0...   |-ci|0 ] or [00..|00..  |M2i   |0|-ci]
@@ -375,27 +378,3 @@ module KarrDomain where
                 conversion = minimize e
         
         widening = join
-
-
-    r = EQs ([[1,0],[0,1]],[1,0],["I","X"])
-    [((While c e),_)] = parse parseStms source_code 
-    source_code = "while I <= 1000 do  (I:=0; X:=X+1)"
-    progTree = (While c e)
-    pow 0 f = id
-    pow n f = f.(pow (n-1) f)
-    fun = \x -> r `join` (semS False  e (condC c x))
-
-    
-    ha = [(pow n fun bottom) | n <- [0..]]
-    ass = [(pow n (semS False e) (EQs ([],[],["I","X"])))| n<-[0..5]]
-    hi  = r `join`  EQs ([[1,0]],[0],["I","X"])
-
-    
-
-
-        --semS False progTree  r
-
-
-
-
-

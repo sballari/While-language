@@ -39,17 +39,12 @@ module PolyUtils where
         foldr (\m ms->
             case m of
                 MC c' ->  (:) <$> pure (M (c*c') varName) <*> ms
-                {- 
-                    TODO : i think it's possible remove the pure 
-                    in a more comprehensible way (non sadistic version) :  
-                    let Just l = ms in Just ((M (c*c') varName): l)
-                -}
                 M c' varName' -> Nothing
         ) (Just []) lp
     
     -----------------------------------------------------------------
     divide :: LPolynomial -> LPolynomial -> Maybe LPolynomial
-    -- this code isn't understandable like my girlfriend
+    -- this code isn't understandable, like my girlfriend
     divide l1 [] = Just l1
     divide [] l2 = Just l2
     divide l1 l2 
@@ -114,6 +109,8 @@ module PolyUtils where
                 if var==name then (c + rSum , rPol)
                 else (rSum,(M c var):rPol)
             m -> (rSum, m:rPol)
+
+
     sumCoefX0 :: LPolynomial -> (Double,LPolynomial)
     sumCoefX0 [] = (0,[]) 
     sumCoefX0 (m:ms) = 
@@ -159,9 +156,9 @@ module PolyUtils where
     minimize (Range a b) = Nothing -- TODO : check if this is the correct approach. I'm not pretty sure.
 ---------------------------------------------------------------------
     order :: [String] -> LPolynomial -> ([Double],Double)
-    --IMPORTANT : the order func wrongs when there are vars in the new constrain that doesn't appear in the ordering list
+    --IMPORTANT : the order func fails when there are vars in the new constrain that doesn't appear in the ordering list
     -- order the l pol according to the variables list given as first parameter. 
-    -- the output tuple is the list of coefficients and  the  the constant term 
+    -- the output tuple is the list of coefficients and the constant term 
     order ord lp = 
         if compatibility ord lp then (coefList, const)
         else error "[order] you are loosing some coefficient of the starting pol. "
@@ -172,7 +169,6 @@ module PolyUtils where
 
     compatibility :: [String] -> LPolynomial -> Bool
     -- check if every var in lPol is present in the given list 
-    -- Vars[lPol] C= ordList 
     compatibility ord lPol = 
         foldr (\m rc -> 
             case m of 
