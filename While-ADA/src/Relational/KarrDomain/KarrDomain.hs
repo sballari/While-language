@@ -55,7 +55,7 @@ module KarrDomain where
                 newAugMT = (transpose newAugM)   
             in 
                 if  newAugMT==[] 
-                    then (EQs ([],[],o))
+                    then (EQs ([],[],vars))
                     else 
                         let 
                            newRs = transpose (tail newAugMT)
