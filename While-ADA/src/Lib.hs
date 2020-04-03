@@ -14,7 +14,65 @@ module Lib where
     import CondCFunc
     import AbsDomain
     import CondCFunSign
+    import KarrDomain
+    import AbsDenSemR
     import CondCFunInt
+
+
+    mainRoutine :: Stm -> [String]->IO()
+    mainRoutine tree vars =
+        putStrLn "\nScegliere il tipo di dominio :\n1) non relazionale;\n2) relazionale" >>
+        getLine >>= \ans -> case ans of
+            "2" -> routine_relazionale  tree vars
+            "1" -> routine_non_relazionale tree vars
+            otherwise -> putStrLn "\nselezione errata: inserire 1 o 2"
+
+    routine_relazionale :: Stm -> [String]-> IO()
+    routine_relazionale tree vars = 
+        do
+            putStrLnCBold "\n-------ANALISI DEN----------" Red
+            putStrLnCBold "DOMINIO: Karr" Blue
+            putStrLn "widening = join "
+            initSys <- askKarrInitialState vars
+            putStrLnResult  ( show (AbsDenSemR.semS False tree  initSys))
+            putStrLnCBold "----------FINE ANALISI--------" Red
+
+
+
+    askKarrInitialState :: [String] -> IO(EQs)
+    askKarrInitialState vars = 
+         do 
+            putStrLn "\nSTATO INIZIALE - DOMINIO DI KARR:"
+            putStrLn "Inizializzare lo stato a IntervalTop ? [s/n]"
+            getLine >>= \ans ->
+                if (snToBool ans) then 
+                    return (EQs ([],[], vars))
+                else 
+                    putStrLn "Fornire lo stato iniziale:">>
+                    putStrLn "es:">>
+                    putStrLn "([[1,0],[1,0]],[1,1]) oppure EQsBottom">>
+                    putStrLn ("L'ordine delle variabile e' "++(show vars)++".")>>
+                    getLine >>= \s -> 
+                        let 
+                            (coef,b) = read s 
+                            is = EQs (coef,b,vars)
+                        in 
+                        putStrLn ("stato iniziale: "++(show is))>>
+                        return is
+    routine_non_relazionale :: Stm -> [String] -> IO()
+    routine_non_relazionale tree vars= 
+            let 
+                
+                (sign_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
+                (int_cfg,r') = (app (createCFG intCondC tree) 1 )::(CGraph (Interval),Int)
+                in 
+                
+                do 
+                    signIS <- askSignInitialState vars
+                    intIS <- askIntInitialState vars
+                    printDenRes tree signIS intIS vars 
+                    printCFGRes sign_cfg signIS vars "Segni"
+                    printCFGRes int_cfg intIS vars "Intervalli"
 
     printTree :: [(Stm,String)] -> IO ()
     printTree resultP = 
@@ -106,12 +164,12 @@ module Lib where
             putStrLnCBold "DOMINIO: Segni" Blue
             putStrLn "widening ? [s/n]" 
             fmap (snToBool) getLine >>= \wideningS ->
-                putStrLnResult  (show (semS wideningS signCondC prTree signIS)) >>
+                putStrLnResult  (show (AbsDenSem.semS wideningS signCondC prTree signIS)) >>
 
                 putStrLnCBold "\nDOMINIO: Intervalli" Blue>> 
                 putStrLn "widening ? [s/n]" >>
                 fmap (snToBool) getLine >>= \wideningI ->
-                putStrLnResult (show (semS wideningI intCondC prTree intIS)) >>
+                putStrLnResult (show (AbsDenSem.semS wideningI intCondC prTree intIS)) >>
                 putStrLnCBold "----------FINE ANALISI--------" Red
 
     printCFGRes:: (AbsDomain a, Show a) => CGraph(a) -> AbsState a -> [Name] -> String -> IO()

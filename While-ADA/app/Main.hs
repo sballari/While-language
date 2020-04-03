@@ -40,22 +40,15 @@ module Main where
             -- putStrLn source_code
             -- putStrLn "-------FINE PROGRAMMA--------"
 
-            let [(tree,rest)] = parse parseStms source_code 
-                vars = variables tree
-                (sign_cfg,r) = (app (createCFG signCondC tree) 1 )::(CGraph (Sign),Int)
-                (int_cfg,r') = (app (createCFG intCondC tree) 1 )::(CGraph (Interval),Int)
-                in 
-                -- printTree ([(tree,rest)]) >>
-                printLabCode tree >>
-                --let (cfg,nf) = app (debugCFG tree) 1  in printCFG cfg >>
-                do 
-                    signIS <- askSignInitialState vars
-                    intIS <- askIntInitialState vars
-                    printDenRes tree signIS intIS vars 
-                    printCFGRes sign_cfg signIS vars "Segni"
-                    printCFGRes int_cfg intIS vars "Intervalli"
-
-            hClose handle 
+             
+            [(tree,rest)] <-return (parse parseStms source_code)
+            vars <- return (variables tree)
+        
+            -- printTree ([(tree,rest)]) >>
+            printLabCode tree 
+            --let (cfg,nf) = app (debugCFG tree) 1  in printCFG cfg >>
+            mainRoutine tree vars
+            hClose handle
             putStrLn "Arrivederci"
 
 
