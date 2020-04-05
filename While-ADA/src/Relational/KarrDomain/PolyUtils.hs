@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fwarn-incomplete-patterns #-}
+
 {-  ######################
        #condC SUB ROUTINE   #
       ###################### -}  
