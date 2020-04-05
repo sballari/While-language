@@ -76,7 +76,7 @@ module MatrixUtilities where
         let 
             (m,c,o) = gaussJordanEl eqs
             (m',c',o') = gaussJordanEl (reverse m, reverse c, reverse o)
-        in (reverse m', reverse c', reverse o') -- in realta' non servirebbe fare la reverse. Serve o non serve! Non confondermi Mona!
+        in (reverse m', reverse c', reverse o')
 
     {- ##########################
     Utilities for assignment, logical elimination, and other reduction ...
