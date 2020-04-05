@@ -3,7 +3,7 @@ Analizzatore statico non relazionale (domini: Segni - Intervalli)
 
 Analizzatore statico relazionale (domini: Karr)
 
-# Come compilare While-ADA
+# Come compilare While-ADA [Unix]
 Installare Stack:
 
 ```bash
