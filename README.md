@@ -9,6 +9,7 @@ Installare Stack:
 ```bash
 curl -sSL https://get.haskellstack.org/ | sh
 ```
+ed eseguire:
 
 ```bash
 While-language/While-ADA$ stack run /wp/euclide.txt/
